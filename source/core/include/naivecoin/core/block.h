@@ -44,6 +44,8 @@ std::wstring compute_hash(
         std::wstring const & data
     );
 
+bool is_new_block_valid(Block const & new_block, Block const & previous_block);
+
 } // namespace naivecoin
 
 #endif // NAIVECOIN_CORE_BLOCK_H

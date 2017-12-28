@@ -59,3 +59,39 @@ BOOST_AUTO_TEST_CASE(make_block)
     BOOST_CHECK(block.timestamp == timestamp);
     BOOST_CHECK(block.data == data);
 }
+
+BOOST_AUTO_TEST_CASE(is_new_block_valid)
+{
+    naivecoin::Block const genesis = naivecoin::Block::genesis();
+
+    BOOST_ASSERT(! naivecoin::is_new_block_valid(genesis, genesis));
+
+
+    uint64_t const index = 1;
+    std::wstring const previous_hash = L"ac0c62f1871b2bda6c28af2a12f9cc1487b2d2b1";
+    std::wstring const data = L"Some data";
+
+    std::tm tm = {};
+    std::stringstream ss("2017-12-28T15:00:00Z");
+    ss >> std::get_time(& tm, "%Y-%m-%dT%TZ");
+    auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(& tm));
+
+    naivecoin::Block const new_block = naivecoin::Block::make_block(
+        index,
+        previous_hash,
+        timestamp,
+        data
+    );
+
+    BOOST_ASSERT(naivecoin::is_new_block_valid(new_block, genesis));
+
+
+    naivecoin::Block const new_bad_block_1 = naivecoin::Block::make_block(
+        index + 3,
+        previous_hash,
+        timestamp,
+        data
+    );
+
+    BOOST_ASSERT(! naivecoin::is_new_block_valid(new_bad_block_1, genesis));
+}

@@ -105,4 +105,33 @@ std::wstring compute_hash(
     return stream.str();
 }
 
+bool is_new_block_valid(Block const & new_block, Block const & previous_block)
+{
+    if (new_block.index != previous_block.index + 1) {
+        return false;
+    }
+
+    std::wstring previous_hash = compute_hash(
+        previous_block.index,
+        previous_block.previous_hash,
+        previous_block.timestamp,
+        previous_block.data
+    );
+    if (new_block.previous_hash != previous_hash) {
+        return false;
+    }
+
+    std::wstring hash = compute_hash(
+        new_block.index,
+        new_block.previous_hash,
+        new_block.timestamp,
+        new_block.data
+    );
+    if (new_block.hash != hash) {
+        return false;
+    }
+
+    return true;
+}
+
 } // namespace naivecoin
