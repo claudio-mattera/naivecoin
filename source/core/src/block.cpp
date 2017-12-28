@@ -4,7 +4,6 @@
 #include <iomanip>
 #include <vector>
 #include <ctime>
-#include <iostream>
 
 #include <openssl/sha.h>
 
@@ -28,8 +27,6 @@ std::wstring compute_hash(
         << data;
 
     std::wstring const whole_string = stream.str();
-
-    std::wcout << whole_string << L'\n';
 
     std::size_t K = 200;
     std::vector<char> temp(K);
