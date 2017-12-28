@@ -63,6 +63,18 @@ Block Block::genesis()
     return Block(index, hash, previous_hash, timestamp, data);
 }
 
+std::wostream & operator<<(std::wostream & stream, Block const & block)
+{
+    std::time_t const time = std::chrono::system_clock::to_time_t(block.timestamp);
+    stream
+        << L"Block index: " << block.index << L", "
+        << L"Timestamp: " << std::put_time(std::gmtime(& time), L"%FT%TZ") << L", "
+        << L"Previous hash: " << block.previous_hash << L", "
+        << L"Hash: " << block.hash << L", "
+        << L"Data: " << block.data << L", ";
+    return stream;
+}
+
 std::wstring compute_hash(
         uint64_t index,
         std::wstring const & previous_hash,

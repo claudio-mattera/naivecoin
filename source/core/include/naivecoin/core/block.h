@@ -6,6 +6,7 @@
 
 #include <string>
 #include <chrono>
+#include <ostream>
 
 namespace naivecoin {
 
@@ -36,6 +37,8 @@ private:
         std::wstring const data
     );
 };
+
+std::wostream & operator<<(std::wostream & stream, Block const & block);
 
 std::wstring compute_hash(
         uint64_t index,
