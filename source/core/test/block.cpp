@@ -1,3 +1,4 @@
+#include <list>
 #include <iomanip>
 
 #define BOOST_TEST_MODULE CoreBlock
@@ -94,4 +95,32 @@ BOOST_AUTO_TEST_CASE(is_new_block_valid)
     );
 
     BOOST_ASSERT(! naivecoin::is_new_block_valid(new_bad_block_1, genesis));
+}
+
+BOOST_AUTO_TEST_CASE(is_blockchain_valid)
+{
+    naivecoin::Block const genesis = naivecoin::Block::genesis();
+
+    std::tm tm = {};
+    std::stringstream ss("2017-12-28T15:00:00Z");
+    ss >> std::get_time(& tm, "%Y-%m-%dT%TZ");
+    auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(& tm));
+
+    naivecoin::Block const second_block = naivecoin::Block::make_block(
+        1,
+        L"ac0c62f1871b2bda6c28af2a12f9cc1487b2d2b1",
+        timestamp,
+        L"Some data"
+    );
+
+    naivecoin::Block const third_block = naivecoin::Block::make_block(
+        2,
+        L"b5961ea6760acf560cbf2395fc9ef03778f93d68",
+        timestamp,
+        L"Some more data"
+    );
+
+    std::list<naivecoin::Block> blockchain{genesis, second_block, third_block};
+
+    BOOST_ASSERT(naivecoin::is_blockchain_valid(blockchain));
 }

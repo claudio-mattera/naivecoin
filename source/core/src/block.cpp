@@ -146,4 +146,25 @@ bool is_new_block_valid(Block const & new_block, Block const & previous_block)
     return true;
 }
 
+bool is_blockchain_valid(std::list<Block> const & blockchain)
+{
+    auto iterator = std::begin(blockchain);
+
+    if (iterator == std::end(blockchain)) {
+        return false;
+    }
+
+    auto previous_iterator = iterator++;
+
+    while (iterator != std::end(blockchain)) {
+        if (!is_new_block_valid(*iterator, *previous_iterator)) {
+            return false;
+        }
+
+        previous_iterator = iterator++;
+    }
+
+    return true;
+}
+
 } // namespace naivecoin

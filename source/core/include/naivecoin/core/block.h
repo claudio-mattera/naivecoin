@@ -7,6 +7,7 @@
 #include <string>
 #include <chrono>
 #include <ostream>
+#include <list>
 
 namespace naivecoin {
 
@@ -48,6 +49,8 @@ std::wstring compute_hash(
     );
 
 bool is_new_block_valid(Block const & new_block, Block const & previous_block);
+
+bool is_blockchain_valid(std::list<Block> const & blockchain);
 
 } // namespace naivecoin
 
