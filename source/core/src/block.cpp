@@ -9,6 +9,60 @@
 
 namespace naivecoin {
 
+Block::Block(
+        uint64_t const index,
+        std::wstring const hash,
+        std::wstring const previous_hash,
+        std::chrono::system_clock::time_point const timestamp,
+        std::wstring const data
+    )
+: index(index)
+, hash(hash)
+, previous_hash(previous_hash)
+, timestamp(timestamp)
+, data(data)
+{
+}
+
+// static
+Block Block::make_block(
+        uint64_t const index,
+        std::wstring const previous_hash,
+        std::chrono::system_clock::time_point const timestamp,
+        std::wstring const data
+    )
+{
+    std::wstring const hash = compute_hash(
+        index,
+        previous_hash,
+        timestamp,
+        data
+    );
+
+    return Block(index, hash, previous_hash, timestamp, data);
+}
+
+// static
+Block Block::genesis()
+{
+    std::tm tm = {};
+    std::stringstream ss("2017-12-28T15:00:00Z");
+    ss >> std::get_time(& tm, "%Y-%m-%dT%TZ");
+    auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(& tm));
+
+    uint64_t const index = 0;
+    std::wstring const previous_hash = L"";
+    std::wstring const data = L"";
+    std::wstring const hash = compute_hash(
+        index,
+        previous_hash,
+        timestamp,
+        data
+    );
+
+    return Block(index, hash, previous_hash, timestamp, data);
+}
+
 std::wstring compute_hash(
         uint64_t index,
         std::wstring const & previous_hash,
