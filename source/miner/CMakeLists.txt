@@ -5,13 +5,13 @@ project(NaivecoinMiner VERSION 0.1 LANGUAGES CXX)
 add_executable(
     NaivecoinMiner
     src/main.cpp
+    src/controlserver.cpp
+    src/controlconnection.cpp
 )
 
 target_include_directories(
     NaivecoinMiner
     PUBLIC
-    ${Boost_INCLUDE_DIRS}
-    ${OPENSSL_INCLUDE_DIRS}
 )
 
 set_target_properties(
@@ -25,8 +25,8 @@ set_target_properties(
 target_link_libraries(
     NaivecoinMiner
     LINK_PUBLIC
-    ${Boost_LIBRARIES}
-    ${OPENSSL_LIBRARIES}
+    Threads::Threads
+    boost-system
     NaivecoinCore
 )
 
