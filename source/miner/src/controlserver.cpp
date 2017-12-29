@@ -6,11 +6,12 @@
 
 namespace naivecoin {
 
-control_server::control_server(boost::asio::io_service & io_service)
+control_server::control_server(boost::asio::io_service & io_service, naivecoin::Miner & miner)
 : acceptor(
     io_service,
     boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), 8013)
 )
+, miner(miner)
 {
     start_accept();
 }
@@ -40,7 +41,7 @@ void control_server::handle_accept(
     std::cout << "Handling accept" << '\n';
     if (!error)
     {
-        new_connection->start();
+        new_connection->start(this->miner);
     }
 
     start_accept();

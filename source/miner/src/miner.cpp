@@ -7,6 +7,7 @@ namespace naivecoin {
 
 Miner::Miner()
 {
+    this->blockchain.push_back(naivecoin::Block::genesis());
 }
 
 void Miner::start()

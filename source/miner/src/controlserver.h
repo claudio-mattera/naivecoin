@@ -9,13 +9,14 @@
 #include <boost/asio.hpp>
 
 #include "controlconnection.h"
+#include "miner.h"
 
 namespace naivecoin {
 
 class control_server
 {
 public:
-    control_server(boost::asio::io_service & io_service);
+    control_server(boost::asio::io_service & io_service, naivecoin::Miner & miner);
 
 private:
     void start_accept();
@@ -26,6 +27,7 @@ private:
         );
 
     boost::asio::ip::tcp::acceptor acceptor;
+    naivecoin::Miner & miner;
 };
 
 } // namespace naivecoin

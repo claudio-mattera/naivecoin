@@ -7,20 +7,25 @@
 
 #include <ctime>
 
-namespace {
+#include <naivecoin/core/serialize.h>
 
-std::string make_daytime_string()
-{
-    using namespace std; // For time_t, time and ctime;
-    time_t now = time(0);
-    return ctime(& now);
-}
+namespace {
 
 std::string get_path(std::string const & request)
 {
     int const get_pos = request.find("GET ") + 4;
     int const end_pos = request.find(" HTTP", get_pos);
     return request.substr(get_pos, end_pos - get_pos);
+}
+
+std::string make_success_response(std::string const & data = "")
+{
+    return "HTTP/1.1 200 OK\n\n" + data;
+}
+
+std::string make_error_response(std::string const & data = "")
+{
+    return "HTTP/1.1 400 Bad Request\n\n" + data;
 }
 
 } // unnamed namespace
@@ -39,7 +44,7 @@ boost::asio::ip::tcp::socket & control_connection::socket()
     return this->connection_socket;
 }
 
-void control_connection::start()
+void control_connection::start(naivecoin::Miner & miner)
 {
     std::cout << "Responding" << '\n';
 
@@ -58,21 +63,15 @@ void control_connection::start()
     std::string path = get_path(stream.str());
 
     if (path == "/quit") {
+        this->send_response(make_success_response());
         std::exit(0);
-
+    } else if (path == "/blockchain") {
+        auto blockchain = miner.get_blockchain();
+        auto data = naivecoin::serialize_blockchain(blockchain);
+        std::string const text = make_success_response(data);
+        this->send_response(text);
     } else {
-        this->message = make_daytime_string();
-
-        boost::asio::async_write(
-            this->connection_socket,
-            boost::asio::buffer(this->message),
-            boost::bind(
-                & control_connection::handle_write,
-                shared_from_this(),
-                boost::asio::placeholders::error,
-                boost::asio::placeholders::bytes_transferred
-            )
-        );
+        this->send_response(make_error_response());
     }
 }
 
@@ -86,6 +85,20 @@ void control_connection::handle_write(
         size_t /*bytes_transferred*/
     )
 {
+}
+
+void control_connection::send_response(std::string const & text)
+{
+    boost::asio::async_write(
+        this->connection_socket,
+        boost::asio::buffer(text),
+        boost::bind(
+            & control_connection::handle_write,
+            shared_from_this(),
+            boost::asio::placeholders::error,
+            boost::asio::placeholders::bytes_transferred
+        )
+    );
 }
 
 } // namespace naivecoin

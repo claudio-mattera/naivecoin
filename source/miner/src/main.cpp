@@ -8,20 +8,20 @@
 #include "miner.h"
 
 
-void start_miner()
+void start_miner(naivecoin::Miner & miner)
 {
-    naivecoin::Miner miner;
     miner.start();
 }
 
 int main()
 {
+    naivecoin::Miner miner;
     try
     {
-        std::thread miner_thread(start_miner);
+        std::thread miner_thread = std::thread(start_miner, std::ref(miner));
 
         boost::asio::io_service io_service;
-        naivecoin::control_server server(io_service);
+        naivecoin::control_server server(io_service, miner);
         io_service.run();
     }
     catch (std::exception& e)

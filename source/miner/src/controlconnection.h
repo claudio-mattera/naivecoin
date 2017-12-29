@@ -9,6 +9,8 @@
 
 #include <boost/asio.hpp>
 
+#include "miner.h"
+
 namespace naivecoin {
 
 class control_connection
@@ -21,10 +23,12 @@ public:
 
     boost::asio::ip::tcp::socket & socket();
 
-    void start();
+    void start(naivecoin::Miner & miner);
 
 private:
     control_connection(boost::asio::io_service & io_service);
+
+    void send_response(std::string const & text);
 
     void handle_write(
             const boost::system::error_code & /*error*/,
@@ -32,7 +36,6 @@ private:
         );
 
     boost::asio::ip::tcp::socket connection_socket;
-    std::string message;
 };
 
 } // namespace naivecoin

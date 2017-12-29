@@ -24,6 +24,11 @@ public:
 
     void request_mine_next_block();
 
+    inline std::list<naivecoin::Block> const & get_blockchain() const
+    {
+        return this->blockchain;
+    }
+
 private:
     enum Operation {
         MINE_NEXT_BLOCK
