@@ -15,13 +15,17 @@ Block::Block(
         std::string const hash,
         std::string const previous_hash,
         std::time_t const timestamp,
-        std::string const data
+        std::string const data,
+        uint16_t const difficulty,
+        uint64_t const nonce
     )
 : index(index)
 , hash(hash)
 , previous_hash(previous_hash)
 , timestamp(timestamp)
 , data(data)
+, difficulty(difficulty)
+, nonce(nonce)
 {
 }
 
@@ -30,17 +34,21 @@ Block Block::make_block(
         uint64_t const index,
         std::string const previous_hash,
         std::time_t const timestamp,
-        std::string const data
+        std::string const data,
+        uint16_t const difficulty,
+        uint64_t const nonce
     )
 {
     std::string const hash = compute_hash(
         index,
         previous_hash,
         timestamp,
-        data
+        data,
+        difficulty,
+        nonce
     );
 
-    return Block(index, hash, previous_hash, timestamp, data);
+    return Block(index, hash, previous_hash, timestamp, data, difficulty, nonce);
 }
 
 // static
@@ -51,14 +59,18 @@ Block Block::genesis()
     uint64_t const index = 0;
     std::string const previous_hash = "";
     std::string const data = "";
+    uint16_t const difficulty = 0;
+    uint64_t const nonce = 0;
     std::string const hash = compute_hash(
         index,
         previous_hash,
         timestamp,
-        data
+        data,
+        difficulty,
+        nonce
     );
 
-    return Block(index, hash, previous_hash, timestamp, data);
+    return Block(index, hash, previous_hash, timestamp, data, difficulty, nonce);
 }
 
 std::ostream & operator<<(std::ostream & stream, Block const & block)
@@ -68,7 +80,9 @@ std::ostream & operator<<(std::ostream & stream, Block const & block)
         << "Timestamp: " << naivecoin::format_timestamp(block.timestamp) << ", "
         << "Previous hash: " << block.previous_hash << ", "
         << "Hash: " << block.hash << ", "
-        << "Data: " << block.data << ", ";
+        << "Data: " << block.data << ", "
+        << "Difficulty: " << block.difficulty << ", "
+        << "Nonce: " << block.nonce << ", ";
     return stream;
 }
 
@@ -76,16 +90,20 @@ std::string compute_hash(
         uint64_t index,
         std::string const & previous_hash,
         std::time_t const & timestamp,
-        std::string const & data
+        std::string const & data,
+        uint16_t const difficulty,
+        uint64_t const nonce
     )
 {
     std::ostringstream stream;
 
     stream
-        << index
-        << previous_hash
-        << naivecoin::format_timestamp(timestamp)
-        << data;
+        << index << ','
+        << previous_hash << ','
+        << naivecoin::format_timestamp(timestamp) << ','
+        << data << ','
+        << difficulty << ','
+        << nonce;
 
     std::string const whole_string = stream.str();
 
@@ -115,7 +133,9 @@ bool is_new_block_valid(Block const & new_block, Block const & previous_block)
         previous_block.index,
         previous_block.previous_hash,
         previous_block.timestamp,
-        previous_block.data
+        previous_block.data,
+        previous_block.difficulty,
+        previous_block.nonce
     );
     if (new_block.previous_hash != previous_hash) {
         return false;
@@ -125,7 +145,9 @@ bool is_new_block_valid(Block const & new_block, Block const & previous_block)
         new_block.index,
         new_block.previous_hash,
         new_block.timestamp,
-        new_block.data
+        new_block.data,
+        new_block.difficulty,
+        new_block.nonce
     );
     if (new_block.hash != hash) {
         return false;
@@ -153,6 +175,11 @@ bool is_blockchain_valid(std::list<Block> const & blockchain)
     }
 
     return true;
+}
+
+bool hash_matches_difficulty(std::string const & hash, uint16_t const difficulty)
+{
+    return false;
 }
 
 } // namespace naivecoin

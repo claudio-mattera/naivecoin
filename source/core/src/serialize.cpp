@@ -34,6 +34,8 @@ Json::Value serialize_block_to_json(naivecoin::Block const & block)
     value["previous_hash"] = block.previous_hash;
     value["timestamp"] = naivecoin::format_timestamp(block.timestamp);
     value["data"] = block.data;
+    value["difficulty"] = block.difficulty;
+    value["nonce"] = block.nonce;
 
     return value;
 }
@@ -57,7 +59,9 @@ naivecoin::Block deserialize_json_to_block(Json::Value const & value)
         static_cast<uint16_t>(value["index"].asInt()),
         value["previous_hash"].asString(),
         timestamp,
-        value["data"].asString()
+        value["data"].asString(),
+        value["difficulty"].asInt(),
+        value["nonce"].asInt()
     );
 
     if (block.hash != value["hash"].asString()) {
@@ -92,7 +96,9 @@ Block deserialize_block(std::string const & text)
         static_cast<uint16_t>(value["index"].asInt()),
         value["previous_hash"].asString(),
         timestamp,
-        value["data"].asString()
+        value["data"].asString(),
+        value["difficulty"].asInt(),
+        value["nonce"].asInt()
     );
 
     if (block.hash != value["hash"].asString()) {

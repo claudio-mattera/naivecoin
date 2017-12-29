@@ -33,11 +33,16 @@ void Miner::mine_next_block()
     std::string const & previous_hash = latest_block.hash;
     std::string const data;
     auto timestamp = naivecoin::now();
+    uint16_t difficulty = 0;
+    uint64_t nonce = 0;
+
     naivecoin::Block const next_block = naivecoin::Block::make_block(
         index,
         previous_hash,
         timestamp,
-        data
+        data,
+        difficulty,
+        nonce
     );
 
     this->blockchain.push_back(next_block);

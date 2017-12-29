@@ -18,7 +18,6 @@ std::time_t parse_timestamp(std::string const & text)
     return std::mktime(& tm);
 }
 
-
 std::string format_timestamp(std::time_t const & timestamp)
 {
     std::ostringstream stream;

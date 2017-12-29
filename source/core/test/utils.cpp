@@ -1,5 +1,5 @@
 #include <list>
-#include <iomanip>
+#include <array>
 
 #include <boost/test/unit_test.hpp>
 
@@ -19,6 +19,42 @@ BOOST_AUTO_TEST_CASE(parse_and_format_timestamp)
     std::string fourth_string = naivecoin::format_timestamp(fourth_timestamp);
 
     BOOST_CHECK_EQUAL(first_string, fourth_string);
+}
+
+BOOST_AUTO_TEST_CASE(hex_to_binary_1)
+{
+    std::string const hex = "b";
+    std::array<bool, 4> expected{true, false, true, true};
+    std::array<bool, 4> actual = naivecoin::hex_to_binary<1>(hex);
+
+    BOOST_CHECK(actual == expected);
+}
+
+BOOST_AUTO_TEST_CASE(hex_to_binary_2)
+{
+    std::string const hex = "4";
+    std::array<bool, 4> expected{false, true, false, false};
+    std::array<bool, 4> actual = naivecoin::hex_to_binary<1>(hex);
+
+    BOOST_CHECK(actual == expected);
+}
+
+BOOST_AUTO_TEST_CASE(hex_to_binary_3)
+{
+    std::string const hex = "42b4c9af";
+    std::array<bool, 32> expected{
+        false, true, false, false,
+        false, false, true, false,
+        true, false, true, true,
+        false, true, false, false,
+        true, true, false, false,
+        true, false, false, true,
+        true, false, true, false,
+        true, true, true, true
+    };
+    std::array<bool, 32> actual = naivecoin::hex_to_binary<8>(hex);
+
+    BOOST_CHECK(actual == expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
