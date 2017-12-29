@@ -4,6 +4,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <naivecoin/core/block.h>
+#include <naivecoin/core/utils.h>
 
 BOOST_AUTO_TEST_SUITE(CoreBlock)
 
@@ -11,7 +12,7 @@ BOOST_AUTO_TEST_CASE(compute_hash)
 {
     uint64_t const index = 0;
     std::string const previous_hash = "";
-    std::chrono::system_clock::time_point const timestamp;
+    std::time_t const timestamp = naivecoin::parse_timestamp("1970-01-01T00:00:00Z");
     std::string const data = "Some data";
 
     std::string const hash = naivecoin::compute_hash(index, previous_hash, timestamp, data);
@@ -25,14 +26,11 @@ BOOST_AUTO_TEST_CASE(genesis)
 {
     naivecoin::Block const genesis = naivecoin::Block::genesis();
 
-    std::tm tm = {};
-    std::stringstream ss("2017-12-28T15:00:00Z");
-    ss >> std::get_time(& tm, "%Y-%m-%dT%TZ");
-    auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(& tm));
+    auto timestamp = naivecoin::parse_timestamp("2017-12-28T15:00:00Z");
 
     BOOST_CHECK_EQUAL(genesis.index, 0);
     BOOST_CHECK_EQUAL(genesis.previous_hash, "");
-    BOOST_CHECK_EQUAL(genesis.hash, "ac0c62f1871b2bda6c28af2a12f9cc1487b2d2b1");
+    BOOST_CHECK_EQUAL(genesis.hash, "3cf59f93577dbe819ae24cd73beffc4e7efabe65");
     BOOST_CHECK(genesis.timestamp == timestamp);
     BOOST_CHECK_EQUAL(genesis.data, "");
 }
@@ -40,13 +38,10 @@ BOOST_AUTO_TEST_CASE(genesis)
 BOOST_AUTO_TEST_CASE(make_block)
 {
     uint64_t const index = 0;
-    std::string const previous_hash = "ac0c62f1871b2bda6c28af2a12f9cc1487b2d2b1";
+    std::string const previous_hash = "3cf59f93577dbe819ae24cd73beffc4e7efabe65";
     std::string const data = "Some data";
 
-    std::tm tm = {};
-    std::stringstream ss("2017-12-28T15:00:00Z");
-    ss >> std::get_time(& tm, "%Y-%m-%dT%TZ");
-    auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(& tm));
+    auto timestamp = naivecoin::parse_timestamp("2017-12-28T15:00:00Z");
 
     naivecoin::Block const block = naivecoin::Block::make_block(
         index,
@@ -57,7 +52,7 @@ BOOST_AUTO_TEST_CASE(make_block)
 
     BOOST_CHECK_EQUAL(block.index, index);
     BOOST_CHECK_EQUAL(block.previous_hash, previous_hash);
-    BOOST_CHECK_EQUAL(block.hash, "d503228c47613c60efb36dc67d0a61f919223a45");
+    BOOST_CHECK_EQUAL(block.hash, "f8ab7f441f391f00a7393f51a188139e36056651");
     BOOST_CHECK(block.timestamp == timestamp);
     BOOST_CHECK_EQUAL(block.data, data);
 }
@@ -70,13 +65,10 @@ BOOST_AUTO_TEST_CASE(is_new_block_valid)
 
 
     uint64_t const index = 1;
-    std::string const previous_hash = "ac0c62f1871b2bda6c28af2a12f9cc1487b2d2b1";
+    std::string const previous_hash = "3cf59f93577dbe819ae24cd73beffc4e7efabe65";
     std::string const data = "Some data";
 
-    std::tm tm = {};
-    std::stringstream ss("2017-12-28T15:00:00Z");
-    ss >> std::get_time(& tm, "%Y-%m-%dT%TZ");
-    auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(& tm));
+    auto timestamp = naivecoin::parse_timestamp("2017-12-28T15:00:00Z");
 
     naivecoin::Block const new_block = naivecoin::Block::make_block(
         index,
@@ -102,21 +94,18 @@ BOOST_AUTO_TEST_CASE(is_blockchain_valid)
 {
     naivecoin::Block const genesis = naivecoin::Block::genesis();
 
-    std::tm tm = {};
-    std::stringstream ss("2017-12-28T15:00:00Z");
-    ss >> std::get_time(& tm, "%Y-%m-%dT%TZ");
-    auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(& tm));
+    auto timestamp = naivecoin::parse_timestamp("2017-12-28T15:00:00Z");
 
     naivecoin::Block const second_block = naivecoin::Block::make_block(
         1,
-        "ac0c62f1871b2bda6c28af2a12f9cc1487b2d2b1",
+        "3cf59f93577dbe819ae24cd73beffc4e7efabe65",
         timestamp,
         "Some data"
     );
 
     naivecoin::Block const third_block = naivecoin::Block::make_block(
         2,
-        "b5961ea6760acf560cbf2395fc9ef03778f93d68",
+        "249feacf4268097d993ccb03cc21d4551b7a3a2b",
         timestamp,
         "Some more data"
     );

@@ -1,11 +1,12 @@
-#include "naivecoin/core/block.h"
+#include <naivecoin/core/block.h>
 
 #include <sstream>
 #include <iomanip>
 #include <vector>
-#include <ctime>
 
 #include <openssl/sha.h>
+
+#include <naivecoin/core/utils.h>
 
 namespace naivecoin {
 
@@ -13,7 +14,7 @@ Block::Block(
         uint64_t const index,
         std::string const hash,
         std::string const previous_hash,
-        std::chrono::system_clock::time_point const timestamp,
+        std::time_t const timestamp,
         std::string const data
     )
 : index(index)
@@ -28,7 +29,7 @@ Block::Block(
 Block Block::make_block(
         uint64_t const index,
         std::string const previous_hash,
-        std::chrono::system_clock::time_point const timestamp,
+        std::time_t const timestamp,
         std::string const data
     )
 {
@@ -45,10 +46,7 @@ Block Block::make_block(
 // static
 Block Block::genesis()
 {
-    std::tm tm = {};
-    std::stringstream ss("2017-12-28T15:00:00Z");
-    ss >> std::get_time(& tm, "%Y-%m-%dT%TZ");
-    auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(& tm));
+    auto timestamp = naivecoin::parse_timestamp("2017-12-28T15:00:00Z");
 
     uint64_t const index = 0;
     std::string const previous_hash = "";
@@ -65,10 +63,9 @@ Block Block::genesis()
 
 std::ostream & operator<<(std::ostream & stream, Block const & block)
 {
-    std::time_t const time = std::chrono::system_clock::to_time_t(block.timestamp);
     stream
         << "Block index: " << block.index << ", "
-        << "Timestamp: " << std::put_time(std::gmtime(& time), "%FT%TZ") << ", "
+        << "Timestamp: " << naivecoin::format_timestamp(block.timestamp) << ", "
         << "Previous hash: " << block.previous_hash << ", "
         << "Hash: " << block.hash << ", "
         << "Data: " << block.data << ", ";
@@ -78,18 +75,16 @@ std::ostream & operator<<(std::ostream & stream, Block const & block)
 std::string compute_hash(
         uint64_t index,
         std::string const & previous_hash,
-        std::chrono::system_clock::time_point const & timestamp,
+        std::time_t const & timestamp,
         std::string const & data
     )
 {
     std::ostringstream stream;
 
-    std::time_t const time = std::chrono::system_clock::to_time_t(timestamp);
-
     stream
         << index
         << previous_hash
-        << std::put_time(std::gmtime(& time), "%FT%TZ")
+        << naivecoin::format_timestamp(timestamp)
         << data;
 
     std::string const whole_string = stream.str();

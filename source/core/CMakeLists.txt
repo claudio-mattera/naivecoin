@@ -7,6 +7,7 @@ add_library(
     SHARED
     src/block.cpp
     src/serialize.cpp
+    src/utils.cpp
 )
 
 target_include_directories(
@@ -61,6 +62,7 @@ add_executable(
     test/main.cpp
     test/block.cpp
     test/serialize.cpp
+    test/utils.cpp
 )
 
 target_link_libraries(

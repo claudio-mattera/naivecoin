@@ -5,9 +5,9 @@
 #define NAIVECOIN_CORE_BLOCK_H
 
 #include <string>
-#include <chrono>
 #include <ostream>
 #include <list>
+#include <ctime>
 
 namespace naivecoin {
 
@@ -17,13 +17,13 @@ public:
     uint64_t const index;
     std::string const hash;
     std::string const previous_hash;
-    std::chrono::system_clock::time_point const timestamp;
+    std::time_t const timestamp;
     std::string const data;
 
     static Block make_block(
         uint64_t const index,
         std::string const previous_hash,
-        std::chrono::system_clock::time_point const timestamp,
+        std::time_t const timestamp,
         std::string const data
     );
 
@@ -34,7 +34,7 @@ private:
         uint64_t const index,
         std::string const hash,
         std::string const previous_hash,
-        std::chrono::system_clock::time_point const timestamp,
+        std::time_t const timestamp,
         std::string const data
     );
 };
@@ -44,7 +44,7 @@ std::ostream & operator<<(std::ostream & stream, Block const & block);
 std::string compute_hash(
         uint64_t index,
         std::string const & previous_hash,
-        std::chrono::system_clock::time_point const & timestamp,
+        std::time_t const & timestamp,
         std::string const & data
     );
 
