@@ -6,6 +6,7 @@ add_library(
     NaivecoinCore
     SHARED
     src/block.cpp
+    src/serialize.cpp
 )
 
 target_include_directories(
@@ -30,6 +31,7 @@ target_link_libraries(
     LINK_PUBLIC
     boost
     openssl
+    jsoncpp_lib
 )
 
 
@@ -56,9 +58,10 @@ export(TARGETS NaivecoinCore FILE NaivecoinCoreConfig.cmake)
 
 add_executable(
     test-naivecoin-core
+    test/main.cpp
     test/block.cpp
+    test/serialize.cpp
 )
-add_definitions(-DBOOST_TEST_DYN_LINK)
 
 target_link_libraries(
     test-naivecoin-core

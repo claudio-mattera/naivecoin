@@ -5,7 +5,6 @@
 #include <boost/bind.hpp>
 
 
-
 namespace naivecoin {
 
 data_server::data_server(boost::asio::io_service & io_service)

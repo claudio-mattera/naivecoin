@@ -31,6 +31,9 @@ set_property(TARGET openssl PROPERTY IMPORTED_LOCATION ${OPENSSL_SSL_LIBRARY})
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
+# JSON CPP
+find_package(jsoncpp)
+
 
 # Subprojects
 

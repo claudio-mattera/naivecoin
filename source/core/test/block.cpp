@@ -1,10 +1,11 @@
 #include <list>
 #include <iomanip>
 
-#define BOOST_TEST_MODULE CoreBlock
 #include <boost/test/unit_test.hpp>
 
 #include <naivecoin/core/block.h>
+
+BOOST_AUTO_TEST_SUITE(CoreBlock)
 
 BOOST_AUTO_TEST_CASE(compute_hash)
 {
@@ -124,3 +125,5 @@ BOOST_AUTO_TEST_CASE(is_blockchain_valid)
 
     BOOST_ASSERT(naivecoin::is_blockchain_valid(blockchain));
 }
+
+BOOST_AUTO_TEST_SUITE_END()
