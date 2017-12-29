@@ -1,6 +1,5 @@
 #include <list>
 #include <iomanip>
-#include <iostream>
 
 #include <boost/test/unit_test.hpp>
 
@@ -12,8 +11,8 @@ BOOST_AUTO_TEST_SUITE(CoreSerialize)
 BOOST_AUTO_TEST_CASE(serialize_block)
 {
     uint64_t const index = 0;
-    std::wstring const previous_hash = L"ac0c62f1871b2bda6c28af2a12f9cc1487b2d2b1";
-    std::wstring const data = L"Some data 2\u2078 = 256";
+    std::string const previous_hash = "ac0c62f1871b2bda6c28af2a12f9cc1487b2d2b1";
+    std::string const data = "Some data 2\u2078 = 256";
 
     std::tm tm = {};
     std::stringstream ss("2017-12-28T15:00:00Z");
@@ -27,21 +26,17 @@ BOOST_AUTO_TEST_CASE(serialize_block)
         data
     );
 
-    std::wstring const serialized = naivecoin::serialize_block(block);
+    std::string const serialized = naivecoin::serialize_block(block);
 
-    std::wcout << data << L'\n';
-    std::wcout << serialized << L'\n';
-
-    std::wstring expected = L"{\n"
-        "     \"data\" : \"Some data 2x = 256\",\n"
-        "     \"hash\" : \"d85ebd21edec93452860d61c14512eeaa42d4819\",\n"
-        "     \"index\" : 0,\n"
-        "     \"previous_hash\" : \"ac0c62f1871b2bda6c28af2a12f9cc1487b2d2b1\",\n"
-        "     \"timestamp\" : \"2017-12-28T14:00:00Z\"\n"
+    std::string expected = "{\n"
+        "\t\"data\" : \"Some data 2\u2078 = 256\",\n"
+        "\t\"hash\" : \"59c38cb7f9984bcde56534c6894aacc13cc642ca\",\n"
+        "\t\"index\" : 0,\n"
+        "\t\"previous_hash\" : \"ac0c62f1871b2bda6c28af2a12f9cc1487b2d2b1\",\n"
+        "\t\"timestamp\" : \"2017-12-28T14:00:00Z\"\n"
         "}";
-    std::wcout << expected << L'\n';
 
-    BOOST_CHECK(serialized == expected);
+    BOOST_CHECK_EQUAL(serialized, expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

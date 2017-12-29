@@ -9,16 +9,16 @@
 
 namespace {
 
-std::string to_string(std::wstring const & input)
+std::string to_string(std::string const & input)
 {
     std::string output;
     output.assign(input.begin(), input.end());
     return output;
 }
 
-std::wstring to_wstring(std::string const & input)
+std::string to_wstring(std::string const & input)
 {
-    std::wstring output;
+    std::string output;
     output.assign(input.begin(), input.end());
     return output;
 }
@@ -43,7 +43,7 @@ std::chrono::system_clock::time_point timepoint_from_string(std::string const & 
 
 namespace naivecoin {
 
-std::wstring serialize_block(Block const & block)
+std::string serialize_block(Block const & block)
 {
     Json::Value root;
 
@@ -59,15 +59,15 @@ std::wstring serialize_block(Block const & block)
     return to_wstring(stream.str());
 }
 
-std::wstring serialize_blockchain(std::list<Block> const & blockchain)
+std::string serialize_blockchain(std::list<Block> const & blockchain)
 {
 }
 
-Block deserialize_block(std::wstring const & text)
+Block deserialize_block(std::string const & text)
 {
 }
 
-std::list<Block> deserialize_blockchain(std::wstring const & text)
+std::list<Block> deserialize_blockchain(std::string const & text)
 {
 }
 

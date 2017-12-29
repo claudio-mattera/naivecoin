@@ -15,16 +15,16 @@ struct Block
 {
 public:
     uint64_t const index;
-    std::wstring const hash;
-    std::wstring const previous_hash;
+    std::string const hash;
+    std::string const previous_hash;
     std::chrono::system_clock::time_point const timestamp;
-    std::wstring const data;
+    std::string const data;
 
     static Block make_block(
         uint64_t const index,
-        std::wstring const previous_hash,
+        std::string const previous_hash,
         std::chrono::system_clock::time_point const timestamp,
-        std::wstring const data
+        std::string const data
     );
 
     static Block genesis();
@@ -32,20 +32,20 @@ public:
 private:
     Block(
         uint64_t const index,
-        std::wstring const hash,
-        std::wstring const previous_hash,
+        std::string const hash,
+        std::string const previous_hash,
         std::chrono::system_clock::time_point const timestamp,
-        std::wstring const data
+        std::string const data
     );
 };
 
-std::wostream & operator<<(std::wostream & stream, Block const & block);
+std::ostream & operator<<(std::ostream & stream, Block const & block);
 
-std::wstring compute_hash(
+std::string compute_hash(
         uint64_t index,
-        std::wstring const & previous_hash,
+        std::string const & previous_hash,
         std::chrono::system_clock::time_point const & timestamp,
-        std::wstring const & data
+        std::string const & data
     );
 
 bool is_new_block_valid(Block const & new_block, Block const & previous_block);

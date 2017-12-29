@@ -11,10 +11,10 @@ namespace naivecoin {
 
 Block::Block(
         uint64_t const index,
-        std::wstring const hash,
-        std::wstring const previous_hash,
+        std::string const hash,
+        std::string const previous_hash,
         std::chrono::system_clock::time_point const timestamp,
-        std::wstring const data
+        std::string const data
     )
 : index(index)
 , hash(hash)
@@ -27,12 +27,12 @@ Block::Block(
 // static
 Block Block::make_block(
         uint64_t const index,
-        std::wstring const previous_hash,
+        std::string const previous_hash,
         std::chrono::system_clock::time_point const timestamp,
-        std::wstring const data
+        std::string const data
     )
 {
-    std::wstring const hash = compute_hash(
+    std::string const hash = compute_hash(
         index,
         previous_hash,
         timestamp,
@@ -51,9 +51,9 @@ Block Block::genesis()
     auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(& tm));
 
     uint64_t const index = 0;
-    std::wstring const previous_hash = L"";
-    std::wstring const data = L"";
-    std::wstring const hash = compute_hash(
+    std::string const previous_hash = "";
+    std::string const data = "";
+    std::string const hash = compute_hash(
         index,
         previous_hash,
         timestamp,
@@ -63,52 +63,45 @@ Block Block::genesis()
     return Block(index, hash, previous_hash, timestamp, data);
 }
 
-std::wostream & operator<<(std::wostream & stream, Block const & block)
+std::ostream & operator<<(std::ostream & stream, Block const & block)
 {
     std::time_t const time = std::chrono::system_clock::to_time_t(block.timestamp);
     stream
-        << L"Block index: " << block.index << L", "
-        << L"Timestamp: " << std::put_time(std::gmtime(& time), L"%FT%TZ") << L", "
-        << L"Previous hash: " << block.previous_hash << L", "
-        << L"Hash: " << block.hash << L", "
-        << L"Data: " << block.data << L", ";
+        << "Block index: " << block.index << ", "
+        << "Timestamp: " << std::put_time(std::gmtime(& time), "%FT%TZ") << ", "
+        << "Previous hash: " << block.previous_hash << ", "
+        << "Hash: " << block.hash << ", "
+        << "Data: " << block.data << ", ";
     return stream;
 }
 
-std::wstring compute_hash(
+std::string compute_hash(
         uint64_t index,
-        std::wstring const & previous_hash,
+        std::string const & previous_hash,
         std::chrono::system_clock::time_point const & timestamp,
-        std::wstring const & data
+        std::string const & data
     )
 {
-    std::wostringstream stream;
+    std::ostringstream stream;
 
     std::time_t const time = std::chrono::system_clock::to_time_t(timestamp);
 
     stream
         << index
         << previous_hash
-        << std::put_time(std::gmtime(& time), L"%FT%TZ")
+        << std::put_time(std::gmtime(& time), "%FT%TZ")
         << data;
 
-    std::wstring const whole_string = stream.str();
-
-    std::size_t K = 200;
-    std::vector<char> temp(K);
-
-    std::size_t n = std::wcstombs(temp.data(), whole_string.c_str(), K);
+    std::string const whole_string = stream.str();
 
     unsigned char hash[SHA_DIGEST_LENGTH]; // == 20
-    SHA1(reinterpret_cast<unsigned char*>(temp.data()), n, hash);
+    SHA1(reinterpret_cast<const unsigned char*>(whole_string.c_str()), whole_string.size(), hash);
 
-    wchar_t whash[2 * SHA_DIGEST_LENGTH + 1];
-
-    stream.str(L"");
+    stream.str("");
 
     for(int i = 0; i < SHA_DIGEST_LENGTH; ++i) {
         stream
-            << std::setfill(L'0')
+            << std::setfill('0')
             << std::setw(2)
             << std::hex
             << static_cast<unsigned int>(hash[i]);
@@ -123,7 +116,7 @@ bool is_new_block_valid(Block const & new_block, Block const & previous_block)
         return false;
     }
 
-    std::wstring previous_hash = compute_hash(
+    std::string previous_hash = compute_hash(
         previous_block.index,
         previous_block.previous_hash,
         previous_block.timestamp,
@@ -133,7 +126,7 @@ bool is_new_block_valid(Block const & new_block, Block const & previous_block)
         return false;
     }
 
-    std::wstring hash = compute_hash(
+    std::string hash = compute_hash(
         new_block.index,
         new_block.previous_hash,
         new_block.timestamp,
