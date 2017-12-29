@@ -5,6 +5,11 @@
 
 namespace naivecoin {
 
+std::time_t now()
+{
+    return std::time(nullptr);
+}
+
 std::time_t parse_timestamp(std::string const & text)
 {
     std::tm tm = {};

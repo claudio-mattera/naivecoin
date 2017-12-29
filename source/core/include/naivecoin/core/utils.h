@@ -9,6 +9,7 @@
 
 namespace naivecoin {
 
+std::time_t now();
 std::time_t parse_timestamp(std::string const & text);
 std::string format_timestamp(std::time_t const & timestamp);
 
