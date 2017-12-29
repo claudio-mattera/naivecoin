@@ -7,6 +7,9 @@ add_executable(
     src/main.cpp
     src/controlserver.cpp
     src/controlconnection.cpp
+    src/dataserver.cpp
+    src/dataconnection.cpp
+    src/miner.cpp
 )
 
 target_include_directories(

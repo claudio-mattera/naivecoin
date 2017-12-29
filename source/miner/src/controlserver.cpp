@@ -34,7 +34,7 @@ void control_server::start_accept()
 
 void control_server::handle_accept(
         control_connection::pointer new_connection,
-        const boost::system::error_code& error
+        const boost::system::error_code & error
     )
 {
     std::cout << "Handling accept" << '\n';
