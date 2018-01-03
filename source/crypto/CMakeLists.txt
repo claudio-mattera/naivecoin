@@ -56,15 +56,15 @@ export(TARGETS NaivecoinCrypto FILE NaivecoinCryptoConfig.cmake)
 # Testing
 
 add_executable(
-    test-naivecoin-crypto
+    NaivecoinCryptoTest
     test/main.cpp
     test/crypto.cpp
 )
 
 target_link_libraries(
-    test-naivecoin-crypto
+    NaivecoinCryptoTest
     boost-test
     NaivecoinCrypto
 )
 
-add_test(test-naivecoin-crypto test-naivecoin-crypto)
+add_test(NaivecoinCryptoTest NaivecoinCryptoTest)

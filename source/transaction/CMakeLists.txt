@@ -60,7 +60,7 @@ export(TARGETS NaivecoinTransaction FILE NaivecoinTransactionConfig.cmake)
 # Testing
 
 add_executable(
-    test-naivecoin-transaction
+    NaivecoinTransactionTest
     test/main.cpp
     test/output.cpp
     test/unspent_output.cpp
@@ -70,10 +70,10 @@ add_executable(
 )
 
 target_link_libraries(
-    test-naivecoin-transaction
+    NaivecoinTransactionTest
     boost-test
     NaivecoinTransaction
     openssl
 )
 
-add_test(test-naivecoin-transaction test-naivecoin-transaction)
+add_test(NaivecoinTransactionTest NaivecoinTransactionTest)

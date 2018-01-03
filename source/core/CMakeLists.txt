@@ -58,7 +58,7 @@ export(TARGETS NaivecoinCore FILE NaivecoinCoreConfig.cmake)
 # Testing
 
 add_executable(
-    test-naivecoin-core
+    NaivecoinCoreTest
     test/main.cpp
     test/block.cpp
     test/serialize.cpp
@@ -66,9 +66,9 @@ add_executable(
 )
 
 target_link_libraries(
-    test-naivecoin-core
+    NaivecoinCoreTest
     boost-test
     NaivecoinCore
 )
 
-add_test(test-naivecoin-core test-naivecoin-core)
+add_test(NaivecoinCoreTest NaivecoinCoreTest)
