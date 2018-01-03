@@ -171,7 +171,7 @@ BOOST_AUTO_TEST_CASE(deserialize_blockchain)
 
     auto expected_iterator = std::begin(expected_blockchain);
     auto iterator = std::begin(blockchain);
-    for (int i = 0; i < blockchain.size(); ++i) {
+    for (std::size_t i = 0; i < blockchain.size(); ++i) {
 
         BOOST_CHECK_EQUAL(iterator->index, expected_iterator->index);
         BOOST_CHECK_EQUAL(iterator->previous_hash, expected_iterator->previous_hash);
