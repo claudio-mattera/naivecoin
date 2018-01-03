@@ -30,6 +30,8 @@ public:
 
 std::ostream & operator<<(std::ostream & stream, Transaction const & transaction);
 
+std::string compute_transaction_id(Transaction const & transaction);
+
 } // namespace naivecoin
 
 #endif // NAIVECOIN_TRANSACTION_TRANSACTION_H
