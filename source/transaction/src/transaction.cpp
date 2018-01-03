@@ -4,8 +4,8 @@ namespace naivecoin {
 
 Transaction::Transaction(
     std::string const & id,
-    std::list<Input> const & input,
-    std::list<Output> const & output
+    std::list<Input> const & inputs,
+    std::list<Output> const & outputs
 )
 : id(id)
 , inputs(inputs)
