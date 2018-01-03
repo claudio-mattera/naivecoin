@@ -6,6 +6,7 @@ add_library(
     NaivecoinTransaction
     SHARED
     src/output.cpp
+    src/unspent_output.cpp
     src/input.cpp
     src/transaction.cpp
     src/utils.cpp
@@ -62,6 +63,7 @@ add_executable(
     test-naivecoin-transaction
     test/main.cpp
     test/output.cpp
+    test/unspent_output.cpp
     test/input.cpp
     test/transaction.cpp
     test/utils.cpp
