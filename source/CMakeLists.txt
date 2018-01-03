@@ -39,4 +39,5 @@ find_package(jsoncpp)
 
 enable_testing()
 add_subdirectory(core)
+add_subdirectory(transaction)
 add_subdirectory(miner)
