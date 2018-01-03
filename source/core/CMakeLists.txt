@@ -31,7 +31,6 @@ target_link_libraries(
     NaivecoinCore
     LINK_PUBLIC
     NaivecoinCrypto
-    boost
     jsoncpp_lib
 )
 

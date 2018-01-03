@@ -32,9 +32,7 @@ set_target_properties(
 target_link_libraries(
     NaivecoinTransaction
     LINK_PUBLIC
-    boost
-    openssl
-    jsoncpp_lib
+    NaivecoinCrypto
 )
 
 
@@ -73,7 +71,6 @@ target_link_libraries(
     NaivecoinTransactionTest
     boost-test
     NaivecoinTransaction
-    openssl
 )
 
 add_test(NaivecoinTransactionTest NaivecoinTransactionTest)

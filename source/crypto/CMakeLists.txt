@@ -28,9 +28,7 @@ set_target_properties(
 target_link_libraries(
     NaivecoinCrypto
     LINK_PUBLIC
-    boost
     openssl
-    jsoncpp_lib
 )
 
 
