@@ -5,6 +5,25 @@
 
 #include <openssl/sha.h>
 
+namespace {
+
+std::string array_to_hex(unsigned char const * const array, std::size_t const length)
+{
+    std::ostringstream stream;
+
+    for(std::size_t i = 0; i < length; ++i) {
+        stream
+            << std::setfill('0')
+            << std::setw(2)
+            << std::hex
+            << static_cast<unsigned int>(array[i]);
+    }
+
+    return stream.str();
+}
+
+} // unnamed namespace
+
 namespace naivecoin {
 
 std::string compute_hash(std::string const & data)
@@ -16,17 +35,7 @@ std::string compute_hash(std::string const & data)
         hash
     );
 
-    std::ostringstream stream;
-
-    for(int i = 0; i < SHA_DIGEST_LENGTH; ++i) {
-        stream
-            << std::setfill('0')
-            << std::setw(2)
-            << std::hex
-            << static_cast<unsigned int>(hash[i]);
-    }
-
-    return stream.str();
+    return array_to_hex(hash, sizeof(hash));
 }
 
 } // namespace naivecoin
