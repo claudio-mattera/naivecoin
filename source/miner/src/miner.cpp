@@ -32,20 +32,51 @@ void Miner::mine_next_block()
     uint64_t const index = 1 + latest_block.index;
     std::string const & previous_hash = latest_block.hash;
     std::string const data;
-    auto timestamp = naivecoin::now();
-    uint16_t difficulty = 0;
-    uint64_t nonce = 0;
+    std::time_t const timestamp= naivecoin::now();
+    uint16_t const difficulty = 0;
 
-    naivecoin::Block const next_block = naivecoin::Block::make_block(
+    naivecoin::Block const next_block = this->find_next_block(
         index,
         previous_hash,
         timestamp,
         data,
-        difficulty,
-        nonce
+        difficulty
     );
 
     this->blockchain.push_back(next_block);
+}
+
+naivecoin::Block Miner::find_next_block(
+    uint64_t const index,
+    std::string const & previous_hash,
+    std::time_t const & timestamp,
+    std::string const & data,
+    uint16_t const difficulty
+)
+{
+    uint64_t nonce = 0;
+    while (true) {
+        std::string const hash = compute_hash(
+            index,
+            previous_hash,
+            timestamp,
+            data,
+            difficulty,
+            nonce
+        );
+        if (naivecoin::hash_matches_difficulty(hash, difficulty)) {
+            return naivecoin::Block::make_block(
+                index,
+                previous_hash,
+                timestamp,
+                data,
+                difficulty,
+                nonce
+            );
+        } else {
+            ++nonce;
+        }
+    }
 }
 
 } // namespace naivecoin

@@ -4,6 +4,8 @@
 #ifndef NAIVECOIN_MINER_MINER_H
 #define NAIVECOIN_MINER_MINER_H
 
+#include <ctime>
+#include <string>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
@@ -36,6 +38,13 @@ private:
 
 private:
     void mine_next_block();
+    naivecoin::Block find_next_block(
+        uint64_t const index,
+        std::string const & previous_hash,
+        std::time_t const & timestamp,
+        std::string const & data,
+        uint16_t const difficulty
+    );
 
 private:
     std::list<naivecoin::Block> blockchain;
