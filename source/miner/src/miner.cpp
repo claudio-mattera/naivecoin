@@ -59,7 +59,7 @@ naivecoin::Block Miner::find_next_block(
 {
     uint64_t nonce = 0;
     while (true) {
-        std::string const hash = compute_hash(
+        std::string const hash = compute_block_hash(
             index,
             previous_hash,
             timestamp,

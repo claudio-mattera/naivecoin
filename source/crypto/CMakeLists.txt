@@ -1,17 +1,15 @@
-project(NaivecoinCore VERSION 0.1 LANGUAGES CXX)
+project(NaivecoinCrypto VERSION 0.1 LANGUAGES CXX)
 
 # Library
 
 add_library(
-    NaivecoinCore
+    NaivecoinCrypto
     SHARED
-    src/block.cpp
-    src/serialize.cpp
-    src/utils.cpp
+    src/crypto.cpp
 )
 
 target_include_directories(
-    NaivecoinCore
+    NaivecoinCrypto
     PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
@@ -20,7 +18,7 @@ target_include_directories(
 )
 
 set_target_properties(
-    NaivecoinCore
+    NaivecoinCrypto
     PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
@@ -28,10 +26,10 @@ set_target_properties(
 )
 
 target_link_libraries(
-    NaivecoinCore
-    LINK_PUBLIC
     NaivecoinCrypto
+    LINK_PUBLIC
     boost
+    openssl
     jsoncpp_lib
 )
 
@@ -39,7 +37,7 @@ target_link_libraries(
 # Installation
 
 install(
-    TARGETS NaivecoinCore EXPORT NaivecoinCoreConfig
+    TARGETS NaivecoinCrypto EXPORT NaivecoinCryptoConfig
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}  # This is for Windows
@@ -49,26 +47,24 @@ install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 # This makes the project importable from the install directory
 # Put config file in per-project dir (name MUST match), can also
 # just go into 'cmake'.
-install(EXPORT NaivecoinCoreConfig DESTINATION share/naivecoin/cmake)
+install(EXPORT NaivecoinCryptoConfig DESTINATION share/naivecoin/cmake)
 
 # This makes the project importable from the build directory
-export(TARGETS NaivecoinCore FILE NaivecoinCoreConfig.cmake)
+export(TARGETS NaivecoinCrypto FILE NaivecoinCryptoConfig.cmake)
 
 
 # Testing
 
 add_executable(
-    test-naivecoin-core
+    test-naivecoin-crypto
     test/main.cpp
-    test/block.cpp
-    test/serialize.cpp
-    test/utils.cpp
+    test/crypto.cpp
 )
 
 target_link_libraries(
-    test-naivecoin-core
+    test-naivecoin-crypto
     boost-test
-    NaivecoinCore
+    NaivecoinCrypto
 )
 
-add_test(test-naivecoin-core test-naivecoin-core)
+add_test(test-naivecoin-crypto test-naivecoin-crypto)

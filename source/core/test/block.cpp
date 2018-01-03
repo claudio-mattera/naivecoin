@@ -6,9 +6,11 @@
 #include <naivecoin/core/block.h>
 #include <naivecoin/core/utils.h>
 
+#include <naivecoin/crypto/crypto.h>
+
 BOOST_AUTO_TEST_SUITE(CoreBlock)
 
-BOOST_AUTO_TEST_CASE(compute_hash)
+BOOST_AUTO_TEST_CASE(compute_block_hash)
 {
     uint64_t const index = 0;
     std::string const previous_hash = "";
@@ -17,7 +19,7 @@ BOOST_AUTO_TEST_CASE(compute_hash)
     uint16_t difficulty = 0;
     uint64_t nonce = 0;
 
-    std::string const hash = naivecoin::compute_hash(index, previous_hash, timestamp, data, difficulty, nonce);
+    std::string const hash = naivecoin::compute_block_hash(index, previous_hash, timestamp, data, difficulty, nonce);
 
     std::string const expected_hash = "25b14367acd2fee29d0b2a8ed4603297f5703a59";
 

@@ -1,12 +1,10 @@
 #include <naivecoin/core/block.h>
 
 #include <sstream>
-#include <iomanip>
-#include <vector>
-
-#include <openssl/sha.h>
 
 #include <naivecoin/core/utils.h>
+
+#include <naivecoin/crypto/crypto.h>
 
 namespace naivecoin {
 
@@ -39,7 +37,7 @@ Block Block::make_block(
         uint64_t const nonce
     )
 {
-    std::string const hash = compute_hash(
+    std::string const hash = compute_block_hash(
         index,
         previous_hash,
         timestamp,
@@ -61,7 +59,7 @@ Block Block::genesis()
     std::string const data = "";
     uint16_t const difficulty = 0;
     uint64_t const nonce = 0;
-    std::string const hash = compute_hash(
+    std::string const hash = compute_block_hash(
         index,
         previous_hash,
         timestamp,
@@ -86,7 +84,7 @@ std::ostream & operator<<(std::ostream & stream, Block const & block)
     return stream;
 }
 
-std::string compute_hash(
+std::string compute_block_hash(
         uint64_t const index,
         std::string const & previous_hash,
         std::time_t const & timestamp,
@@ -107,20 +105,7 @@ std::string compute_hash(
 
     std::string const whole_string = stream.str();
 
-    unsigned char hash[SHA_DIGEST_LENGTH]; // == 20
-    SHA1(reinterpret_cast<const unsigned char*>(whole_string.c_str()), whole_string.size(), hash);
-
-    stream.str("");
-
-    for(int i = 0; i < SHA_DIGEST_LENGTH; ++i) {
-        stream
-            << std::setfill('0')
-            << std::setw(2)
-            << std::hex
-            << static_cast<unsigned int>(hash[i]);
-    }
-
-    return stream.str();
+    return naivecoin::compute_hash(whole_string);
 }
 
 bool is_new_block_valid(Block const & new_block, Block const & previous_block)
@@ -129,7 +114,7 @@ bool is_new_block_valid(Block const & new_block, Block const & previous_block)
         return false;
     }
 
-    std::string previous_hash = compute_hash(
+    std::string previous_hash = compute_block_hash(
         previous_block.index,
         previous_block.previous_hash,
         previous_block.timestamp,
@@ -141,7 +126,7 @@ bool is_new_block_valid(Block const & new_block, Block const & previous_block)
         return false;
     }
 
-    std::string hash = compute_hash(
+    std::string hash = compute_block_hash(
         new_block.index,
         new_block.previous_hash,
         new_block.timestamp,

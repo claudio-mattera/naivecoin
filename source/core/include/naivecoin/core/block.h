@@ -47,7 +47,7 @@ private:
 
 std::ostream & operator<<(std::ostream & stream, Block const & block);
 
-std::string compute_hash(
+std::string compute_block_hash(
         uint64_t const index,
         std::string const & previous_hash,
         std::time_t const & timestamp,
