@@ -8,6 +8,7 @@ add_library(
     src/output.cpp
     src/input.cpp
     src/transaction.cpp
+    src/utils.cpp
 )
 
 target_include_directories(
@@ -63,6 +64,7 @@ add_executable(
     test/output.cpp
     test/input.cpp
     test/transaction.cpp
+    test/utils.cpp
 )
 
 target_link_libraries(
