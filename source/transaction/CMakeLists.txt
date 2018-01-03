@@ -7,6 +7,7 @@ add_library(
     SHARED
     src/output.cpp
     src/input.cpp
+    src/transaction.cpp
 )
 
 target_include_directories(
@@ -61,6 +62,7 @@ add_executable(
     test/main.cpp
     test/output.cpp
     test/input.cpp
+    test/transaction.cpp
 )
 
 target_link_libraries(
