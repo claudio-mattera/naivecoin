@@ -135,4 +135,21 @@ BOOST_AUTO_TEST_CASE(is_blockchain_valid)
     BOOST_ASSERT(naivecoin::is_blockchain_valid(blockchain));
 }
 
+BOOST_AUTO_TEST_CASE(hash_matches_difficulty)
+{
+    int const difficulty_1 = 4;
+    std::string const hash_1_1 = "08f3a3ee5e6b4b0d3255bfef95601890afd80709";
+    std::string const hash_1_2 = "16bca3ee5e6b4b0d3255bfef95601890afd80709";
+
+    BOOST_ASSERT(naivecoin::hash_matches_difficulty(hash_1_1, difficulty_1));
+    BOOST_ASSERT(! naivecoin::hash_matches_difficulty(hash_1_2, difficulty_1));
+
+    int const difficulty_2 = 8;
+    std::string const hash_2_1 = "0027a3ee5e6b4b0d3255bfef95601890afd80709";
+    std::string const hash_2_2 = "05c2a3ee5e6b4b0d3255bfef95601890afd80709";
+
+    BOOST_ASSERT(naivecoin::hash_matches_difficulty(hash_2_1, difficulty_2));
+    BOOST_ASSERT(! naivecoin::hash_matches_difficulty(hash_2_2, difficulty_2));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

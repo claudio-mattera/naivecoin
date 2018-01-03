@@ -179,7 +179,14 @@ bool is_blockchain_valid(std::list<Block> const & blockchain)
 
 bool hash_matches_difficulty(std::string const & hash, uint16_t const difficulty)
 {
-    return false;
+    int const N = 20;
+    std::array<bool, 4 * N> const hash_in_binary = hex_to_binary<N>(hash);
+    for (int i = 0; i < difficulty; ++i) {
+        if (hash_in_binary[i]) {
+            return false;
+        }
+    }
+    return true;
 }
 
 } // namespace naivecoin
