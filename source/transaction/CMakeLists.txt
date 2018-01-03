@@ -6,6 +6,7 @@ add_library(
     NaivecoinTransaction
     SHARED
     src/output.cpp
+    src/input.cpp
 )
 
 target_include_directories(
@@ -59,6 +60,7 @@ add_executable(
     test-naivecoin-transaction
     test/main.cpp
     test/output.cpp
+    test/input.cpp
 )
 
 target_link_libraries(
