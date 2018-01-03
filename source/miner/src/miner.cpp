@@ -124,4 +124,18 @@ uint16_t Miner::get_adjusted_difficulty(naivecoin::Block const & latest_block)
     }
 }
 
+bool Miner::is_timestamp_valid(naivecoin::Block const & new_block)
+{
+    naivecoin::Block const & latest_block = * this->blockchain.crbegin();
+    std::time_t const now = std::time(nullptr);
+
+    if (std::difftime(new_block.timestamp, latest_block.timestamp) < -60) {
+        return false;
+    } else if (std::difftime(now, new_block.timestamp) < -60) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
 } // namespace naivecoin

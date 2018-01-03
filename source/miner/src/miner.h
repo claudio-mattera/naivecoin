@@ -51,6 +51,7 @@ private:
     );
     uint16_t get_difficulty();
     uint16_t get_adjusted_difficulty(naivecoin::Block const & latest_block);
+    bool is_timestamp_valid(naivecoin::Block const & new_block);
 
 private:
     std::list<naivecoin::Block> blockchain;
