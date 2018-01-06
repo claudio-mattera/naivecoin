@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE(generate_key_pair)
     std::pair<std::string, std::string> pair = naivecoin::generate_key_pair();
 
     BOOST_CHECK_EQUAL(pair.first.size(), 268);
-    BOOST_CHECK_EQUAL(pair.second.size(), 384);
+    BOOST_CHECK_EQUAL(pair.second.size(), 386);
 }
 
 BOOST_AUTO_TEST_CASE(sign_and_verify)
