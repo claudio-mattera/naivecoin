@@ -7,7 +7,11 @@
 
 namespace naivecoin {
 
-Miner::Miner()
+Miner::Miner(uint64_t const seed)
+: blockchain()
+, mutex()
+, condition_variable()
+, mersenne_twister_engine(seed)
 {
     this->blockchain.push_back(naivecoin::Block::genesis());
 }
@@ -57,8 +61,9 @@ naivecoin::Block Miner::find_next_block(
     uint16_t const difficulty
 )
 {
-    uint64_t nonce = 0;
     while (true) {
+        uint64_t const nonce = this->mersenne_twister_engine();
+
         std::string const hash = compute_block_hash(
             index,
             previous_hash,
@@ -76,8 +81,6 @@ naivecoin::Block Miner::find_next_block(
                 difficulty,
                 nonce
             );
-        } else {
-            ++nonce;
         }
     }
 }

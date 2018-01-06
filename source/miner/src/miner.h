@@ -10,6 +10,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <list>
+#include <random>
 
 #include <boost/asio.hpp>
 
@@ -20,7 +21,7 @@ namespace naivecoin {
 class Miner
 {
 public:
-    Miner();
+    Miner(uint64_t const seed = std::mt19937_64::default_seed);
 
     void start();
 
@@ -58,6 +59,8 @@ private:
 
     std::mutex mutex;
     std::condition_variable condition_variable;
+
+    std::mt19937_64 mersenne_twister_engine;
 };
 
 } // namespace naivecoin
