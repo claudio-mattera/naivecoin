@@ -1,6 +1,3 @@
-#include <list>
-#include <array>
-
 #include <boost/test/unit_test.hpp>
 
 #include <naivecoin/crypto/crypto.h>
