@@ -133,7 +133,6 @@ std::pair<std::string, std::string> generate_key_pair()
      * Here we print the private/public key data in PEM format.   *
      * ---------------------------------------------------------- */
     if(! PEM_write_bio_PrivateKey(bio.get(), pkey.get(), nullptr, nullptr, 0, 0, nullptr)) {
-        ERR_print_errors_fp(stdout);
         throw std::runtime_error("Error writing private key data in PEM format");
     }
     BIO_flush(bio.get());
