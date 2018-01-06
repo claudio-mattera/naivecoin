@@ -28,4 +28,20 @@ BOOST_AUTO_TEST_CASE(generate_key_pair)
     BOOST_CHECK_EQUAL(pair.second.size(), 384);
 }
 
+BOOST_AUTO_TEST_CASE(sign_and_verify)
+{
+    std::pair<std::string, std::string> const pair = naivecoin::generate_key_pair();
+
+    std::string const data = "Some data";
+
+    std::string const signature = naivecoin::sign(data, pair.second);
+
+    BOOST_CHECK(naivecoin::verify(data, signature, pair.first));
+
+    std::string const other_data = "Some different data";
+    std::string const other_signature = naivecoin::sign(other_data, pair.second);
+
+    BOOST_CHECK(! naivecoin::verify(data, other_signature, pair.first));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

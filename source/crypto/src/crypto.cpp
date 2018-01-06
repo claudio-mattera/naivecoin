@@ -17,6 +17,8 @@
 
 namespace {
 
+EVP_MD const * const HASH_FUNCTION = EVP_sha512();
+
 std::string array_to_hex(unsigned char const * const array, std::size_t const length)
 {
     std::ostringstream stream;
@@ -30,6 +32,25 @@ std::string array_to_hex(unsigned char const * const array, std::size_t const le
     }
 
     return stream.str();
+}
+
+std::vector<unsigned char> hex_to_array(std::string const & hex)
+{
+    std::vector<unsigned char> array(hex.size() / 2);
+
+    std::istringstream stream(hex);
+
+    for (std::size_t i = 0; i < hex.size(); i += 2) {
+        char high;
+        stream >> high;
+        char low;
+        stream >> low;
+        char const tmp[3] = {high, low, '\0'};
+        unsigned int const value = std::strtoul(tmp, nullptr, 16);
+        array[i / 2] = value;
+    }
+
+    return array;
 }
 
 } // unnamed namespace
@@ -143,6 +164,97 @@ std::pair<std::string, std::string> generate_key_pair()
     fclose(stream);
 
     return std::make_pair(public_key, private_key);
+}
+
+std::string sign(std::string const & data, std::string const & private_key)
+{
+    BIO * bio = BIO_new_mem_buf(private_key.c_str(), private_key.size());
+    BIO * b64 = bio; //BIO_new(BIO_f_base64());
+    //BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
+    //BIO_push(bio, b64);
+
+    std::unique_ptr<EVP_PKEY, void(*)(EVP_PKEY*)> pkey(
+        PEM_read_bio_PrivateKey(b64, nullptr, nullptr, nullptr),
+        EVP_PKEY_free
+    );
+
+    if (! pkey) {
+        throw std::runtime_error("Read private key failed");
+    }
+
+    /* Create the Message Digest Context and wrap it in a unique_ptr */
+    std::unique_ptr<EVP_MD_CTX, void(*)(EVP_MD_CTX*)> message_digest_context(
+        EVP_MD_CTX_create(),
+        EVP_MD_CTX_destroy
+    );
+
+    /* Initialise the DigestSign operation - SHA-256 has been selected as the message digest function in this example */
+    if(1 != EVP_DigestSignInit(message_digest_context.get(), nullptr, HASH_FUNCTION, nullptr, pkey.get())) {
+        throw std::runtime_error("Digest initialization failed");
+    }
+
+    /* Call update with the message */
+    if(1 != EVP_DigestSignUpdate(message_digest_context.get(), data.c_str(), data.size())) {
+        throw std::runtime_error("Digest update failed");
+    }
+
+    /* Finalise the DigestSign operation */
+    /* First call EVP_DigestSignFinal with a nullptr sig parameter to obtain the length of the
+     * signature. Length is returned in slen */
+    std::size_t slen;
+    if(1 != EVP_DigestSignFinal(message_digest_context.get(), nullptr, & slen)) {
+        throw std::runtime_error("Digest final failed");
+    }
+
+    /* Allocate memory for the signature based on size in slen */
+    std::vector<unsigned char> sig(slen);
+
+    /* Obtain the signature */
+    if(1 != EVP_DigestSignFinal(message_digest_context.get(), sig.data(), & slen)) {
+        throw std::runtime_error("Digest final failed");
+    }
+
+    return array_to_hex(sig.data(), slen);
+}
+
+bool verify(std::string const & data, std::string const & signature, std::string const & public_key)
+{
+    BIO * bio = BIO_new_mem_buf(public_key.c_str(), public_key.size());
+    BIO * b64 = bio; //BIO_new(BIO_f_base64());
+    //BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
+    //BIO_push(b64, bio);
+
+    std::unique_ptr<EVP_PKEY, void(*)(EVP_PKEY*)> pkey(
+        PEM_read_bio_PUBKEY(b64, nullptr, nullptr, nullptr),
+        EVP_PKEY_free
+    );
+
+    if (! pkey) {
+        throw std::runtime_error("Read public key failed");
+    }
+
+    /* Create the Message Digest Context and wrap it in a unique_ptr */
+    std::unique_ptr<EVP_MD_CTX, void(*)(EVP_MD_CTX*)> message_digest_context(
+        EVP_MD_CTX_create(),
+        EVP_MD_CTX_destroy
+    );
+
+    /* Initialize `key` with a public key */
+    if(1 != EVP_DigestVerifyInit(message_digest_context.get(), nullptr, HASH_FUNCTION, nullptr, pkey.get())) {
+        throw std::runtime_error("Digest initialization failed");
+    }
+    /* Initialize `key` with a public key */
+    if(1 != EVP_DigestVerifyUpdate(message_digest_context.get(), data.c_str(), data.size())) {
+        throw std::runtime_error("Digest update failed");
+    }
+
+    std::vector<unsigned char> const array = hex_to_array(signature);
+
+    if(1 == EVP_DigestVerifyFinal(message_digest_context.get(), array.data(), array.size())) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 } // namespace naivecoin
