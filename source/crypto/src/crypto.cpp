@@ -124,46 +124,41 @@ std::pair<std::string, std::string> generate_key_pair()
         throw std::runtime_error("Error assigning ECC key to EVP_PKEY structure.");
     }
 
-    BIO * bio = BIO_new(BIO_s_mem());
-    BIO * b64 = bio; //BIO_new(BIO_f_base64());
-    //BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
-    //BIO_push(b64, bio);
+    std::unique_ptr<BIO, void(*)(BIO*)> bio(
+        BIO_new(BIO_s_mem()),
+        BIO_free_all
+    );
 
     /* ---------------------------------------------------------- *
      * Here we print the private/public key data in PEM format.   *
      * ---------------------------------------------------------- */
-    if(! PEM_write_bio_PrivateKey(b64, pkey.get(), nullptr, nullptr, 0, 0, nullptr)) {
+    if(! PEM_write_bio_PrivateKey(bio.get(), pkey.get(), nullptr, nullptr, 0, 0, nullptr)) {
         ERR_print_errors_fp(stdout);
         throw std::runtime_error("Error writing private key data in PEM format");
     }
-    BIO_flush(b64);
+    BIO_flush(bio.get());
 
-    std::string const private_key = read_from_bio(b64);
+    std::string const private_key = read_from_bio(bio.get());
 
-    if(!PEM_write_bio_PUBKEY(b64, pkey.get())) {
+    if(!PEM_write_bio_PUBKEY(bio.get(), pkey.get())) {
         throw std::runtime_error("Error writing public key data in PEM format");
     }
-    BIO_flush(b64);
+    BIO_flush(bio.get());
 
-    std::string const public_key = read_from_bio(b64);
-
-    /* ---------------------------------------------------------- *
-     * Free up all structures                                     *
-     * ---------------------------------------------------------- */
-    BIO_free_all(b64);
+    std::string const public_key = read_from_bio(bio.get());
 
     return std::make_pair(public_key, private_key);
 }
 
 std::string sign(std::string const & data, std::string const & private_key)
 {
-    BIO * bio = BIO_new_mem_buf(private_key.c_str(), private_key.size());
-    BIO * b64 = bio; //BIO_new(BIO_f_base64());
-    //BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
-    //BIO_push(bio, b64);
+    std::unique_ptr<BIO, void(*)(BIO*)> bio(
+        BIO_new_mem_buf(private_key.c_str(), private_key.size()),
+        BIO_free_all
+    );
 
     std::unique_ptr<EVP_PKEY, void(*)(EVP_PKEY*)> pkey(
-        PEM_read_bio_PrivateKey(b64, nullptr, nullptr, nullptr),
+        PEM_read_bio_PrivateKey(bio.get(), nullptr, nullptr, nullptr),
         EVP_PKEY_free
     );
 
@@ -208,13 +203,13 @@ std::string sign(std::string const & data, std::string const & private_key)
 
 bool verify(std::string const & data, std::string const & signature, std::string const & public_key)
 {
-    BIO * bio = BIO_new_mem_buf(public_key.c_str(), public_key.size());
-    BIO * b64 = bio; //BIO_new(BIO_f_base64());
-    //BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
-    //BIO_push(b64, bio);
+    std::unique_ptr<BIO, void(*)(BIO*)> bio(
+        BIO_new_mem_buf(public_key.c_str(), public_key.size()),
+        BIO_free_all
+    );
 
     std::unique_ptr<EVP_PKEY, void(*)(EVP_PKEY*)> pkey(
-        PEM_read_bio_PUBKEY(b64, nullptr, nullptr, nullptr),
+        PEM_read_bio_PUBKEY(bio.get(), nullptr, nullptr, nullptr),
         EVP_PKEY_free
     );
 
