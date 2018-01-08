@@ -12,13 +12,14 @@
 #include <naivecoin/core/block.h>
 
 #include "dataconnection.h"
+#include "miner.h"
 
 namespace naivecoin {
 
 class data_server
 {
 public:
-    data_server(boost::asio::io_service & io_service);
+    data_server(boost::asio::io_service & io_service, uint64_t port, naivecoin::Miner & miner);
 
 private:
     void start_accept();
@@ -29,6 +30,7 @@ private:
         );
 
     boost::asio::ip::tcp::acceptor acceptor;
+    naivecoin::Miner & miner;
 };
 
 void send_block(

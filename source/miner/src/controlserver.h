@@ -16,7 +16,7 @@ namespace naivecoin {
 class control_server
 {
 public:
-    control_server(boost::asio::io_service & io_service, naivecoin::Miner & miner);
+    control_server(boost::asio::io_service & io_service, uint64_t port, naivecoin::Miner & miner);
 
 private:
     void start_accept();

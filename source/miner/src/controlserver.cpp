@@ -6,10 +6,10 @@
 
 namespace naivecoin {
 
-control_server::control_server(boost::asio::io_service & io_service, naivecoin::Miner & miner)
+control_server::control_server(boost::asio::io_service & io_service, uint64_t port, naivecoin::Miner & miner)
 : acceptor(
     io_service,
-    boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), 8013)
+    boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port)
 )
 , miner(miner)
 {
