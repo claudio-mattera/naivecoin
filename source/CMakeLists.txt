@@ -11,7 +11,7 @@ endif()
 # Dependencies
 
 # Boost
-find_package(Boost COMPONENTS system log thread unit_test_framework REQUIRED )
+find_package(Boost COMPONENTS system log thread unit_test_framework program_options REQUIRED )
 
 add_library(boost INTERFACE IMPORTED)
 set_property(TARGET boost PROPERTY
@@ -24,6 +24,10 @@ set_property(TARGET boost-test PROPERTY IMPORTED_LOCATION ${Boost_UNIT_TEST_FRAM
 add_library(boost-system SHARED IMPORTED)
 set_property(TARGET boost-system PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
 set_property(TARGET boost-system PROPERTY IMPORTED_LOCATION ${Boost_SYSTEM_LIBRARY})
+
+add_library(boost-programoptions SHARED IMPORTED)
+set_property(TARGET boost-programoptions PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
+set_property(TARGET boost-programoptions PROPERTY IMPORTED_LOCATION ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 # OpenSSL
 find_package(OpenSSL)

@@ -10,6 +10,7 @@ add_executable(
     src/dataserver.cpp
     src/dataconnection.cpp
     src/miner.cpp
+    src/options.cpp
 )
 
 target_include_directories(
@@ -30,6 +31,7 @@ target_link_libraries(
     LINK_PUBLIC
     Threads::Threads
     boost-system
+    boost-programoptions
     NaivecoinCore
 )
 
