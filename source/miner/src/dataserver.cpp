@@ -4,6 +4,7 @@
 
 #include <boost/bind.hpp>
 
+#include <naivecoin/core/serialize.h>
 
 namespace naivecoin {
 
@@ -54,7 +55,21 @@ void send_block(
     int const port
 )
 {
+    using boost::asio::ip::tcp;
 
+    boost::asio::io_service io_service;
+
+    tcp::resolver resolver(io_service);
+    tcp::resolver::query query(hostname, std::to_string(port));
+    tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
+
+    tcp::socket socket(io_service);
+    boost::asio::connect(socket, endpoint_iterator);
+
+    std::string message = serialize_block(block);
+
+    boost::system::error_code ignored_error;
+    boost::asio::write(socket, boost::asio::buffer(message), ignored_error);
 }
 
 void send_blockchain(

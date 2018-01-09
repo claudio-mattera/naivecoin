@@ -33,6 +33,7 @@ target_link_libraries(
     boost-system
     boost-programoptions
     NaivecoinCore
+    NaivecoinHttp
 )
 
 

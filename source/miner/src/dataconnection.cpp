@@ -1,5 +1,8 @@
 #include "dataconnection.h"
 
+#include <naivecoin/core/serialize.h>
+#include <naivecoin/http/http.h>
+
 #include <boost/bind.hpp>
 #include <boost/array.hpp>
 
@@ -9,18 +12,29 @@
 
 namespace {
 
-std::string make_daytime_string()
+std::string read_whole_payload(boost::asio::ip::tcp::socket & connection_socket)
 {
-    using namespace std; // For time_t, time and ctime;
-    time_t now = time(0);
-    return ctime(& now);
-}
+    std::ostringstream stream;
 
-std::string get_path(std::string const & request)
-{
-    int const get_pos = request.find("GET ") + 4;
-    int const end_pos = request.find(" HTTP", get_pos);
-    return request.substr(get_pos, end_pos - get_pos);
+    boost::array<char, 128> buf;
+    boost::system::error_code error;
+
+    while (true) {
+        if (connection_socket.available(error) <= 0) {
+            break;
+        }
+        size_t const len = connection_socket.read_some(boost::asio::buffer(buf), error);
+
+        stream.write(buf.data(), len);
+
+        if (error == boost::asio::error::eof) {
+            break; // Connection closed cleanly by peer.
+        } else if (error) {
+            throw boost::system::system_error(error);
+        }
+    }
+
+    return stream.str();
 }
 
 } // unnamed namespace
@@ -43,37 +57,42 @@ void data_connection::start()
 {
     std::cout << "Responding" << '\n';
 
-    boost::array<char, 128> buf;
-    boost::system::error_code error;
-    size_t len = this->connection_socket.read_some(boost::asio::buffer(buf), error);
+    std::string const request = read_whole_payload(this->connection_socket);
 
-    if (error == boost::asio::error::eof) {
-        return; // Connection closed cleanly by peer.
-    } else if (error) {
-        throw boost::system::system_error(error);
-    }
+    std::string const response = process_request(
+        request,
+        [](Method const method, std::string const & path, std::string const & data) {
+            int const prefix = data[0] - '0';
+            std::string const rest_of_data = data.substr(1, -1);
+            std::cout << "Received prefix: " << prefix << std::endl;
 
-    std::ostringstream stream;
-    stream.write(buf.data(), len);
-    std::string path = get_path(stream.str());
+            switch (prefix) {
+                case 1:
+                {
+                    Block const block = deserialize_block(rest_of_data);
+                    std::cout << "Received block " << block << std::endl;
+                    break;
+                }
+                default:
+                {
+                    std::cout << "Prefix: " << prefix << '\n';
+                    break;
+                }
+            }
+            return "Some text";
+        }
+    );
 
-    if (path == "/quit") {
-        std::exit(0);
-
-    } else {
-        this->message = make_daytime_string();
-
-        boost::asio::async_write(
-            this->connection_socket,
-            boost::asio::buffer(this->message),
-            boost::bind(
-                & data_connection::handle_write,
-                shared_from_this(),
-                boost::asio::placeholders::error,
-                boost::asio::placeholders::bytes_transferred
-            )
-        );
-    }
+    boost::asio::async_write(
+        this->connection_socket,
+        boost::asio::buffer(response),
+        boost::bind(
+            & data_connection::handle_write,
+            shared_from_this(),
+            boost::asio::placeholders::error,
+            boost::asio::placeholders::bytes_transferred
+        )
+    );
 }
 
 data_connection::data_connection(boost::asio::io_service & io_service)

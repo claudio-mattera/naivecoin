@@ -21,6 +21,13 @@ class data_server
 public:
     data_server(boost::asio::io_service & io_service, uint64_t port, naivecoin::Miner & miner);
 
+    enum Prefix {
+        Block = 0x01,
+        Blockchain = 0x02,
+        RequestLatestBlock = 0x03,
+        RequestBlockchain = 0x04
+    };
+
 private:
     void start_accept();
 

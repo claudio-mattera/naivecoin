@@ -20,7 +20,7 @@ void Miner::start()
 {
     while (true) {
         naivecoin::Block const & latest_block = * this->blockchain.crbegin();
-        std::cout << "Latest block: " << latest_block << '\n';
+        //std::cout << "Latest block: " << latest_block << '\n';
 
         //std::this_thread::sleep_for(std::chrono::seconds(10));
         this->mine_next_block();
