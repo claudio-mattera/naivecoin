@@ -34,7 +34,6 @@ private:
         );
 
     boost::asio::ip::tcp::socket connection_socket;
-    std::string message;
     std::shared_ptr<spdlog::logger> logger;
 };
 
