@@ -3,8 +3,6 @@
 #include <boost/bind.hpp>
 #include <boost/array.hpp>
 
-#include <iostream>
-
 #include <ctime>
 
 #include <naivecoin/core/serialize.h>
@@ -46,7 +44,7 @@ boost::asio::ip::tcp::socket & control_connection::socket()
 
 void control_connection::start(naivecoin::Miner & miner)
 {
-    std::cout << "Responding" << '\n';
+    this->logger->info("Responding");
 
     boost::array<char, 128> buf;
     boost::system::error_code error;
@@ -77,6 +75,7 @@ void control_connection::start(naivecoin::Miner & miner)
 
 control_connection::control_connection(boost::asio::io_service & io_service)
 : connection_socket(io_service)
+, logger(spdlog::get("controlconnection"))
 {
 }
 

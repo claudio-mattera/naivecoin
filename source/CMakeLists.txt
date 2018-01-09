@@ -42,6 +42,12 @@ find_package(Threads REQUIRED)
 # JSON CPP
 find_package(jsoncpp)
 
+# fmt
+find_package(fmt CONFIG REQUIRED)
+
+# Spdlog
+find_package(spdlog CONFIG REQUIRED)
+
 
 # Subprojects
 

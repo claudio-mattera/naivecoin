@@ -1,7 +1,6 @@
 #include "miner.h"
 
 #include <chrono>
-#include <iostream>
 
 #include <naivecoin/core/utils.h>
 
@@ -12,6 +11,7 @@ Miner::Miner(uint64_t const seed)
 , mutex()
 , condition_variable()
 , mersenne_twister_engine(seed)
+, logger(spdlog::get("miner"))
 {
     this->blockchain.push_back(naivecoin::Block::genesis());
 }
@@ -20,7 +20,10 @@ void Miner::start()
 {
     while (true) {
         naivecoin::Block const & latest_block = * this->blockchain.crbegin();
-        //std::cout << "Latest block: " << latest_block << '\n';
+
+        //std::ostringstream stream;
+        //stream << latest_block;
+        //this->logger->info("Latest block: {}", stream.str());
 
         //std::this_thread::sleep_for(std::chrono::seconds(10));
         this->mine_next_block();
@@ -97,7 +100,9 @@ uint16_t Miner::get_difficulty()
 
 uint16_t Miner::get_adjusted_difficulty(naivecoin::Block const & latest_block)
 {
-    std::cout << "Adjusting difficulty for block " << latest_block.index;
+    std::ostringstream log_stream;
+    log_stream << "Adjusting difficulty for block " << latest_block.index;
+
     auto iterator = this->blockchain.crbegin();
     for (int i = 0; i < Miner::DIFFICULTY_ADJUSTMENT_INTERVAL_IN_BLOCKS; ++i) {
         ++iterator;
@@ -114,17 +119,23 @@ uint16_t Miner::get_adjusted_difficulty(naivecoin::Block const & latest_block)
         )
     );
 
-    std::cout << ", elapsed time: " << actual_elapsed_time.count() << "s";
+    uint16_t new_difficulty;
+
+    log_stream << ", elapsed time: " << actual_elapsed_time.count() << 's';
     if (actual_elapsed_time < expected_elapsed_time / 2) {
-        std::cout << ", increasing difficulty" << '\n';
-        return latest_block.difficulty + 1;
+        log_stream << ", increasing difficulty";
+        new_difficulty = latest_block.difficulty + 1;
     } else if (actual_elapsed_time > expected_elapsed_time * 2) {
-        std::cout << ", decreasing difficulty" << '\n';
-        return latest_block.difficulty - 1;
+        log_stream << ", decreasing difficulty";
+        new_difficulty = latest_block.difficulty - 1;
     } else {
-        std::cout << ", maintaining difficulty" << '\n';
-        return latest_block.difficulty;
+        log_stream << ", maintaining difficulty";
+        new_difficulty = latest_block.difficulty;
     }
+
+    this->logger->info(log_stream.str());
+
+    return new_difficulty;
 }
 
 bool Miner::is_timestamp_valid(naivecoin::Block const & new_block)

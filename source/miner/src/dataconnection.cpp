@@ -6,8 +6,6 @@
 #include <boost/bind.hpp>
 #include <boost/array.hpp>
 
-#include <iostream>
-
 #include <ctime>
 
 namespace {
@@ -55,27 +53,30 @@ boost::asio::ip::tcp::socket & data_connection::socket()
 
 void data_connection::start()
 {
-    std::cout << "Responding" << '\n';
+    this->logger->info("Responding");
 
     std::string const request = read_whole_payload(this->connection_socket);
 
     std::string const response = process_request(
         request,
-        [](Method const method, std::string const & path, std::string const & data) {
+        [this](Method const method, std::string const & path, std::string const & data) {
             int const prefix = data[0] - '0';
             std::string const rest_of_data = data.substr(1, -1);
-            std::cout << "Received prefix: " << prefix << std::endl;
+            this->logger->info("Received prefix: {}", prefix);
 
             switch (prefix) {
                 case 1:
                 {
                     Block const block = deserialize_block(rest_of_data);
-                    std::cout << "Received block " << block << std::endl;
+
+                    std::ostringstream stream;
+                    stream << block;
+                    this->logger->info("Received block {}", stream.str());
                     break;
                 }
                 default:
                 {
-                    std::cout << "Prefix: " << prefix << '\n';
+                    this->logger->info("Prefix: {}", prefix);
                     break;
                 }
             }
@@ -97,6 +98,7 @@ void data_connection::start()
 
 data_connection::data_connection(boost::asio::io_service & io_service)
 : connection_socket(io_service)
+, logger(spdlog::get("dataconnection"))
 {
 }
 

@@ -9,6 +9,8 @@
 
 #include <boost/asio.hpp>
 
+#include <spdlog/spdlog.h>
+
 #include "miner.h"
 
 namespace naivecoin {
@@ -36,6 +38,7 @@ private:
         );
 
     boost::asio::ip::tcp::socket connection_socket;
+    std::shared_ptr<spdlog::logger> logger;
 };
 
 } // namespace naivecoin

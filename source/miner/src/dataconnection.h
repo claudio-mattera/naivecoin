@@ -9,6 +9,8 @@
 
 #include <boost/asio.hpp>
 
+#include <spdlog/spdlog.h>
+
 namespace naivecoin {
 
 class data_connection
@@ -33,6 +35,7 @@ private:
 
     boost::asio::ip::tcp::socket connection_socket;
     std::string message;
+    std::shared_ptr<spdlog::logger> logger;
 };
 
 } // namespace naivecoin

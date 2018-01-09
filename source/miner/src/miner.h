@@ -14,6 +14,8 @@
 
 #include <boost/asio.hpp>
 
+#include <spdlog/spdlog.h>
+
 #include <naivecoin/core/block.h>
 
 namespace naivecoin {
@@ -61,6 +63,8 @@ private:
     std::condition_variable condition_variable;
 
     std::mt19937_64 mersenne_twister_engine;
+
+    std::shared_ptr<spdlog::logger> logger;
 };
 
 } // namespace naivecoin

@@ -32,6 +32,8 @@ target_link_libraries(
     Threads::Threads
     boost-system
     boost-programoptions
+    fmt::fmt
+    spdlog::spdlog
     NaivecoinCore
     NaivecoinHttp
 )

@@ -1,7 +1,5 @@
 #include "controlserver.h"
 
-#include <iostream>
-
 #include <boost/bind.hpp>
 
 namespace naivecoin {
@@ -12,6 +10,7 @@ control_server::control_server(boost::asio::io_service & io_service, uint64_t po
     boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port)
 )
 , miner(miner)
+, logger(spdlog::get("controlserver"))
 {
     start_accept();
 }
@@ -21,7 +20,7 @@ void control_server::start_accept()
     control_connection::pointer new_connection =
         control_connection::create(this->acceptor.get_io_service());
 
-    std::cout << "Calling async_accept" << '\n';
+    this->logger->info("Calling async_accept");
     this->acceptor.async_accept(
         new_connection->socket(),
         boost::bind(
@@ -38,7 +37,7 @@ void control_server::handle_accept(
         const boost::system::error_code & error
     )
 {
-    std::cout << "Handling accept" << '\n';
+    this->logger->info("Handling accept");
     if (!error)
     {
         new_connection->start(this->miner);

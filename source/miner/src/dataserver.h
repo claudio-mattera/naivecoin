@@ -11,6 +11,8 @@
 
 #include <naivecoin/core/block.h>
 
+#include <spdlog/spdlog.h>
+
 #include "dataconnection.h"
 #include "miner.h"
 
@@ -38,6 +40,7 @@ private:
 
     boost::asio::ip::tcp::acceptor acceptor;
     naivecoin::Miner & miner;
+    std::shared_ptr<spdlog::logger> logger;
 };
 
 void send_block(
