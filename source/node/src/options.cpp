@@ -78,7 +78,7 @@ boost::program_options::variables_map process_program_options(int const argc, ch
             "Random seed for nonce generation"
         )
         (
-            "data-port,d",
+            "port,p",
             po::value<uint64_t>()
                 ->default_value(3030)
                 ->notifier(
@@ -86,18 +86,7 @@ boost::program_options::variables_map process_program_options(int const argc, ch
                         check_port(port);
                     }
                 ),
-            "TCP port to use for data connections"
-        )
-        (
-            "control-port,c",
-            po::value<uint64_t>()
-                ->default_value(3031)
-                ->notifier(
-                    [](uint64_t const port) {
-                        check_port(port);
-                    }
-                ),
-            "TCP port to use for control connections"
+            "TCP port to use for incoming connections"
         )
         (
             "peers,p",

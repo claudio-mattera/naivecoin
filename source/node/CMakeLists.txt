@@ -5,8 +5,7 @@ project(NaivecoinNode VERSION 0.1 LANGUAGES CXX)
 add_executable(
     NaivecoinNode
     src/main.cpp
-    src/controlserver.cpp
-    src/controlconnection.cpp
+    src/node.cpp
     src/dataserver.cpp
     src/dataconnection.cpp
     src/miner.cpp

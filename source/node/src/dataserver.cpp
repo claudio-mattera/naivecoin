@@ -8,12 +8,16 @@
 
 namespace naivecoin {
 
-data_server::data_server(boost::asio::io_service & io_service, uint64_t port, naivecoin::Miner & miner)
+data_server::data_server(
+    std::function<void(std::string const &)> const & message_handler,
+    boost::asio::io_service & io_service,
+    uint64_t port
+)
 : acceptor(
     io_service,
     boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port)
 )
-, miner(miner)
+, message_handler(message_handler)
 , logger(spdlog::get("dataserver"))
 {
     start_accept();
@@ -22,9 +26,9 @@ data_server::data_server(boost::asio::io_service & io_service, uint64_t port, na
 void data_server::start_accept()
 {
     data_connection::pointer new_connection =
-        data_connection::create(this->acceptor.get_io_service());
+        data_connection::create(this->message_handler, this->acceptor.get_io_service());
 
-    this->logger->info("Calling async_accept");
+    this->logger->debug("Calling async_accept");
     this->acceptor.async_accept(
         new_connection->socket(),
         boost::bind(
@@ -41,7 +45,7 @@ void data_server::handle_accept(
         const boost::system::error_code & error
     )
 {
-    this->logger->info("Handling accept");
+    this->logger->debug("Handling accept");
     if (!error)
     {
         new_connection->start();

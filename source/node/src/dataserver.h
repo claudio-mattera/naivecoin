@@ -6,6 +6,7 @@
 
 #include <string>
 #include <list>
+#include <functional>
 
 #include <boost/asio.hpp>
 
@@ -14,14 +15,17 @@
 #include <spdlog/spdlog.h>
 
 #include "dataconnection.h"
-#include "miner.h"
 
 namespace naivecoin {
 
 class data_server
 {
 public:
-    data_server(boost::asio::io_service & io_service, uint64_t port, naivecoin::Miner & miner);
+    data_server(
+        std::function<void(std::string const &)> const & message_handler,
+        boost::asio::io_service & io_service,
+        uint64_t port
+    );
 
     enum Prefix {
         Block = 0x01,
@@ -39,7 +43,7 @@ private:
         );
 
     boost::asio::ip::tcp::acceptor acceptor;
-    naivecoin::Miner & miner;
+    std::function<void(std::string const &)> const & message_handler;
     std::shared_ptr<spdlog::logger> logger;
 };
 

@@ -41,9 +41,12 @@ std::string read_whole_payload(boost::asio::ip::tcp::socket & connection_socket)
 namespace naivecoin {
 
 //static
-data_connection::pointer data_connection::create(boost::asio::io_service & io_service)
+data_connection::pointer data_connection::create(
+    std::function<void(std::string const &)> const & message_handler,
+    boost::asio::io_service & io_service
+)
 {
-    return pointer(new data_connection(io_service));
+    return pointer(new data_connection(message_handler, io_service));
 }
 
 boost::asio::ip::tcp::socket & data_connection::socket()
@@ -53,34 +56,15 @@ boost::asio::ip::tcp::socket & data_connection::socket()
 
 void data_connection::start()
 {
-    this->logger->info("Responding");
+    this->logger->debug("Responding");
 
     std::string const request = read_whole_payload(this->connection_socket);
 
     std::string const response = process_request(
         request,
-        [this](Method const method, std::string const & path, std::string const & data) {
-            int const prefix = data[0] - '0';
-            std::string const rest_of_data = data.substr(1, -1);
-            this->logger->info("Received prefix: {}", prefix);
-
-            switch (prefix) {
-                case 1:
-                {
-                    Block const block = deserialize_block(rest_of_data);
-
-                    std::ostringstream stream;
-                    stream << block;
-                    this->logger->info("Received block {}", stream.str());
-                    break;
-                }
-                default:
-                {
-                    this->logger->info("Prefix: {}", prefix);
-                    break;
-                }
-            }
-            return "Some text";
+        [this](Method const /*method*/, std::string const & /*path*/, std::string const & data) {
+            this->message_handler(data);
+            return "";
         }
     );
 
@@ -96,8 +80,12 @@ void data_connection::start()
     );
 }
 
-data_connection::data_connection(boost::asio::io_service & io_service)
-: connection_socket(io_service)
+data_connection::data_connection(
+    std::function<void(std::string const &)> const & message_handler,
+    boost::asio::io_service & io_service
+)
+: message_handler(message_handler)
+, connection_socket(io_service)
 , logger(spdlog::get("dataconnection"))
 {
 }

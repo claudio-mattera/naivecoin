@@ -1,24 +1,19 @@
 #include <cstdlib>
 #include <ctime>
 #include <thread>
+#include <functional>
 
 #include <boost/asio.hpp>
 
 #include <spdlog/spdlog.h>
 
-#include "controlserver.h"
 #include "dataserver.h"
-#include "miner.h"
+#include "node.h"
 #include "options.h"
-
-
-void start_miner(naivecoin::Miner & miner)
-{
-    miner.start();
-}
 
 void initialize_loggers()
 {
+    spdlog::stdout_logger_mt("node");
     spdlog::stdout_logger_mt("miner");
     spdlog::stdout_logger_mt("dataserver");
     spdlog::stdout_logger_mt("dataconnection");
@@ -40,17 +35,19 @@ int main(int argc, char * argv[])
         ? options["peers"].as<std::vector<std::string>>()
         : std::vector<std::string>();
 
-    naivecoin::Miner miner(seed);
+    naivecoin::Node node(peers, seed);
 
-    uint64_t const control_port = options["control-port"].as<uint64_t>();
-    uint64_t const data_port = options["data-port"].as<uint64_t>();
+    uint64_t const data_port = options["port"].as<uint64_t>();
     try
     {
-        std::thread miner_thread = std::thread(start_miner, std::ref(miner));
-
         boost::asio::io_service io_service;
-        naivecoin::control_server control_server(io_service, control_port, miner);
-        naivecoin::data_server data_server(io_service, data_port, miner);
+
+        auto const message_handler = std::bind(
+            & naivecoin::Node::process_message,
+            & node,
+            std::placeholders::_1
+        );
+        naivecoin::data_server data_server(message_handler, io_service, data_port);
         io_service.run();
     }
     catch (std::exception& e)

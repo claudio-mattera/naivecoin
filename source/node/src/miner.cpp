@@ -121,13 +121,15 @@ uint16_t Miner::get_adjusted_difficulty(naivecoin::Block const & latest_block)
 
     uint16_t new_difficulty;
 
+    uint16_t const INCREMENT = 1;
+
     log_stream << ", elapsed time: " << actual_elapsed_time.count() << 's';
     if (actual_elapsed_time < expected_elapsed_time / 2) {
         log_stream << ", increasing difficulty";
-        new_difficulty = latest_block.difficulty + 1;
+        new_difficulty = latest_block.difficulty + INCREMENT;
     } else if (actual_elapsed_time > expected_elapsed_time * 2) {
         log_stream << ", decreasing difficulty";
-        new_difficulty = latest_block.difficulty - 1;
+        new_difficulty = latest_block.difficulty - INCREMENT;
     } else {
         log_stream << ", maintaining difficulty";
         new_difficulty = latest_block.difficulty;
