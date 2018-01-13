@@ -67,7 +67,7 @@ void send_block(
     tcp::socket socket(io_service);
     boost::asio::connect(socket, endpoint_iterator);
 
-    std::string message = serialize_block(block);
+    std::string message = create_send_block_message(block, "");
 
     boost::system::error_code ignored_error;
     boost::asio::write(socket, boost::asio::buffer(message), ignored_error);

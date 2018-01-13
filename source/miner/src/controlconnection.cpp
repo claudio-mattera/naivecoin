@@ -65,7 +65,7 @@ void control_connection::start(naivecoin::Miner & miner)
         std::exit(0);
     } else if (path == "/blockchain") {
         auto blockchain = miner.get_blockchain();
-        auto data = naivecoin::serialize_blockchain(blockchain);
+        auto data = naivecoin::create_send_blockchain_message(blockchain, "");
         std::string const text = make_success_response(data);
         this->send_response(text);
     } else {

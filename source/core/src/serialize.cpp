@@ -71,21 +71,35 @@ naivecoin::Block deserialize_json_to_block(Json::Value const & value)
     return block;
 }
 
+std::list<naivecoin::Block> deserialize_json_to_blockchain(Json::Value const & array)
+{
+    std::list<naivecoin::Block> blockchain;
+
+    for (auto value: array) {
+        blockchain.push_back(deserialize_json_to_block(value));
+    }
+
+    return blockchain;
+}
+
+Json::Value create_message(
+    std::string const & message,
+    Json::Value const & data,
+    std::string const & sender
+)
+{
+    Json::Value value;
+
+    value["sender"] = sender;
+    value["message"] = message;
+    value["data"] = data;
+
+    return value;
+}
+
 } // unnamed namespace
 
 namespace naivecoin {
-
-std::string serialize_block(Block const & block)
-{
-    Json::Value const root = serialize_block_to_json(block);
-    return format_json(root);
-}
-
-std::string serialize_blockchain(std::list<Block> const & blockchain)
-{
-    Json::Value const array = serialize_blockchain_to_json(blockchain);
-    return format_json(array);
-}
 
 Block deserialize_block(std::string const & text)
 {
@@ -118,6 +132,68 @@ std::list<Block> deserialize_blockchain(std::string const & text)
     }
 
     return blockchain;
+}
+
+std::string create_send_block_message(Block const & block, std::string const & sender)
+{
+    Json::Value const data = serialize_block_to_json(block);
+    Json::Value const message = create_message("send block", data, sender);
+    return format_json(message);
+}
+
+std::string create_send_blockchain_message(std::list<Block> const & blockchain, std::string const & sender)
+{
+    Json::Value const data = serialize_blockchain_to_json(blockchain);
+    Json::Value const message = create_message("send blockchain", data, sender);
+    return format_json(message);
+}
+
+std::string create_query_latest_block_message(std::string const & sender)
+{
+    Json::Value const message = create_message("query latest block", Json::Value(), sender);
+    return format_json(message);
+}
+
+std::string create_query_blockchain_message(std::string const & sender)
+{
+    Json::Value const message = create_message("query blockchain", Json::Value(), sender);
+    return format_json(message);
+}
+
+void process_message(
+    std::string const & serialized_message,
+    std::function<void(Block const &, std::string const &)> const & process_send_block_message,
+    std::function<void(std::list<Block> const &, std::string const &)> const & process_send_blockchain_message,
+    std::function<void(std::string const &)> const & process_query_latest_block_message,
+    std::function<void(std::string const &)> const & process_query_blockchain_message,
+    std::function<void(std::string const &, std::string const &)> const & process_unknown_message,
+    std::function<void(std::string const &)> const & process_invalid_message
+)
+{
+    try {
+        Json::Value const root = parse_json(serialized_message);
+        if (! root.isObject()) {
+            throw Json::RuntimeError("Not a JSON object");
+        }
+        std::string const sender = root["sender"].asString();
+        std::string const message = root["message"].asString();
+
+        if (message == "send block") {
+            Block const block = deserialize_json_to_block(root["data"]);
+            process_send_block_message(block, sender);
+        } else if (message == "send blockchain") {
+            std::list<Block> const blockchain = deserialize_json_to_blockchain(root["data"]);
+            process_send_blockchain_message(blockchain, sender);
+        } else if (message == "query latest block") {
+            process_query_latest_block_message(sender);
+        } else if (message == "query blockchain") {
+            process_query_blockchain_message(sender);
+        } else {
+            process_unknown_message(message, sender);
+        }
+    } catch (Json::RuntimeError const & exception) {
+        process_invalid_message(exception.what());
+    }
 }
 
 } // namespace naivecoin
