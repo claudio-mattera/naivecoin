@@ -1,8 +1,8 @@
 
 #pragma once
 
-#ifndef NAIVECOIN_MINER_MINER_H
-#define NAIVECOIN_MINER_MINER_H
+#ifndef NAIVECOIN_NODE_MINER_H
+#define NAIVECOIN_NODE_MINER_H
 
 #include <ctime>
 #include <string>
@@ -69,4 +69,4 @@ private:
 
 } // namespace naivecoin
 
-#endif // NAIVECOIN_MINER_MINER_H
+#endif // NAIVECOIN_NODE_MINER_H

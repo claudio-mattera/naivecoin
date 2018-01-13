@@ -1,8 +1,8 @@
 
 #pragma once
 
-#ifndef NAIVECOIN_MINER_OPTIONS_H
-#define NAIVECOIN_MINER_OPTIONS_H
+#ifndef NAIVECOIN_NODE_OPTIONS_H
+#define NAIVECOIN_NODE_OPTIONS_H
 
 #include <boost/program_options.hpp>
 
@@ -12,4 +12,4 @@ boost::program_options::variables_map process_program_options(int const argc, ch
 
 } // namespace naivecoin
 
-#endif // NAIVECOIN_MINER_OPTIONS_H
+#endif // NAIVECOIN_NODE_OPTIONS_H

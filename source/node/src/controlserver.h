@@ -1,8 +1,8 @@
 
 #pragma once
 
-#ifndef NAIVECOIN_MINER_CONTROLSERVER_H
-#define NAIVECOIN_MINER_CONTROLSERVER_H
+#ifndef NAIVECOIN_NODE_CONTROLSERVER_H
+#define NAIVECOIN_NODE_CONTROLSERVER_H
 
 #include <string>
 
@@ -35,4 +35,4 @@ private:
 
 } // namespace naivecoin
 
-#endif // NAIVECOIN_MINER_CONTROLSERVER_H
+#endif // NAIVECOIN_NODE_CONTROLSERVER_H

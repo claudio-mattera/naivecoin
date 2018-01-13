@@ -1,9 +1,9 @@
-project(NaivecoinMiner VERSION 0.1 LANGUAGES CXX)
+project(NaivecoinNode VERSION 0.1 LANGUAGES CXX)
 
 # Executable
 
 add_executable(
-    NaivecoinMiner
+    NaivecoinNode
     src/main.cpp
     src/controlserver.cpp
     src/controlconnection.cpp
@@ -14,12 +14,12 @@ add_executable(
 )
 
 target_include_directories(
-    NaivecoinMiner
+    NaivecoinNode
     PUBLIC
 )
 
 set_target_properties(
-    NaivecoinMiner
+    NaivecoinNode
     PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
@@ -27,7 +27,7 @@ set_target_properties(
 )
 
 target_link_libraries(
-    NaivecoinMiner
+    NaivecoinNode
     LINK_PUBLIC
     Threads::Threads
     boost-system
@@ -42,7 +42,7 @@ target_link_libraries(
 # Installation
 
 install(
-    TARGETS NaivecoinMiner
+    TARGETS NaivecoinNode
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}

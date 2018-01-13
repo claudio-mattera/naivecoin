@@ -1,8 +1,8 @@
 
 #pragma once
 
-#ifndef NAIVECOIN_MINER_DATASERVER_H
-#define NAIVECOIN_MINER_DATASERVER_H
+#ifndef NAIVECOIN_NODE_DATASERVER_H
+#define NAIVECOIN_NODE_DATASERVER_H
 
 #include <string>
 #include <list>
@@ -67,4 +67,4 @@ std::list<naivecoin::Block> request_blockchain(
 
 } // namespace naivecoin
 
-#endif // NAIVECOIN_MINER_DATASERVER_H
+#endif // NAIVECOIN_NODE_DATASERVER_H
