@@ -10,6 +10,7 @@ add_library(
     src/input.cpp
     src/transaction.cpp
     src/utils.cpp
+    src/serialize.cpp
 )
 
 target_include_directories(
@@ -32,6 +33,7 @@ set_target_properties(
 target_link_libraries(
     NaivecoinTransaction
     LINK_PUBLIC
+    jsoncpp_lib
     NaivecoinCrypto
 )
 
@@ -65,6 +67,7 @@ add_executable(
     test/input.cpp
     test/transaction.cpp
     test/utils.cpp
+    test/serialize.cpp
 )
 
 target_link_libraries(
