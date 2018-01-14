@@ -14,6 +14,7 @@ namespace naivecoin {
 
 Block deserialize_block(std::string const & text);
 std::list<Block> deserialize_blockchain(std::string const & text);
+std::string serialize_blockchain(std::list<Block> const & blockchain);
 
 std::string create_send_block_message(Block const & block, std::string const & sender);
 std::string create_send_blockchain_message(std::list<Block> const & blockchain, std::string const & sender);

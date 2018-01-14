@@ -136,6 +136,12 @@ std::list<Block> deserialize_blockchain(std::string const & text)
     return blockchain;
 }
 
+std::string serialize_blockchain(std::list<Block> const & blockchain)
+{
+    Json::Value const value = serialize_blockchain_to_json(blockchain);
+    return format_json(value);
+}
+
 std::string create_send_block_message(Block const & block, std::string const & sender)
 {
     Json::Value const data = serialize_block_to_json(block);

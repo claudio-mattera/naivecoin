@@ -44,19 +44,26 @@ void Node::start()
     }
 }
 
-void Node::process_message(std::string const & path, std::string const & message)
+std::string Node::process_message(std::string const & path, std::string const & message)
 {
     using namespace std::placeholders;
 
-    naivecoin::process_message(
-        message,
-        std::bind(& Node::process_send_block_message, this, _1, _2),
-        std::bind(& Node::process_send_blockchain_message, this, _1, _2),
-        std::bind(& Node::process_query_latest_block_message, this, _1),
-        std::bind(& Node::process_query_blockchain_message, this, _1),
-        std::bind(& Node::process_unknown_message, this, _1, _2),
-        std::bind(& Node::process_invalid_message, this, _1)
-    );
+    if (path == "/") {
+        naivecoin::process_message(
+            message,
+            std::bind(& Node::process_send_block_message, this, _1, _2),
+            std::bind(& Node::process_send_blockchain_message, this, _1, _2),
+            std::bind(& Node::process_query_latest_block_message, this, _1),
+            std::bind(& Node::process_query_blockchain_message, this, _1),
+            std::bind(& Node::process_unknown_message, this, _1, _2),
+            std::bind(& Node::process_invalid_message, this, _1)
+        );
+        return "";
+    } else if (path == "/query/blockchain") {
+        return serialize_blockchain(this->blockchain);
+    }
+
+    return "";
 }
 
 void Node::request_new_block()

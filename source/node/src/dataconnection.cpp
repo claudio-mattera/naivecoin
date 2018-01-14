@@ -63,8 +63,7 @@ void data_connection::start()
     std::string const response = process_request(
         request,
         [this](Method const /*method*/, std::string const & path, std::string const & data) {
-            this->message_handler(path, data);
-            return "";
+            return this->message_handler(path, data);
         }
     );
 

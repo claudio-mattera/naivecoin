@@ -30,7 +30,7 @@ public:
 
     void start();
 
-    void process_message(std::string const & path, std::string const & message);
+    std::string process_message(std::string const & path, std::string const & message);
 
 private:
     void request_new_block();
