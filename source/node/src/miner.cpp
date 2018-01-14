@@ -7,38 +7,67 @@
 namespace naivecoin {
 
 Miner::Miner(uint64_t const seed)
-: blockchain()
-, mutex()
-, condition_variable()
+: latest_blocks()
+, next_blocks()
+, input_mutex()
+, input_condition_variable()
+, output_mutex()
+, output_condition_variable()
 , mersenne_twister_engine(seed)
 , logger(spdlog::get("miner"))
 {
-    this->blockchain.push_back(naivecoin::Block::genesis());
 }
 
 void Miner::start()
 {
     while (true) {
-        naivecoin::Block const & latest_block = * this->blockchain.crbegin();
+        Block const * latest_block_ptr;
+        {
+            std::unique_lock<std::mutex> unique_lock(this->input_mutex);
+            this->input_condition_variable.wait(unique_lock);
 
-        //std::ostringstream stream;
-        //stream << latest_block;
-        //this->logger->info("Latest block: {}", stream.str());
+            latest_block_ptr = & this->latest_blocks.back();
+        }
 
-        //std::this_thread::sleep_for(std::chrono::seconds(10));
-        this->mine_next_block();
+
+        Block const next_block = this->mine_next_block(*latest_block_ptr);
+
+        {
+            std::lock_guard<std::mutex> lock_guard(this->output_mutex);
+
+            this->next_blocks.push(next_block);
+        }
+        this->output_condition_variable.notify_one();
     }
 }
 
-void Miner::request_mine_next_block()
+void Miner::request_mine_next_block(Block const & latest_block)
 {
+    {
+        std::lock_guard<std::mutex> lock_guard(this->input_mutex);
 
+        this->latest_blocks.push(latest_block);
+        if (this->latest_blocks.size() > Miner::DIFFICULTY_ADJUSTMENT_INTERVAL_IN_BLOCKS) {
+            this->latest_blocks.pop();
+        }
+    }
+    this->input_condition_variable.notify_one();
 }
 
-void Miner::mine_next_block()
+Block Miner::get_next_block()
 {
-    naivecoin::Block const & latest_block = * this->blockchain.crbegin();
+    {
+        std::unique_lock<std::mutex> unique_lock(this->output_mutex);
+        this->output_condition_variable.wait(unique_lock);
 
+        Block const next_block = this->next_blocks.front();
+        this->next_blocks.pop();
+        return next_block;
+    }
+}
+
+Block Miner::mine_next_block(Block const & latest_block)
+{
     uint64_t const index = 1 + latest_block.index;
     std::string const & previous_hash = latest_block.hash;
     std::string const data;
@@ -53,7 +82,7 @@ void Miner::mine_next_block()
         difficulty
     );
 
-    this->blockchain.push_back(next_block);
+    return next_block;
 }
 
 naivecoin::Block Miner::find_next_block(
@@ -90,7 +119,7 @@ naivecoin::Block Miner::find_next_block(
 
 uint16_t Miner::get_difficulty()
 {
-    naivecoin::Block const & latest_block = * this->blockchain.crbegin();
+    naivecoin::Block const & latest_block = this->latest_blocks.back();
     if (latest_block.index % Miner::DIFFICULTY_ADJUSTMENT_INTERVAL_IN_BLOCKS == 0) {
         return this->get_adjusted_difficulty(latest_block);
     } else {
@@ -103,11 +132,7 @@ uint16_t Miner::get_adjusted_difficulty(naivecoin::Block const & latest_block)
     std::ostringstream log_stream;
     log_stream << "Adjusting difficulty for block " << latest_block.index;
 
-    auto iterator = this->blockchain.crbegin();
-    for (int i = 0; i < Miner::DIFFICULTY_ADJUSTMENT_INTERVAL_IN_BLOCKS; ++i) {
-        ++iterator;
-    }
-    naivecoin::Block const latest_adjustment_block = * iterator;
+    naivecoin::Block const latest_adjustment_block = this->latest_blocks.front();
 
     auto expected_elapsed_time = std::chrono::seconds(
         Miner::DIFFICULTY_ADJUSTMENT_INTERVAL_IN_BLOCKS * Miner::BLOCK_GENERATION_INTERVAL_IN_SECONDS
@@ -142,7 +167,7 @@ uint16_t Miner::get_adjusted_difficulty(naivecoin::Block const & latest_block)
 
 bool Miner::is_timestamp_valid(naivecoin::Block const & new_block)
 {
-    naivecoin::Block const & latest_block = * this->blockchain.crbegin();
+    naivecoin::Block const & latest_block = this->latest_blocks.back();
     std::time_t const now = std::time(nullptr);
 
     if (std::difftime(new_block.timestamp, latest_block.timestamp) < -60) {

@@ -5,6 +5,7 @@
 #define NAIVECOIN_NODE_NODE_H
 
 #include <random>
+#include <list>
 
 #include <spdlog/spdlog.h>
 
@@ -18,6 +19,8 @@ class Node
 {
 public:
     Node(std::vector<std::string> const & peers, uint64_t const seed = std::mt19937_64::default_seed);
+
+    void start();
 
     void process_message(std::string const & message);
 
@@ -33,6 +36,7 @@ private:
 
 private:
     std::vector<std::string> peers;
+    std::list<Block> blockchain;
     Miner miner;
     std::thread miner_thread;
 

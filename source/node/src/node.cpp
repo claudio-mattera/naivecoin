@@ -13,6 +13,7 @@ namespace naivecoin {
 
 Node::Node(std::vector<std::string> const & peers, uint64_t const seed)
 : peers(peers)
+, blockchain()
 , miner(seed)
 , miner_thread(
     std::thread(
@@ -21,7 +22,21 @@ Node::Node(std::vector<std::string> const & peers, uint64_t const seed)
 )
 , logger(spdlog::get("node"))
 {
+    this->blockchain.push_back(naivecoin::Block::genesis());
+}
+
+void Node::start()
+{
     this->logger->info("Node active");
+    while (true) {
+        Block const & latest_block = * this->blockchain.crbegin();
+
+        this->miner.request_mine_next_block(latest_block);
+
+        Block const & next_block = this->miner.get_next_block();
+
+        this->blockchain.push_back(next_block);
+    }
 }
 
 void Node::process_message(std::string const & message)

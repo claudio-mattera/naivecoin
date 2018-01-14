@@ -6,6 +6,7 @@
 
 #include <ctime>
 #include <string>
+#include <queue>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
@@ -27,12 +28,9 @@ public:
 
     void start();
 
-    void request_mine_next_block();
+    void request_mine_next_block(Block const & latest_block);
 
-    inline std::list<naivecoin::Block> const & get_blockchain() const
-    {
-        return this->blockchain;
-    }
+    Block get_next_block();
 
 private:
     enum Operation {
@@ -44,7 +42,7 @@ private:
     uint16_t const DIFFICULTY_ADJUSTMENT_INTERVAL_IN_BLOCKS = 10;
 
 private:
-    void mine_next_block();
+    Block mine_next_block(Block const & latest_block);
     naivecoin::Block find_next_block(
         uint64_t const index,
         std::string const & previous_hash,
@@ -57,10 +55,14 @@ private:
     bool is_timestamp_valid(naivecoin::Block const & new_block);
 
 private:
-    std::list<naivecoin::Block> blockchain;
+    std::queue<Block> latest_blocks;
+    std::queue<Block> next_blocks;
 
-    std::mutex mutex;
-    std::condition_variable condition_variable;
+    std::mutex input_mutex;
+    std::condition_variable input_condition_variable;
+
+    std::mutex output_mutex;
+    std::condition_variable output_condition_variable;
 
     std::mt19937_64 mersenne_twister_engine;
 

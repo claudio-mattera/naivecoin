@@ -2,6 +2,7 @@
 #include <ctime>
 #include <thread>
 #include <functional>
+#include <future>
 
 #include <boost/asio.hpp>
 
@@ -13,6 +14,7 @@
 
 void initialize_loggers()
 {
+    spdlog::stdout_logger_mt("main");
     spdlog::stdout_logger_mt("node");
     spdlog::stdout_logger_mt("miner");
     spdlog::stdout_logger_mt("dataserver");
@@ -26,6 +28,7 @@ int main(int argc, char * argv[])
     auto const options = naivecoin::process_program_options(argc, argv);
 
     initialize_loggers();
+    auto logger = spdlog::get("miner");
 
     uint64_t const seed = options.count("seed")
         ? options["seed"].as<uint64_t>()
@@ -40,6 +43,9 @@ int main(int argc, char * argv[])
     uint64_t const data_port = options["port"].as<uint64_t>();
     try
     {
+        logger->info("Launching node thread");
+        auto main_future = std::async(std::launch::async, [&node](){node.start();});
+
         boost::asio::io_service io_service;
 
         std::function<void(std::string const &)> const message_handler = std::bind(
@@ -48,6 +54,7 @@ int main(int argc, char * argv[])
             std::placeholders::_1
         );
         naivecoin::data_server data_server(message_handler, io_service, data_port);
+        logger->info("Launching server thread");
         io_service.run();
     }
     catch (std::exception& e)
