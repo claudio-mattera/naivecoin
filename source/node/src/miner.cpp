@@ -81,7 +81,7 @@ Block Miner::mine_next_block(Block const & latest_block)
 {
     uint64_t const index = 1 + latest_block.index;
 
-    Output const transaction_output(this->private_key, Miner::COINBASE_AMOUNT);
+    Output const transaction_output(this->public_key, Miner::COINBASE_AMOUNT);
     Transaction const coinbase_transaction({}, {transaction_output});
     std::list<Transaction> block_transactions{coinbase_transaction};
 
