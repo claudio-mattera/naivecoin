@@ -42,7 +42,7 @@ int main(int argc, char * argv[])
     {
         boost::asio::io_service io_service;
 
-        auto const message_handler = std::bind(
+        std::function<void(std::string const &)> const message_handler = std::bind(
             & naivecoin::Node::process_message,
             & node,
             std::placeholders::_1

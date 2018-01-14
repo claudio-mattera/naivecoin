@@ -18,7 +18,7 @@ std::string read_whole_payload(boost::asio::ip::tcp::socket & connection_socket)
     boost::system::error_code error;
 
     while (true) {
-        if (connection_socket.available(error) <= 0) {
+        if (stream.tellp() > 0 && connection_socket.available(error) <= 0) {
             break;
         }
         size_t const len = connection_socket.read_some(boost::asio::buffer(buf), error);

@@ -65,7 +65,9 @@ naivecoin::Block deserialize_json_to_block(Json::Value const & value)
     );
 
     if (block.hash != value["hash"].asString()) {
-        throw new std::invalid_argument("Hash mismatch");
+        std::ostringstream stream;
+        stream << "Hash mismatch " << block.hash << " != " << value["hash"].asString();
+        throw std::invalid_argument(stream.str());
     }
 
     return block;
@@ -116,7 +118,7 @@ Block deserialize_block(std::string const & text)
     );
 
     if (block.hash != value["hash"].asString()) {
-        throw new std::invalid_argument("Hash mismatch");
+        throw std::invalid_argument("Hash mismatch");
     }
 
     return block;
@@ -192,6 +194,8 @@ void process_message(
             process_unknown_message(message, sender);
         }
     } catch (Json::RuntimeError const & exception) {
+        process_invalid_message(exception.what());
+    } catch (std::exception const & exception) {
         process_invalid_message(exception.what());
     }
 }
