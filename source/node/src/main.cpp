@@ -39,7 +39,7 @@ int main(int argc, char * argv[])
     auto const options = naivecoin::process_program_options(argc, argv);
 
     initialize_loggers();
-    auto logger = spdlog::get("miner");
+    auto logger = spdlog::get("main");
 
     uint64_t const seed = options.count("seed")
         ? options["seed"].as<uint64_t>()
