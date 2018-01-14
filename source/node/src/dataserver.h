@@ -14,6 +14,7 @@
 
 #include <spdlog/spdlog.h>
 
+#include "messagehandler.h"
 #include "dataconnection.h"
 
 namespace naivecoin {
@@ -22,7 +23,7 @@ class data_server
 {
 public:
     data_server(
-        std::function<void(std::string const &, std::string const &)> const & message_handler,
+        MessageHandler const & message_handler,
         boost::asio::io_service & io_service,
         uint64_t port
     );
@@ -43,7 +44,7 @@ private:
         );
 
     boost::asio::ip::tcp::acceptor acceptor;
-    std::function<void(std::string const &, std::string const &)> const & message_handler;
+    MessageHandler const & message_handler;
     std::shared_ptr<spdlog::logger> logger;
 };
 
