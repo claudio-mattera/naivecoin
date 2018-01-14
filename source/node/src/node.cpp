@@ -11,10 +11,15 @@ namespace {
 
 namespace naivecoin {
 
-Node::Node(std::vector<std::string> const & peers, uint64_t const seed)
+Node::Node(
+    std::string const & public_key,
+    std::string const & private_key,
+    std::vector<std::string> const & peers,
+    uint64_t const seed
+)
 : peers(peers)
 , blockchain()
-, miner(seed)
+, miner(public_key, private_key, seed)
 , miner_thread(
     std::thread(
         std::bind(& Miner::start, std::ref(miner))

@@ -103,6 +103,20 @@ boost::program_options::variables_map process_program_options(int const argc, ch
             ,
             "List of peer nodes"
         )
+        (
+            "public",
+            po::value<std::string>()
+                ->required()
+            ,
+            "Public key filename for coinbase transactions"
+        )
+        (
+            "private",
+            po::value<std::string>()
+                ->required()
+            ,
+            "Private key filename for coinbase transactions"
+        )
     ;
 
     po::variables_map args;

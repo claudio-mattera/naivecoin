@@ -11,6 +11,9 @@
 
 #include <naivecoin/core/block.h>
 
+#include <naivecoin/transaction/transaction.h>
+#include <naivecoin/transaction/unspent_output.h>
+
 #include "miner.h"
 
 namespace naivecoin {
@@ -18,7 +21,12 @@ namespace naivecoin {
 class Node
 {
 public:
-    Node(std::vector<std::string> const & peers, uint64_t const seed = std::mt19937_64::default_seed);
+    Node(
+        std::string const & public_key,
+        std::string const & private_key,
+        std::vector<std::string> const & peers,
+        uint64_t const seed = std::mt19937_64::default_seed
+    );
 
     void start();
 

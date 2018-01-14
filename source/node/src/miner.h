@@ -24,7 +24,11 @@ namespace naivecoin {
 class Miner
 {
 public:
-    Miner(uint64_t const seed = std::mt19937_64::default_seed);
+    Miner(
+        std::string const & public_key,
+        std::string const & private_key,
+        uint64_t const seed = std::mt19937_64::default_seed
+    );
 
     void start();
 
@@ -41,6 +45,8 @@ private:
 
     uint16_t const DIFFICULTY_ADJUSTMENT_INTERVAL_IN_BLOCKS = 10;
 
+    uint64_t const COINBASE_AMOUNT = 50;
+
 private:
     Block mine_next_block(Block const & latest_block);
     naivecoin::Block find_next_block(
@@ -55,6 +61,9 @@ private:
     bool is_timestamp_valid(naivecoin::Block const & new_block);
 
 private:
+    std::string const public_key;
+    std::string const private_key;
+
     std::queue<Block> latest_blocks;
     std::queue<Block> next_blocks;
 

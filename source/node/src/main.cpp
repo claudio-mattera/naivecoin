@@ -1,5 +1,7 @@
 #include <cstdlib>
 #include <ctime>
+#include <fstream>
+#include <string>
 #include <thread>
 #include <functional>
 #include <future>
@@ -23,6 +25,15 @@ void initialize_loggers()
     spdlog::stdout_logger_mt("controlconnection");
 }
 
+std::string read_file(std::string const & filename)
+{
+    std::ifstream stream(filename);
+    return std::string(
+        std::istreambuf_iterator<char>(stream),
+        std::istreambuf_iterator<char>()
+    );
+}
+
 int main(int argc, char * argv[])
 {
     auto const options = naivecoin::process_program_options(argc, argv);
@@ -38,7 +49,10 @@ int main(int argc, char * argv[])
         ? options["peers"].as<std::vector<std::string>>()
         : std::vector<std::string>();
 
-    naivecoin::Node node(peers, seed);
+    auto const public_key = read_file(options["public"].as<std::string>());
+    auto const private_key = read_file(options["private"].as<std::string>());
+
+    naivecoin::Node node(public_key, private_key, peers, seed);
 
     uint64_t const data_port = options["port"].as<uint64_t>();
     try

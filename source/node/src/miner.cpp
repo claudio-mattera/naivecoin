@@ -4,10 +4,21 @@
 
 #include <naivecoin/core/utils.h>
 
+#include <naivecoin/transaction/output.h>
+#include <naivecoin/transaction/input.h>
+#include <naivecoin/transaction/transaction.h>
+#include <naivecoin/transaction/serialize.h>
+
 namespace naivecoin {
 
-Miner::Miner(uint64_t const seed)
-: latest_blocks()
+Miner::Miner(
+    std::string const & public_key,
+    std::string const & private_key,
+    uint64_t const seed
+)
+: public_key(public_key)
+, private_key(private_key)
+, latest_blocks()
 , next_blocks()
 , input_mutex()
 , input_condition_variable()
@@ -69,8 +80,13 @@ Block Miner::get_next_block()
 Block Miner::mine_next_block(Block const & latest_block)
 {
     uint64_t const index = 1 + latest_block.index;
+
+    Output const transaction_output(this->private_key, Miner::COINBASE_AMOUNT);
+    Transaction const coinbase_transaction({}, {transaction_output});
+    std::list<Transaction> block_transactions{coinbase_transaction};
+
     std::string const & previous_hash = latest_block.hash;
-    std::string const data;
+    std::string const data = serialize_transactions(block_transactions);
     std::time_t const timestamp= naivecoin::now();
     uint16_t const difficulty = this->get_difficulty();
 
