@@ -9,6 +9,7 @@
 #include <list>
 
 #include <naivecoin/transaction/output.h>
+#include <naivecoin/transaction/unspent_output.h>
 #include <naivecoin/transaction/input.h>
 
 namespace naivecoin {
@@ -30,6 +31,13 @@ public:
 std::ostream & operator<<(std::ostream & stream, Transaction const & transaction);
 
 std::string compute_transaction_id(Transaction const & transaction);
+
+std::string compute_input_signature(
+    Transaction const & transaction,
+    uint64_t const transaction_input_index,
+    std::string const & private_key,
+    std::list<UnspentOutput> const & unspent_outputs
+);
 
 } // namespace naivecoin
 
