@@ -62,10 +62,11 @@ int main(int argc, char * argv[])
 
         boost::asio::io_service io_service;
 
-        std::function<void(std::string const &)> const message_handler = std::bind(
+        std::function<void(std::string const &, std::string const &)> const message_handler = std::bind(
             & naivecoin::Node::process_message,
             & node,
-            std::placeholders::_1
+            std::placeholders::_1,
+            std::placeholders::_2
         );
         naivecoin::data_server data_server(message_handler, io_service, data_port);
         logger->info("Launching server thread");

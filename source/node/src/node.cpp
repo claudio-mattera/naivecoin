@@ -44,7 +44,7 @@ void Node::start()
     }
 }
 
-void Node::process_message(std::string const & message)
+void Node::process_message(std::string const & path, std::string const & message)
 {
     using namespace std::placeholders;
 

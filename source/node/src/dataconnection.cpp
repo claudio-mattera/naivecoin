@@ -42,7 +42,7 @@ namespace naivecoin {
 
 //static
 data_connection::pointer data_connection::create(
-    std::function<void(std::string const &)> const & message_handler,
+    std::function<void(std::string const &, std::string const &)> const & message_handler,
     boost::asio::io_service & io_service
 )
 {
@@ -62,8 +62,8 @@ void data_connection::start()
 
     std::string const response = process_request(
         request,
-        [this](Method const /*method*/, std::string const & /*path*/, std::string const & data) {
-            this->message_handler(data);
+        [this](Method const /*method*/, std::string const & path, std::string const & data) {
+            this->message_handler(path, data);
             return "";
         }
     );
@@ -81,7 +81,7 @@ void data_connection::start()
 }
 
 data_connection::data_connection(
-    std::function<void(std::string const &)> const & message_handler,
+    std::function<void(std::string const &, std::string const &)> const & message_handler,
     boost::asio::io_service & io_service
 )
 : message_handler(message_handler)
