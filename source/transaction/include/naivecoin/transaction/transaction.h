@@ -22,7 +22,6 @@ public:
 
 public:
     Transaction(
-        std::string const & id,
         std::list<Input> const & inputs,
         std::list<Output> const & outputs
     );
