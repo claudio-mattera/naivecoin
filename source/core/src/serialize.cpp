@@ -60,8 +60,8 @@ naivecoin::Block deserialize_json_to_block(Json::Value const & value)
         value["previous_hash"].asString(),
         timestamp,
         value["data"].asString(),
-        value["difficulty"].asInt(),
-        value["nonce"].asInt()
+        value["difficulty"].asUInt(),
+        value["nonce"].asUInt64()
     );
 
     if (block.hash != value["hash"].asString()) {
@@ -127,13 +127,7 @@ Block deserialize_block(std::string const & text)
 std::list<Block> deserialize_blockchain(std::string const & text)
 {
     Json::Value const array = parse_json(text);
-    std::list<naivecoin::Block> blockchain;
-
-    for (auto value: array) {
-        blockchain.push_back(deserialize_json_to_block(value));
-    }
-
-    return blockchain;
+    return deserialize_json_to_blockchain(array);
 }
 
 std::string serialize_blockchain(std::list<Block> const & blockchain)

@@ -83,7 +83,7 @@ naivecoin::Output deserialize_json_to_output(Json::Value const & value)
 {
     naivecoin::Output const output(
         value["address"].asString(),
-        value["amount"].asInt()
+        value["amount"].asUInt64()
     );
     return output;
 }
@@ -101,7 +101,7 @@ naivecoin::Input deserialize_json_to_input(Json::Value const & value)
 {
     naivecoin::Input const input(
         value["transaction_output_id"].asString(),
-        value["transaction_output_index"].asInt(),
+        value["transaction_output_index"].asUInt(),
         value["signature"].asString()
     );
     return input;
