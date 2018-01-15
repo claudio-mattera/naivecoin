@@ -3,6 +3,7 @@
 #include <naivecoin/core/serialize.h>
 
 #include <sstream>
+#include <algorithm>
 
 namespace {
 
@@ -12,6 +13,7 @@ namespace {
 namespace naivecoin {
 
 Node::Node(
+    uint16_t const port,
     std::string const & public_key,
     std::vector<std::string> const & peers,
     uint64_t const seed
@@ -27,6 +29,39 @@ Node::Node(
 , logger(spdlog::get("node"))
 {
     this->blockchain.push_back(naivecoin::Block::genesis());
+
+    this->server.config.port = port;
+
+    this->server.resource["^/$"]["POST"] = [this](auto response, auto request) {
+        std::string const content = request->content.string();
+        using namespace std::placeholders;
+        try {
+            naivecoin::process_message(
+                content,
+                std::bind(& Node::process_send_block_message, this, _1, _2),
+                std::bind(& Node::process_send_blockchain_message, this, _1, _2),
+                std::bind(& Node::process_query_latest_block_message, this, _1),
+                std::bind(& Node::process_query_blockchain_message, this, _1),
+                std::bind(& Node::process_unknown_message, this, _1, _2),
+                std::bind(& Node::process_invalid_message, this, content, _1)
+            );
+            response->write();
+        } catch (std::exception const & exception) {
+            response->write(
+                SimpleWeb::StatusCode::client_error_bad_request,
+                exception.what()
+            );
+        }
+    };
+    this->server.resource["^/query/blockchain$"]["GET"] = [this](auto response, auto /*request*/) {
+        response->write(serialize_blockchain(this->blockchain));
+    };
+    this->server.on_error = [this](auto /*request*/, auto /*error_code*/) {
+    };
+
+    this->server_thread = std::thread([this]() {
+        this->server.start();
+    });
 }
 
 void Node::start()
@@ -41,28 +76,6 @@ void Node::start()
 
         this->blockchain.push_back(next_block);
     }
-}
-
-std::string Node::process_message(std::string const & path, std::string const & message)
-{
-    using namespace std::placeholders;
-
-    if (path == "/") {
-        naivecoin::process_message(
-            message,
-            std::bind(& Node::process_send_block_message, this, _1, _2),
-            std::bind(& Node::process_send_blockchain_message, this, _1, _2),
-            std::bind(& Node::process_query_latest_block_message, this, _1),
-            std::bind(& Node::process_query_blockchain_message, this, _1),
-            std::bind(& Node::process_unknown_message, this, _1, _2),
-            std::bind(& Node::process_invalid_message, this, _1)
-        );
-        return "";
-    } else if (path == "/query/blockchain") {
-        return serialize_blockchain(this->blockchain);
-    }
-
-    return "";
 }
 
 void Node::request_new_block()
@@ -96,9 +109,13 @@ void Node::process_unknown_message(std::string const & message, std::string cons
     this->logger->info("Sender {} sent unknown message {}", sender, message);
 }
 
-void Node::process_invalid_message(std::string const & error)
+void Node::process_invalid_message(std::string const & content, std::string const & error)
 {
+    std::string const prefix = "Hash mismatch";
     this->logger->info("Received invalid message: {}", error);
+    if (std::equal(prefix.begin(), prefix.end(), error.begin())) {
+        this->logger->info("Content: \"{}\"", content);
+    }
 }
 
 } // namespace naivecoin
