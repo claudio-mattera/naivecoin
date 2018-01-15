@@ -15,6 +15,7 @@ void initialize_loggers()
 {
     spdlog::stdout_logger_mt("main");
     spdlog::stdout_logger_mt("node");
+    spdlog::stdout_logger_mt("sender");
     spdlog::stdout_logger_mt("miner");
 }
 

@@ -2,7 +2,6 @@
 
 #include <naivecoin/core/serialize.h>
 
-#include <simple-web-server/client_http.hpp>
 
 #include <sstream>
 #include <algorithm>
@@ -24,6 +23,7 @@ Node::Node(
 , peers()
 , blockchain()
 , miner(public_key, seed)
+, sender()
 , miner_thread(
     std::thread(
         std::bind(& Miner::start, std::ref(miner))
@@ -62,6 +62,10 @@ Node::Node(
     this->server.on_error = [this](auto /*request*/, auto /*error_code*/) {
     };
 
+    this->sender_thread = std::thread([this]() {
+        this->sender.start();
+    });
+
     this->server_thread = std::thread([this]() {
         this->server.start();
     });
@@ -87,25 +91,12 @@ void Node::start()
     }
 }
 
-void Node::send_message(std::string const & message, std::string const & receiver)
-{
-    SimpleWeb::Client<SimpleWeb::HTTP> client(receiver);
-    client.request("POST", "/", message, [this, &receiver](auto /*response*/, auto error_code) {
-        if(error_code) {
-            this->logger->error("Sending message to {} failed: {}", receiver, error_code.message());
-        }
-    });
-    client.io_service->run();
-    /*auto request = client.request("POST", "/", message);
-    request->content.string();*/
-}
-
 void Node::connect_to_peer(std::string const & peer)
 {
     std::string const message = create_query_latest_block_message(this->address);
 
     this->logger->info("Querying peer {} for its latest block", peer);
-    this->send_message(message, peer);
+    this->sender.enqueue_message(message, peer);
 }
 
 void Node::send_block_to_peers(Block const & block)
@@ -115,7 +106,7 @@ void Node::send_block_to_peers(Block const & block)
         std::string const message = create_send_block_message(block, this->address);
 
         this->logger->info("Sending block to peer {}", peer);
-        this->send_message(message, peer);
+        this->sender.enqueue_message(message, peer);
     }
 }
 
@@ -147,7 +138,7 @@ void Node::process_send_block_message(Block const & block, std::string const & s
             this->logger->info("This block comes from a blockchain longer than ours, querying for full blockchain");
 
             std::string const message = create_query_blockchain_message(this->address);
-            this->send_message(message, sender);
+            this->sender.enqueue_message(message, sender);
         }
     }
 }
@@ -187,14 +178,14 @@ void Node::process_query_latest_block_message(std::string const & sender)
 
     Block const & latest_block = * this->blockchain.crbegin();
     std::string const message = create_send_block_message(latest_block, this->address);
-    this->send_message(message, sender);
+    this->sender.enqueue_message(message, sender);
 }
 
 void Node::process_query_blockchain_message(std::string const & sender)
 {
     this->logger->info("Sender {} requested blockchain", sender);
     std::string const message = create_send_blockchain_message(this->blockchain, this->address);
-    this->send_message(message, sender);
+    this->sender.enqueue_message(message, sender);
 }
 
 void Node::process_unknown_message(std::string const & message, std::string const & sender)
