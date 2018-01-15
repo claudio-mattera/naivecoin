@@ -17,7 +17,7 @@
 
 namespace {
 
-EVP_MD const * const HASH_FUNCTION = EVP_sha512();
+EVP_MD const * const HASH_FUNCTION = EVP_sha1();
 
 std::string array_to_hex(unsigned char const * const array, std::size_t const length)
 {
@@ -76,7 +76,7 @@ std::string compute_hash(std::string const & data)
     );
 
     /* Initialise the Digest operation */
-    if(1 != EVP_DigestInit_ex(message_digest_context.get(), EVP_sha1(), nullptr)) {
+    if(1 != EVP_DigestInit_ex(message_digest_context.get(), HASH_FUNCTION, nullptr)) {
         throw std::runtime_error("Digest initialization failed");
     }
 
