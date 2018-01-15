@@ -5,7 +5,7 @@
 #include <vector>
 #include <iomanip>
 #include <stdexcept>
-#include <iostream>
+#include <mutex>
 
 #include <openssl/sha.h>
 
@@ -16,6 +16,8 @@
 #include <openssl/pem.h>
 
 namespace {
+
+std::mutex hash_mutex;
 
 EVP_MD const * const HASH_FUNCTION = EVP_sha1();
 
@@ -67,6 +69,8 @@ namespace naivecoin {
 
 std::string compute_hash(std::string const & data)
 {
+    std::lock_guard<std::mutex> guard(hash_mutex);
+
     OpenSSL_add_all_digests();
 
     /* Create the Message Digest Context and wrap it in a unique_ptr */
@@ -98,6 +102,8 @@ std::string compute_hash(std::string const & data)
 
 std::pair<std::string, std::string> generate_key_pair()
 {
+    std::lock_guard<std::mutex> guard(hash_mutex);
+
     std::string const ECCTYPE = "secp521r1";
 
     // Inspired by http://fm4dd.com/openssl/eckeycreate.htm
@@ -170,6 +176,8 @@ std::pair<std::string, std::string> generate_key_pair()
 
 std::string sign(std::string const & data, std::string const & private_key)
 {
+    std::lock_guard<std::mutex> guard(hash_mutex);
+
     std::unique_ptr<BIO, void(*)(BIO*)> bio(
         BIO_new_mem_buf(private_key.c_str(), private_key.size()),
         BIO_free_all
@@ -221,6 +229,8 @@ std::string sign(std::string const & data, std::string const & private_key)
 
 bool verify(std::string const & data, std::string const & signature, std::string const & public_key)
 {
+    std::lock_guard<std::mutex> guard(hash_mutex);
+
     std::unique_ptr<BIO, void(*)(BIO*)> bio(
         BIO_new_mem_buf(public_key.c_str(), public_key.size()),
         BIO_free_all
