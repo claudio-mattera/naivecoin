@@ -67,14 +67,33 @@ namespace naivecoin {
 
 std::string compute_hash(std::string const & data)
 {
-    unsigned char hash[SHA_DIGEST_LENGTH]; // == 20 for SHA1
-    SHA1(
-        reinterpret_cast<const unsigned char*>(data.c_str()),
-        data.size(),
-        hash
+    OpenSSL_add_all_digests();
+
+    /* Create the Message Digest Context and wrap it in a unique_ptr */
+    std::unique_ptr<EVP_MD_CTX, void(*)(EVP_MD_CTX*)> message_digest_context(
+        EVP_MD_CTX_create(),
+        EVP_MD_CTX_destroy
     );
 
-    return array_to_hex(hash, sizeof(hash));
+    /* Initialise the Digest operation */
+    if(1 != EVP_DigestInit_ex(message_digest_context.get(), EVP_sha1(), nullptr)) {
+        throw std::runtime_error("Digest initialization failed");
+    }
+
+    /* Call update with the message */
+    if(1 != EVP_DigestUpdate(message_digest_context.get(), data.c_str(), data.size())) {
+        throw std::runtime_error("Digest update failed");
+    }
+
+    unsigned int slen;
+    std::array<unsigned char, EVP_MAX_MD_SIZE> sig;
+
+    /* Obtain the signature */
+    if(1 != EVP_DigestFinal_ex(message_digest_context.get(), sig.data(), & slen)) {
+        throw std::runtime_error("Digest final failed");
+    }
+
+    return array_to_hex(sig.data(), slen);
 }
 
 std::pair<std::string, std::string> generate_key_pair()
