@@ -55,8 +55,8 @@ naivecoin::Block deserialize_json_to_block(Json::Value const & value)
 {
     auto timestamp = naivecoin::parse_timestamp(value["timestamp"].asString());
 
-    naivecoin::Block block = naivecoin::Block::make_block(
-        static_cast<uint16_t>(value["index"].asInt()),
+    naivecoin::Block const block = naivecoin::Block::make_block(
+        static_cast<uint16_t>(value["index"].asUInt64()),
         value["previous_hash"].asString(),
         timestamp,
         value["data"].asString(),
@@ -106,22 +106,7 @@ namespace naivecoin {
 Block deserialize_block(std::string const & text)
 {
     Json::Value const value = parse_json(text);
-    auto timestamp = naivecoin::parse_timestamp(value["timestamp"].asString());
-
-    naivecoin::Block block = naivecoin::Block::make_block(
-        static_cast<uint16_t>(value["index"].asInt()),
-        value["previous_hash"].asString(),
-        timestamp,
-        value["data"].asString(),
-        value["difficulty"].asInt(),
-        value["nonce"].asInt()
-    );
-
-    if (block.hash != value["hash"].asString()) {
-        throw std::invalid_argument("Hash mismatch");
-    }
-
-    return block;
+    return deserialize_json_to_block(value);
 }
 
 std::list<Block> deserialize_blockchain(std::string const & text)
