@@ -33,7 +33,11 @@ public:
     void start();
 
 private:
-    void request_new_block();
+    void send_message(std::string const & message, std::string const & receiver);
+    void connect_to_peer(std::string const & peer);
+    void send_block_to_peers(Block const & block);
+    void add_block_to_blockchain(Block const & block);
+    void replace_blockchain(std::list<Block> const & blockchain);
 
     void process_send_block_message(Block const &, std::string const &);
     void process_send_blockchain_message(std::list<Block> const &, std::string const &);
@@ -43,6 +47,7 @@ private:
     void process_invalid_message(std::string const &, std::string const &);
 
 private:
+    std::string const address;
     std::vector<std::string> peers;
     std::list<Block> blockchain;
     Miner miner;

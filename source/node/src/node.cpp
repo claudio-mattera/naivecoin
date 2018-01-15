@@ -2,6 +2,8 @@
 
 #include <naivecoin/core/serialize.h>
 
+#include <simple-web-server/client_http.hpp>
+
 #include <sstream>
 #include <algorithm>
 
@@ -18,7 +20,8 @@ Node::Node(
     std::vector<std::string> const & peers,
     uint64_t const seed
 )
-: peers(peers)
+: address(std::string("localhost:") + std::to_string(port))
+, peers()
 , blockchain()
 , miner(public_key, seed)
 , miner_thread(
@@ -62,11 +65,15 @@ Node::Node(
     this->server_thread = std::thread([this]() {
         this->server.start();
     });
+
+    for (std::string const peer: peers) {
+        this->connect_to_peer(peer);
+    }
 }
 
 void Node::start()
 {
-    this->logger->info("Node active");
+    this->logger->info("Node active with {} peers", this->peers.size());
     while (true) {
         Block const & latest_block = * this->blockchain.crbegin();
 
@@ -75,33 +82,119 @@ void Node::start()
         Block const & next_block = this->miner.get_next_block();
 
         this->blockchain.push_back(next_block);
+
+        this->send_block_to_peers(next_block);
     }
 }
 
-void Node::request_new_block()
+void Node::send_message(std::string const & message, std::string const & receiver)
+{
+    SimpleWeb::Client<SimpleWeb::HTTP> client(receiver);
+    client.request("POST", "/", message, [this, &receiver](auto /*response*/, auto error_code) {
+        if(error_code) {
+            this->logger->error("Sending message to {} failed: {}", receiver, error_code.message());
+        }
+    });
+    client.io_service->run();
+    /*auto request = client.request("POST", "/", message);
+    request->content.string();*/
+}
+
+void Node::connect_to_peer(std::string const & peer)
+{
+    std::string const message = create_query_latest_block_message(this->address);
+
+    this->logger->info("Querying peer {} for its latest block", peer);
+    this->send_message(message, peer);
+}
+
+void Node::send_block_to_peers(Block const & block)
+{
+    return;
+    for (std::string const peer: this->peers) {
+        std::string const message = create_send_block_message(block, this->address);
+
+        this->logger->info("Sending block to peer {}", peer);
+        this->send_message(message, peer);
+    }
+}
+
+void Node::add_block_to_blockchain(Block const & /*block*/)
+{
+}
+
+void Node::replace_blockchain(std::list<Block> const & /*blockchain*/)
 {
 }
 
 void Node::process_send_block_message(Block const & block, std::string const & sender)
 {
-    std::ostringstream stream;
-    stream << block;
-    this->logger->info("Received block {} from sender {}", stream.str(), sender);
+    this->logger->info("Received block {} from sender {}", block.index, sender);
+
+    Block const & latest_block = * this->blockchain.crbegin();
+
+    if (block.index <= latest_block.index) {
+        // Do nothings
+    } else {
+        if (block.index == latest_block.index + 1) {
+            if (block.previous_hash == latest_block.hash) {
+                this->logger->info("This is a valid next block (index: {}), adding it to our blockchain", block.index);
+                this->add_block_to_blockchain(block);
+            } else {
+                this->logger->warn("Block does not belong to our blockchain, ignoring it");
+            }
+        } else {
+            this->logger->info("This block comes from a blockchain longer than ours, querying for full blockchain");
+
+            std::string const message = create_query_blockchain_message(this->address);
+            this->send_message(message, sender);
+        }
+    }
 }
 
-void Node::process_send_blockchain_message(std::list<Block> const & blockchain, std::string const & sender)
+void Node::process_send_blockchain_message(std::list<Block> const & other_blockchain, std::string const & sender)
 {
-    this->logger->info("Received blockchain of {} blocks from sender {}", blockchain.size(), sender);
+    this->logger->info("Received blockchain of {} blocks from sender {}", other_blockchain.size(), sender);
+
+    if (is_blockchain_valid(other_blockchain)) {
+        this->logger->info("Blockchain is valid");
+        uint64_t const other_cumulative_difficulty = compute_cumulative_difficulty(other_blockchain);
+        uint64_t const this_cumulative_difficulty = compute_cumulative_difficulty(this->blockchain);
+
+        if (other_cumulative_difficulty > this_cumulative_difficulty) {
+            this->logger->info(
+                "Blockchain has higher cumulative difficulty than ours ({} > {}), replacing it",
+                other_cumulative_difficulty,
+                this_cumulative_difficulty
+            );
+
+            this->replace_blockchain(other_blockchain);
+        } else {
+            this->logger->info(
+                "Out blockchain has higher cumulative difficulty ({} > {})",
+                this_cumulative_difficulty,
+                other_cumulative_difficulty
+            );
+        }
+    } else {
+        this->logger->warn("Blockchain is NOT valid, ignoring this message");
+    }
 }
 
 void Node::process_query_latest_block_message(std::string const & sender)
 {
     this->logger->info("Sender {} requested latest block", sender);
+
+    Block const & latest_block = * this->blockchain.crbegin();
+    std::string const message = create_send_block_message(latest_block, this->address);
+    this->send_message(message, sender);
 }
 
 void Node::process_query_blockchain_message(std::string const & sender)
 {
     this->logger->info("Sender {} requested blockchain", sender);
+    std::string const message = create_send_blockchain_message(this->blockchain, this->address);
+    this->send_message(message, sender);
 }
 
 void Node::process_unknown_message(std::string const & message, std::string const & sender)
@@ -109,12 +202,11 @@ void Node::process_unknown_message(std::string const & message, std::string cons
     this->logger->info("Sender {} sent unknown message {}", sender, message);
 }
 
-void Node::process_invalid_message(std::string const & content, std::string const & error)
+void Node::process_invalid_message(std::string const & /*content*/, std::string const & error)
 {
     std::string const prefix = "Hash mismatch";
     this->logger->info("Received invalid message: {}", error);
     if (std::equal(prefix.begin(), prefix.end(), error.begin())) {
-        this->logger->info("Content: \"{}\"", content);
     }
 }
 
