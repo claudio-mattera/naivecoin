@@ -50,9 +50,8 @@ int main(int argc, char * argv[])
         : std::vector<std::string>();
 
     auto const public_key = read_file(options["public"].as<std::string>());
-    auto const private_key = read_file(options["private"].as<std::string>());
 
-    naivecoin::Node node(public_key, private_key, peers, seed);
+    naivecoin::Node node(public_key, peers, seed);
 
     uint64_t const data_port = options["port"].as<uint64_t>();
     try

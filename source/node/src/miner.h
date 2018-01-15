@@ -26,7 +26,6 @@ class Miner
 public:
     Miner(
         std::string const & public_key,
-        std::string const & private_key,
         uint64_t const seed = std::mt19937_64::default_seed
     );
 
@@ -62,7 +61,6 @@ private:
 
 private:
     std::string const public_key;
-    std::string const private_key;
 
     std::queue<Block> latest_blocks;
     std::queue<Block> next_blocks;

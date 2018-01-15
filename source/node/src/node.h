@@ -23,7 +23,6 @@ class Node
 public:
     Node(
         std::string const & public_key,
-        std::string const & private_key,
         std::vector<std::string> const & peers,
         uint64_t const seed = std::mt19937_64::default_seed
     );

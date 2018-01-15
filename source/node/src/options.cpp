@@ -110,13 +110,6 @@ boost::program_options::variables_map process_program_options(int const argc, ch
             ,
             "Public key filename for coinbase transactions"
         )
-        (
-            "private",
-            po::value<std::string>()
-                ->required()
-            ,
-            "Private key filename for coinbase transactions"
-        )
     ;
 
     po::variables_map args;

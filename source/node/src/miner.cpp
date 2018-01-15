@@ -13,11 +13,9 @@ namespace naivecoin {
 
 Miner::Miner(
     std::string const & public_key,
-    std::string const & private_key,
     uint64_t const seed
 )
 : public_key(public_key)
-, private_key(private_key)
 , latest_blocks()
 , next_blocks()
 , input_mutex()
