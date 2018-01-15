@@ -154,4 +154,32 @@ BOOST_AUTO_TEST_CASE(hash_matches_difficulty)
     BOOST_ASSERT(! naivecoin::hash_matches_difficulty(hash_2_2, difficulty_2));
 }
 
+BOOST_AUTO_TEST_CASE(compute_cumulative_difficulty)
+{
+    naivecoin::Block const first_block = naivecoin::Block::make_block(
+        0,
+        "",
+        naivecoin::parse_timestamp("2017-12-28T15:00:00Z"),
+        "Some data 2\u2078 = 256",
+        4,
+        0
+    );
+
+    naivecoin::Block const second_block = naivecoin::Block::make_block(
+        1,
+        "bb01688103096f8389dd97460f5805dead135b2f",
+        naivecoin::parse_timestamp("2017-12-28T16:00:00Z"),
+        "Some other 2\u00B9\u2070 = 1024",
+        6,
+        0
+    );
+
+    std::list<naivecoin::Block> const blockchain{first_block, second_block};
+
+    uint64_t const expected_difficulty = 16 + 64;
+    uint64_t const actual_difficulty = naivecoin::compute_cumulative_difficulty(blockchain);
+
+    BOOST_CHECK_EQUAL(actual_difficulty, expected_difficulty);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

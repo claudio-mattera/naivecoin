@@ -1,6 +1,10 @@
 #include <naivecoin/core/block.h>
 
 #include <sstream>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#include <cmath>
 
 #include <naivecoin/core/utils.h>
 
@@ -172,6 +176,27 @@ bool hash_matches_difficulty(std::string const & hash, uint16_t const difficulty
         }
     }
     return true;
+}
+
+uint64_t compute_cumulative_difficulty(std::list<Block> const & blockchain)
+{
+    std::vector<uint64_t> difficulties(blockchain.size());
+    std::transform(
+        std::begin(blockchain),
+        std::end(blockchain),
+        std::begin(difficulties),
+        [](auto const & block) {
+            return block.difficulty;
+        }
+    );
+    return std::accumulate(
+        std::begin(difficulties),
+        std::end(difficulties),
+        0,
+        [](uint64_t const accumulator, uint64_t const difficulty) {
+            return accumulator + std::pow(2, difficulty);
+        }
+    );
 }
 
 } // namespace naivecoin

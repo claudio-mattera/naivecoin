@@ -62,6 +62,8 @@ bool is_blockchain_valid(std::list<Block> const & blockchain);
 
 bool hash_matches_difficulty(std::string const & hash, uint16_t const difficulty);
 
+uint64_t compute_cumulative_difficulty(std::list<Block> const & blockchain);
+
 } // namespace naivecoin
 
 #endif // NAIVECOIN_CORE_BLOCK_H
