@@ -36,8 +36,12 @@ public:
 private:
     void connect_to_peer(std::string const & peer);
     void send_block_to_peers(Block const & block);
-    void add_block_to_blockchain(Block const & block);
-    void replace_blockchain(std::list<Block> const & blockchain);
+    bool try_adding_block_to_blockchain(Block const & block);
+    void replace_blockchain(std::list<Block> blockchain);
+    Block get_latest_block() const;
+    std::string serialize_blockchain() const;
+    uint64_t compute_cumulative_difficulty() const;
+    std::string create_send_blockchain_message(std::string const & address) const;
 
     void process_send_block_message(Block const &, std::string const &);
     void process_send_blockchain_message(std::list<Block> const &, std::string const &);
@@ -45,6 +49,8 @@ private:
     void process_query_blockchain_message(std::string const &);
     void process_unknown_message(std::string const &, std::string const &);
     void process_invalid_message(std::string const &, std::string const &);
+
+    void add_peer(std::string const & peer);
 
 private:
     std::string const address;
