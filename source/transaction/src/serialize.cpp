@@ -119,13 +119,10 @@ std::list<naivecoin::Input> deserialize_json_to_inputs(Json::Value const & array
 naivecoin::Transaction deserialize_json_to_transaction(Json::Value const & value)
 {
     naivecoin::Transaction const transaction(
+        value["id"].asString(),
         deserialize_json_to_inputs(value["inputs"]),
         deserialize_json_to_outputs(value["outputs"])
     );
-    std::string const computed_id = naivecoin::compute_transaction_id(transaction);
-    if (computed_id != transaction.id) {
-        throw std::invalid_argument("Invalid transaction id");
-    }
     return transaction;
 }
 

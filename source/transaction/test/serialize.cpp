@@ -14,7 +14,7 @@ BOOST_AUTO_TEST_CASE(serialize)
     naivecoin::Input const i2{"o2", 5, ""};
     naivecoin::Output const o3{"address", 33};
 
-    naivecoin::Transaction const t{{i1, i2}, {o3}};
+    naivecoin::Transaction const t{"", {i1, i2}, {o3}};
     std::list<naivecoin::Transaction> const expected_transactions{t};
 
     std::string const text = naivecoin::serialize_transactions(expected_transactions);

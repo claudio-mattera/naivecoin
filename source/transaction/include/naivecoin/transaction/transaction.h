@@ -14,6 +14,8 @@
 
 namespace naivecoin {
 
+uint64_t const COINBASE_AMOUNT = 50;
+
 struct Transaction
 {
 public:
@@ -23,6 +25,7 @@ public:
 
 public:
     Transaction(
+        std::string const & id,
         std::list<Input> const & inputs,
         std::list<Output> const & outputs
     );
@@ -37,6 +40,27 @@ std::string compute_input_signature(
     uint64_t const transaction_input_index,
     std::string const & private_key,
     std::list<UnspentOutput> const & unspent_outputs
+);
+
+bool is_transaction_list_valid(
+    std::list<Transaction> const & transactions,
+    std::list<UnspentOutput> const & unspent_outputs
+);
+
+bool is_transaction_valid(
+    Transaction const & transaction,
+    std::list<UnspentOutput> const & unspent_outputs
+);
+
+Transaction create_transaction(
+    std::list<Input> inputs,
+    std::list<Output> const & outputs,
+    std::list<std::string> const & private_keys,
+    std::list<UnspentOutput> const & unspent_outputs
+);
+
+Transaction create_coinbase_transaction(
+    std::string const & address
 );
 
 } // namespace naivecoin

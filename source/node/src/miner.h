@@ -36,15 +36,9 @@ public:
     Block get_next_block();
 
 private:
-    enum Operation {
-        MINE_NEXT_BLOCK
-    };
-
     uint16_t const BLOCK_GENERATION_INTERVAL_IN_SECONDS = 10;
 
     uint16_t const DIFFICULTY_ADJUSTMENT_INTERVAL_IN_BLOCKS = 10;
-
-    uint64_t const COINBASE_AMOUNT = 50;
 
 private:
     Block mine_next_block(Block const & latest_block);
