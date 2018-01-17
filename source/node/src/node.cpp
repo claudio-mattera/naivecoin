@@ -88,6 +88,7 @@ void Node::start()
         Block const & next_block = this->miner.get_next_block();
 
         if (this->try_adding_block_to_blockchain(next_block)) {
+            this->logger->info("Mined next block {}", next_block.index);
             this->send_block_to_peers(next_block);
         } else {
             this->logger->info("Could not add mined block to blockchain");
@@ -108,7 +109,7 @@ void Node::send_block_to_peers(Block const & block)
     for (std::string const peer: this->peers) {
         std::string const message = create_send_block_message(block, this->address);
 
-        this->logger->info("Sending block to peer {}", peer);
+        this->logger->debug("Sending block to peer {}", peer);
         this->sender.enqueue_message(message, peer);
     }
 }

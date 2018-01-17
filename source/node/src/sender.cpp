@@ -31,13 +31,13 @@ void Sender::start()
         }
 
         if (queue_is_empty) {
-            this->logger->info("Queue is empty, waiting for messages");
+            this->logger->debug("Queue is empty, waiting for messages");
             std::unique_lock<std::mutex> unique_lock(this->mutex);
             this->condition_variable.wait(unique_lock);
         } else {
             std::string const message = next_pair.first;
             std::string const receiver = next_pair.second;
-            this->logger->info("Sending a message to {}", receiver);
+            this->logger->debug("Sending a message to {}", receiver);
             SimpleWeb::Client<SimpleWeb::HTTP> client(receiver);
             client.request("POST", "/", message, [this, &receiver](auto /*response*/, auto error_code) {
                 if(error_code) {
