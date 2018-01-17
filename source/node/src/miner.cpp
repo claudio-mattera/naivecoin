@@ -13,9 +13,11 @@ namespace naivecoin {
 
 Miner::Miner(
     std::string const & public_key,
+    uint64_t const sleep_time,
     uint64_t const seed
 )
 : public_key(public_key)
+, sleep_time(sleep_time)
 , latest_blocks()
 , next_blocks()
 , input_mutex()
@@ -130,6 +132,8 @@ naivecoin::Block Miner::find_next_block(
                 nonce
             );
         }
+
+        std::this_thread::sleep_for( std::chrono::milliseconds(this->sleep_time));
     }
 }
 

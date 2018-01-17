@@ -46,7 +46,8 @@ int main(int argc, char * argv[])
     auto const public_key = read_file(options["public"].as<std::string>());
 
     uint64_t const port = options["port"].as<uint64_t>();
-    naivecoin::Node node(port, public_key, peers, seed);
+    uint64_t const sleep_time = options["sleep"].as<uint64_t>();
+    naivecoin::Node node(port, public_key, peers, sleep_time, seed);
 
     logger->info("Launching node thread");
     auto main_future = std::async(std::launch::async, [&node](){node.start();});

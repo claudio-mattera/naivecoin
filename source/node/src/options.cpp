@@ -110,6 +110,13 @@ boost::program_options::variables_map process_program_options(int const argc, ch
             ,
             "Public key filename for coinbase transactions"
         )
+        (
+            "sleep",
+            po::value<uint64_t>()
+                ->default_value(10)
+            ,
+            "Miner sleep time"
+        )
     ;
 
     po::variables_map args;

@@ -19,12 +19,13 @@ Node::Node(
     uint16_t const port,
     std::string const & public_key,
     std::vector<std::string> const & peers,
+    uint64_t const sleep_time,
     uint64_t const seed
 )
 : address(std::string("localhost:") + std::to_string(port))
 , peers(std::begin(peers), std::end(peers))
 , blockchain()
-, miner(public_key, seed)
+, miner(public_key, sleep_time, seed)
 , sender()
 , miner_thread(
     std::thread(

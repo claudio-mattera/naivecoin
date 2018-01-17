@@ -28,6 +28,7 @@ public:
         uint16_t const port,
         std::string const & public_key,
         std::vector<std::string> const & peers,
+        uint64_t const sleep_time,
         uint64_t const seed = std::mt19937_64::default_seed
     );
 
