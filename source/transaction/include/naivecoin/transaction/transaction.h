@@ -43,6 +43,7 @@ std::string compute_input_signature(
 );
 
 bool is_transaction_list_valid(
+    uint64_t const index,
     std::list<Transaction> const & transactions,
     std::list<UnspentOutput> const & unspent_outputs
 );
@@ -50,6 +51,11 @@ bool is_transaction_list_valid(
 bool is_transaction_valid(
     Transaction const & transaction,
     std::list<UnspentOutput> const & unspent_outputs
+);
+
+bool is_coinbase_transaction_valid(
+    uint64_t const index,
+    Transaction const & coinbase_transaction
 );
 
 Transaction create_transaction(
@@ -60,6 +66,7 @@ Transaction create_transaction(
 );
 
 Transaction create_coinbase_transaction(
+    uint64_t const index,
     std::string const & address
 );
 

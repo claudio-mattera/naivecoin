@@ -125,6 +125,7 @@ std::string compute_input_signature(
 }
 
 bool is_transaction_list_valid(
+    uint64_t const index,
     std::list<Transaction> const & transactions,
     std::list<UnspentOutput> const & unspent_outputs
 )
@@ -139,11 +140,32 @@ bool is_transaction_list_valid(
     Transaction coinbase_transaction = * iterator;
     ++iterator;
 
+    if (! is_coinbase_transaction_valid(index, coinbase_transaction))
+
+    while (iterator != std::end(transactions)) {
+        if (! is_transaction_valid(* iterator, unspent_outputs)) {
+            return false;
+        }
+        ++iterator;
+    }
+
+    return true;
+}
+
+bool is_coinbase_transaction_valid(
+    uint64_t const index,
+    Transaction const & coinbase_transaction
+)
+{
     if (compute_transaction_id(coinbase_transaction) != coinbase_transaction.id) {
         return false;
     }
-    if (! coinbase_transaction.inputs.empty()) {
-        // Coinbase transaction has no inputs.
+    if (coinbase_transaction.inputs.size() != 1) {
+        // Coinbase transaction has exactly one input.
+        return false;
+    }
+    if (coinbase_transaction.inputs.front().transaction_output_index != index) {
+        // Coinbase transaction output refers to the current block index.
         return false;
     }
     if (coinbase_transaction.outputs.size() != 1) {
@@ -152,13 +174,6 @@ bool is_transaction_list_valid(
     }
     if (coinbase_transaction.outputs.front().amount != naivecoin::COINBASE_AMOUNT) {
         return false;
-    }
-
-    while (iterator != std::end(transactions)) {
-        if (! is_transaction_valid(* iterator, unspent_outputs)) {
-            return false;
-        }
-        ++iterator;
     }
 
     return true;
@@ -250,26 +265,31 @@ Transaction create_transaction(
 )
 {
     std::string const transaction_id = ::compute_transaction_id(inputs, outputs);
-    auto input_iterator = std::begin(inputs);
-    auto private_key_iterator = std::begin(private_keys);
-    while (input_iterator != std::end(inputs)) {
-        input_iterator->signature = compute_input_signature(
-            transaction_id,
-            * input_iterator,
-            * private_key_iterator,
-            unspent_outputs
-        );
-        ++input_iterator;
-        ++private_key_iterator;
+
+    if (private_keys.empty()) {
+        // Coinbase transaction, not signing the input
+    } else {
+        auto input_iterator = std::begin(inputs);
+        auto private_key_iterator = std::begin(private_keys);
+        while (input_iterator != std::end(inputs)) {
+            input_iterator->signature = compute_input_signature(
+                transaction_id,
+                * input_iterator,
+                * private_key_iterator,
+                unspent_outputs
+            );
+            ++input_iterator;
+            ++private_key_iterator;
+        }
     }
 
     return Transaction(transaction_id, inputs, outputs);
 }
 
-Transaction create_coinbase_transaction(std::string const & address)
+Transaction create_coinbase_transaction(uint64_t const index, std::string const & address)
 {
     return create_transaction(
-        {},
+        {Input("", index)},
         {Output(address, naivecoin::COINBASE_AMOUNT)},
         {},
         {}
