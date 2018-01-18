@@ -1,6 +1,9 @@
 #include "node.h"
 
 #include <naivecoin/core/serialize.h>
+#include <naivecoin/core/utils.h>
+
+#include <naivecoin/transaction/serialize.h>
 
 #include <mutex>
 #include <sstream>
@@ -64,6 +67,27 @@ Node::Node(
     };
     this->server.resource["^/query/blockchain$"]["GET"] = [this](auto response, auto /*request*/) {
         response->write(this->serialize_blockchain());
+    };
+    this->server.resource["^/query/balance$"]["GET"] = [this](auto response, auto request) {
+        auto address_it = request->header.find("Address");
+        if (address_it == std::end(request->header)) {
+            response->write(
+                SimpleWeb::StatusCode::client_error_bad_request,
+                "Address unspecified"
+            );
+        } else {
+            try {
+                std::string const address = core::replace(address_it->second, "_", "\n");
+                uint64_t const balance = this->calculate_balance(address);
+                response->write(SimpleWeb::StatusCode::success_ok);
+                *response << balance;
+            } catch (std::exception const & exception) {
+                response->write(
+                    SimpleWeb::StatusCode::client_error_bad_request,
+                    exception.what()
+                );
+            }
+        }
     };
     this->server.on_error = [this](auto /*request*/, auto /*error_code*/) {
     };
@@ -193,6 +217,21 @@ std::string Node::create_send_blockchain_message(std::string const & address) co
         std::end(this->blockchain),
         address
     );
+}
+
+uint64_t Node::calculate_balance(std::string const & address) const
+{
+    std::lock_guard lock_guard(blockchain_mutex);
+
+    uint64_t balance = 0;
+
+    for (transaction::UnspentOutput unspent_output: this->unspent_outputs) {
+        if (unspent_output.address == address) {
+            balance += unspent_output.amount;
+        }
+    }
+
+    return balance;
 }
 
 void Node::process_send_block_message(core::Block const & block, std::string const & sender)
