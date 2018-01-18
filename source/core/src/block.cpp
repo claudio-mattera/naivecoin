@@ -62,7 +62,7 @@ Block Block::genesis()
 
     uint64_t const index = 0;
     std::string const previous_hash = "";
-    std::string const data = "";
+    std::string const data = "[]";
     uint16_t const difficulty = 0;
     uint64_t const nonce = 0;
     std::string const hash = compute_block_hash(

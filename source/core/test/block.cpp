@@ -34,9 +34,9 @@ BOOST_AUTO_TEST_CASE(genesis)
 
     BOOST_CHECK_EQUAL(genesis.index, 0);
     BOOST_CHECK_EQUAL(genesis.previous_hash, "");
-    BOOST_CHECK_EQUAL(genesis.hash, "2366930026a1831f1490ea762d134ffa03f675dd");
+    BOOST_CHECK_EQUAL(genesis.hash, "28a5495744d36c3fdd386d38efdad2f8f1a1dad6");
     BOOST_CHECK(genesis.timestamp == timestamp);
-    BOOST_CHECK_EQUAL(genesis.data, "");
+    BOOST_CHECK_EQUAL(genesis.data, "[]");
     BOOST_CHECK_EQUAL(genesis.difficulty, 0);
     BOOST_CHECK_EQUAL(genesis.nonce, 0);
 }
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(is_new_block_valid)
 
 
     uint64_t const index = 1;
-    std::string const previous_hash = "2366930026a1831f1490ea762d134ffa03f675dd";
+    std::string const previous_hash = "28a5495744d36c3fdd386d38efdad2f8f1a1dad6";
     std::string const data = "Some data";
     uint16_t difficulty = 0;
     uint64_t nonce = 0;
@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE(is_blockchain_valid)
 
     naivecoin::core::Block const second_block = naivecoin::core::Block::make_block(
         1,
-        "2366930026a1831f1490ea762d134ffa03f675dd",
+        "28a5495744d36c3fdd386d38efdad2f8f1a1dad6",
         timestamp,
         "Some data",
         0,
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(is_blockchain_valid)
 
     naivecoin::core::Block const third_block = naivecoin::core::Block::make_block(
         2,
-        "a0f5e0cbb1b06ff17f236b90168db9fb1ecd4278",
+        "94b816a2a66d74bfd8699e4b3437795f6444a506",
         timestamp,
         "Some more data",
         0,
