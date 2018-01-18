@@ -55,6 +55,16 @@ std::array<bool, 4 * N> hex_to_binary(std::string const & text)
     return binary;
 }
 
+std::string replace(std::string text, std::string const & pattern, std::string const & after)
+{
+    std::size_t pos = 0;
+    while ((pos = text.find(pattern, pos)) != std::string::npos) {
+        text.replace(pos, pattern.length(), after);
+        pos += pattern.length();
+    }
+    return text;
+}
+
 
 // Explicit template instantiations
 

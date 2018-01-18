@@ -57,4 +57,13 @@ BOOST_AUTO_TEST_CASE(hex_to_binary_3)
     BOOST_CHECK(actual == expected);
 }
 
+BOOST_AUTO_TEST_CASE(replace)
+{
+    std::string const input = "hello world";
+    std::string const actual = naivecoin::core::replace(input, "ll", "kk");
+    std::string const expected = "hekko world";
+
+    BOOST_CHECK_EQUAL(actual, expected);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
