@@ -27,6 +27,7 @@ Node::Node(
 : address(std::string("localhost:") + std::to_string(port))
 , peers(std::begin(peers), std::end(peers))
 , blockchain()
+, unspent_outputs()
 , miner(public_key, sleep_time, seed)
 , sender()
 , miner_thread(
@@ -125,6 +126,17 @@ bool Node::try_adding_block_to_blockchain(core::Block const & block)
 
     if (block.index == latest_block.index + 1 && block.previous_hash == latest_block.hash) {
         this->blockchain.push_back(block);
+
+        std::list<transaction::Transaction> const block_transactions = transaction::deserialize_transactions(block.data);
+        std::list<transaction::UnspentOutput> new_unspent_outputs = transaction::update_unspent_outputs(
+            block.index,
+            block_transactions,
+            this->unspent_outputs
+        );
+
+        this->unspent_outputs.clear();
+        this->unspent_outputs.splice(std::begin(this->unspent_outputs), new_unspent_outputs);
+
         return true;
     } else {
         return false;
@@ -133,11 +145,14 @@ bool Node::try_adding_block_to_blockchain(core::Block const & block)
 
 void Node::replace_blockchain(std::list<core::Block> new_blockchain)
 {
-    std::lock_guard lock_guard(blockchain_mutex);
+    {
+        std::lock_guard lock_guard(blockchain_mutex);
+        this->blockchain.clear();
+    }
 
-    this->blockchain.clear();
-
-    this->blockchain.splice(std::begin(this->blockchain), new_blockchain);
+    for (core::Block block: new_blockchain) {
+        this->try_adding_block_to_blockchain(block);
+    }
 }
 
 core::Block Node::get_latest_block() const

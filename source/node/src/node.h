@@ -59,6 +59,7 @@ private:
     std::string const address;
     std::vector<std::string> peers;
     std::list<core::Block> blockchain;
+    std::list<transaction::UnspentOutput> unspent_outputs;
     Miner miner;
     Sender sender;
     std::thread miner_thread;
