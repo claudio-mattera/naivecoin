@@ -4,7 +4,7 @@
 #include <iomanip>
 #include <mutex>
 
-namespace naivecoin {
+namespace naivecoin::core {
 
 std::mutex time_mutex;
 
@@ -68,4 +68,4 @@ std::array<bool, 4 * 1> hex_to_binary<1>(std::string const & text);
 template
 std::array<bool, 4 * 8> hex_to_binary<8>(std::string const & text);
 
-} // namespace naivecoin
+} // namespace naivecoin::core

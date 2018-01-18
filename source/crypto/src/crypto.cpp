@@ -65,7 +65,7 @@ inline std::string read_from_bio(BIO * const bio)
 
 } // unnamed namespace
 
-namespace naivecoin {
+namespace naivecoin::crypto {
 
 std::string compute_hash(std::string const & data)
 {
@@ -269,4 +269,4 @@ bool verify(std::string const & data, std::string const & signature, std::string
     }
 }
 
-} // namespace naivecoin
+} // namespace naivecoin::crypto

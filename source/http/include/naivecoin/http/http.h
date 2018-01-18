@@ -7,7 +7,7 @@
 #include <string>
 #include <functional>
 
-namespace naivecoin {
+namespace naivecoin::http {
 
 enum Method {
 	GET = 1,
@@ -19,6 +19,6 @@ std::string process_request(
 	std::function<std::string(Method const, std::string const &, std::string const &)> callback
 );
 
-} // namespace naivecoin
+} // namespace naivecoin::http
 
 #endif // HTTP_H

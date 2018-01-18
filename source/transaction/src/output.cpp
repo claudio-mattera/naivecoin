@@ -1,6 +1,6 @@
 #include <naivecoin/transaction/output.h>
 
-namespace naivecoin {
+namespace naivecoin::transaction {
 
 Output::Output(
     std::string const address,
@@ -19,4 +19,4 @@ std::ostream & operator<<(std::ostream & stream, Output const & output)
     return stream;
 }
 
-} // namespace naivecoin
+} // namespace naivecoin::transaction

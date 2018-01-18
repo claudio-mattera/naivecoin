@@ -13,7 +13,7 @@
 
 #include <spdlog/spdlog.h>
 
-namespace naivecoin {
+namespace naivecoin::node {
 
 class Sender
 {
@@ -33,6 +33,6 @@ private:
     std::shared_ptr<spdlog::logger> logger;
 };
 
-} // namespace naivecoin
+} // namespace naivecoin::node
 
 #endif // NAIVECOIN_NODE_SENDER_H

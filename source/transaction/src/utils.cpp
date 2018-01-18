@@ -4,7 +4,7 @@
 #include <iterator>
 #include <algorithm>
 
-namespace naivecoin {
+namespace naivecoin::transaction {
 
 std::string join_inputs(std::list<Input> const & inputs)
 {
@@ -32,4 +32,4 @@ std::string join_outputs(std::list<Output> const & outputs)
     return stream.str();
 }
 
-} // namespace naivecoin
+} // namespace naivecoin::transaction

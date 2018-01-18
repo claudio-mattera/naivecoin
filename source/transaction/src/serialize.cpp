@@ -10,6 +10,8 @@
 
 namespace {
 
+using namespace naivecoin::transaction;
+
 std::string format_json(Json::Value const & value)
 {
     std::ostringstream stream;
@@ -26,7 +28,7 @@ Json::Value parse_json(std::string const & text)
     return value;
 }
 
-Json::Value serialize_output_to_json(naivecoin::Output const & output)
+Json::Value serialize_output_to_json(Output const & output)
 {
     Json::Value value;
     value["address"] = output.address;
@@ -34,7 +36,7 @@ Json::Value serialize_output_to_json(naivecoin::Output const & output)
     return value;
 }
 
-Json::Value serialize_outputs_to_json(std::list<naivecoin::Output> const & outputs)
+Json::Value serialize_outputs_to_json(std::list<Output> const & outputs)
 {
     Json::Value array(Json::arrayValue);
     for (auto output: outputs) {
@@ -43,7 +45,7 @@ Json::Value serialize_outputs_to_json(std::list<naivecoin::Output> const & outpu
     return array;
 }
 
-Json::Value serialize_input_to_json(naivecoin::Input const & input)
+Json::Value serialize_input_to_json(Input const & input)
 {
     Json::Value value;
     value["transaction_output_id"] = input.transaction_output_id;
@@ -52,7 +54,7 @@ Json::Value serialize_input_to_json(naivecoin::Input const & input)
     return value;
 }
 
-Json::Value serialize_inputs_to_json(std::list<naivecoin::Input> const & inputs)
+Json::Value serialize_inputs_to_json(std::list<Input> const & inputs)
 {
     Json::Value array(Json::arrayValue);
     for (auto input: inputs) {
@@ -61,7 +63,7 @@ Json::Value serialize_inputs_to_json(std::list<naivecoin::Input> const & inputs)
     return array;
 }
 
-Json::Value serialize_transaction_to_json(naivecoin::Transaction const & transaction)
+Json::Value serialize_transaction_to_json(Transaction const & transaction)
 {
     Json::Value value;
     value["id"] = transaction.id;
@@ -70,7 +72,7 @@ Json::Value serialize_transaction_to_json(naivecoin::Transaction const & transac
     return value;
 }
 
-Json::Value serialize_transactions_to_json(std::list<naivecoin::Transaction> const & transactions)
+Json::Value serialize_transactions_to_json(std::list<Transaction> const & transactions)
 {
     Json::Value array(Json::arrayValue);
     for (auto transaction: transactions) {
@@ -79,27 +81,27 @@ Json::Value serialize_transactions_to_json(std::list<naivecoin::Transaction> con
     return array;
 }
 
-naivecoin::Output deserialize_json_to_output(Json::Value const & value)
+Output deserialize_json_to_output(Json::Value const & value)
 {
-    naivecoin::Output const output(
+    Output const output(
         value["address"].asString(),
         value["amount"].asUInt64()
     );
     return output;
 }
 
-std::list<naivecoin::Output> deserialize_json_to_outputs(Json::Value const & array)
+std::list<Output> deserialize_json_to_outputs(Json::Value const & array)
 {
-    std::list<naivecoin::Output> outputs;
+    std::list<Output> outputs;
     for (Json::Value value: array) {
         outputs.push_back(deserialize_json_to_output(value));
     }
     return outputs;
 }
 
-naivecoin::Input deserialize_json_to_input(Json::Value const & value)
+Input deserialize_json_to_input(Json::Value const & value)
 {
-    naivecoin::Input const input(
+    Input const input(
         value["transaction_output_id"].asString(),
         value["transaction_output_index"].asUInt(),
         value["signature"].asString()
@@ -107,18 +109,18 @@ naivecoin::Input deserialize_json_to_input(Json::Value const & value)
     return input;
 }
 
-std::list<naivecoin::Input> deserialize_json_to_inputs(Json::Value const & array)
+std::list<Input> deserialize_json_to_inputs(Json::Value const & array)
 {
-    std::list<naivecoin::Input> inputs;
+    std::list<Input> inputs;
     for (Json::Value value: array) {
         inputs.push_back(deserialize_json_to_input(value));
     }
     return inputs;
 }
 
-naivecoin::Transaction deserialize_json_to_transaction(Json::Value const & value)
+Transaction deserialize_json_to_transaction(Json::Value const & value)
 {
-    naivecoin::Transaction const transaction(
+    Transaction const transaction(
         value["id"].asString(),
         deserialize_json_to_inputs(value["inputs"]),
         deserialize_json_to_outputs(value["outputs"])
@@ -126,9 +128,9 @@ naivecoin::Transaction deserialize_json_to_transaction(Json::Value const & value
     return transaction;
 }
 
-std::list<naivecoin::Transaction> deserialize_json_to_transactions(Json::Value const & array)
+std::list<Transaction> deserialize_json_to_transactions(Json::Value const & array)
 {
-    std::list<naivecoin::Transaction> transactions;
+    std::list<Transaction> transactions;
     for (Json::Value value: array) {
         transactions.push_back(deserialize_json_to_transaction(value));
     }
@@ -137,7 +139,7 @@ std::list<naivecoin::Transaction> deserialize_json_to_transactions(Json::Value c
 
 } // unnamed namespace
 
-namespace naivecoin {
+namespace naivecoin::transaction {
 
 std::string serialize_transactions(std::list<Transaction> const & transactions)
 {
@@ -151,4 +153,4 @@ std::list<Transaction> deserialize_transactions(std::string const & text)
     return deserialize_json_to_transactions(value);
 }
 
-} // namespace naivecoin
+} // namespace naivecoin::transaction

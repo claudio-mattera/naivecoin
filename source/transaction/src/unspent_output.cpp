@@ -1,6 +1,6 @@
 #include <naivecoin/transaction/unspent_output.h>
 
-namespace naivecoin {
+namespace naivecoin::transaction {
 
 UnspentOutput::UnspentOutput(
     std::string const & transaction_id,
@@ -25,4 +25,4 @@ std::ostream & operator<<(std::ostream & stream, UnspentOutput const & unspent_o
     return stream;
 }
 
-} // namespace naivecoin
+} // namespace naivecoin::transaction

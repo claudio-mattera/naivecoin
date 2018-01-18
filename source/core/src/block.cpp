@@ -10,7 +10,9 @@
 
 #include <naivecoin/crypto/crypto.h>
 
-namespace naivecoin {
+namespace naivecoin::core {
+
+using namespace naivecoin;
 
 Block::Block(
         uint64_t const index,
@@ -56,7 +58,7 @@ Block Block::make_block(
 // static
 Block Block::genesis()
 {
-    auto timestamp = naivecoin::parse_timestamp("2017-12-28T15:00:00Z");
+    auto timestamp = parse_timestamp("2017-12-28T15:00:00Z");
 
     uint64_t const index = 0;
     std::string const previous_hash = "";
@@ -79,7 +81,7 @@ std::ostream & operator<<(std::ostream & stream, Block const & block)
 {
     stream
         << "Block index: " << block.index << ", "
-        << "Timestamp: " << naivecoin::format_timestamp(block.timestamp) << ", "
+        << "Timestamp: " << format_timestamp(block.timestamp) << ", "
         << "Previous hash: " << block.previous_hash << ", "
         << "Hash: " << block.hash << ", "
         << "Data: " << block.data << ", "
@@ -102,14 +104,14 @@ std::string compute_block_hash(
     stream
         << index << ','
         << previous_hash << ','
-        << naivecoin::format_timestamp(timestamp) << ','
+        << format_timestamp(timestamp) << ','
         << data << ','
         << difficulty << ','
         << nonce;
 
     std::string const whole_string = stream.str();
 
-    return naivecoin::compute_hash(whole_string);
+    return crypto::compute_hash(whole_string);
 }
 
 bool is_new_block_valid(Block const & new_block, Block const & previous_block)
@@ -199,4 +201,4 @@ uint64_t compute_cumulative_difficulty(std::list<Block> const & blockchain)
     );
 }
 
-} // namespace naivecoin
+} // namespace naivecoin::core

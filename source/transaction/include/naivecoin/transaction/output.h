@@ -9,7 +9,7 @@
 #include <list>
 #include <ctime>
 
-namespace naivecoin {
+namespace naivecoin::transaction {
 
 struct Output
 {
@@ -26,6 +26,6 @@ public:
 
 std::ostream & operator<<(std::ostream & stream, Output const & output);
 
-} // namespace naivecoin
+} // namespace naivecoin::transaction
 
 #endif // NAIVECOIN_TRANSACTION_OUTPUT_H

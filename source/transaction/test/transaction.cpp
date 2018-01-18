@@ -112,22 +112,22 @@ std::vector<std::string> const private_keys{
     fifth_pair.second
 };
 
-std::pair<naivecoin::Transaction, std::list<naivecoin::UnspentOutput>> make_test_transaction()
+std::pair<naivecoin::transaction::Transaction, std::list<naivecoin::transaction::UnspentOutput>> make_test_transaction()
 {
-    std::list<naivecoin::UnspentOutput> const unspent_outputs{
-        naivecoin::UnspentOutput(
+    std::list<naivecoin::transaction::UnspentOutput> const unspent_outputs{
+        naivecoin::transaction::UnspentOutput(
             "first transaction id",
             7,
             addresses[0],
             2874
         ),
-        naivecoin::UnspentOutput(
+        naivecoin::transaction::UnspentOutput(
             "second transaction id",
             34,
             addresses[1],
             13
         ),
-        naivecoin::UnspentOutput(
+        naivecoin::transaction::UnspentOutput(
             "third transaction id",
             239,
             addresses[2],
@@ -135,29 +135,29 @@ std::pair<naivecoin::Transaction, std::list<naivecoin::UnspentOutput>> make_test
         )
     };
 
-    std::list<naivecoin::Input> inputs{
-        naivecoin::Input(
+    std::list<naivecoin::transaction::Input> inputs{
+        naivecoin::transaction::Input(
             "first transaction id",
             7
         ),
-        naivecoin::Input(
+        naivecoin::transaction::Input(
             "third transaction id",
             239
         )
     };
 
-    std::list<naivecoin::Output> const outputs{
-        naivecoin::Output(
+    std::list<naivecoin::transaction::Output> const outputs{
+        naivecoin::transaction::Output(
             addresses[3],
             984
         ),
-        naivecoin::Output(
+        naivecoin::transaction::Output(
             addresses[4],
             2873
         )
     };
 
-    naivecoin::Transaction const transaction = naivecoin::create_transaction(
+    naivecoin::transaction::Transaction const transaction = naivecoin::transaction::create_transaction(
         inputs,
         outputs,
         {private_keys[0], private_keys[2]},
@@ -173,20 +173,20 @@ BOOST_AUTO_TEST_SUITE(TransactionTransaction)
 
 BOOST_AUTO_TEST_CASE(compute_transaction_id)
 {
-    std::list<naivecoin::Input> const inputs{
-        naivecoin::Input("some id", 23, ""),
-        naivecoin::Input("some other id", 54, ""),
-        naivecoin::Input("a third id", 458, "")
+    std::list<naivecoin::transaction::Input> const inputs{
+        naivecoin::transaction::Input("some id", 23, ""),
+        naivecoin::transaction::Input("some other id", 54, ""),
+        naivecoin::transaction::Input("a third id", 458, "")
     };
-    std::list<naivecoin::Output> const outputs{
-        naivecoin::Output("12345", 7564),
-        naivecoin::Output("98765", 546),
-        naivecoin::Output("0001", 5436)
+    std::list<naivecoin::transaction::Output> const outputs{
+        naivecoin::transaction::Output("12345", 7564),
+        naivecoin::transaction::Output("98765", 546),
+        naivecoin::transaction::Output("0001", 5436)
     };
 
-    naivecoin::Transaction transaction("", inputs, outputs);
+    naivecoin::transaction::Transaction transaction("", inputs, outputs);
 
-    std::string const actual = naivecoin::compute_transaction_id(transaction);
+    std::string const actual = naivecoin::transaction::compute_transaction_id(transaction);
 
     std::string const expected = "f515a03fd85da81a23ea16b227678fdd7ec99de8";
 
@@ -196,10 +196,10 @@ BOOST_AUTO_TEST_CASE(compute_transaction_id)
 BOOST_AUTO_TEST_CASE(is_transaction_valid)
 {
     auto pair = make_test_transaction();
-    naivecoin::Transaction transaction = pair.first;
-    std::list<naivecoin::UnspentOutput> unspent_outputs = pair.second;
+    naivecoin::transaction::Transaction transaction = pair.first;
+    std::list<naivecoin::transaction::UnspentOutput> unspent_outputs = pair.second;
 
-    bool const is_valid = naivecoin::is_transaction_valid(transaction, unspent_outputs);
+    bool const is_valid = naivecoin::transaction::is_transaction_valid(transaction, unspent_outputs);
 
     BOOST_CHECK(is_valid);
 }
@@ -207,8 +207,8 @@ BOOST_AUTO_TEST_CASE(is_transaction_valid)
 BOOST_AUTO_TEST_CASE(is_transaction_valid_coinbase)
 {
     uint64_t const index = 33;
-    naivecoin::Transaction transaction = naivecoin::create_coinbase_transaction(index, addresses[3]);
-    bool const is_valid = naivecoin::is_transaction_valid(transaction, {});
+    naivecoin::transaction::Transaction transaction = naivecoin::transaction::create_coinbase_transaction(index, addresses[3]);
+    bool const is_valid = naivecoin::transaction::is_transaction_valid(transaction, {});
 
     BOOST_CHECK(! is_valid);
 }
@@ -216,8 +216,8 @@ BOOST_AUTO_TEST_CASE(is_transaction_valid_coinbase)
 BOOST_AUTO_TEST_CASE(is_coinbase_transaction_valid)
 {
     uint64_t const index = 33;
-    naivecoin::Transaction const transaction = naivecoin::create_coinbase_transaction(index, addresses[3]);
-    bool const is_valid = naivecoin::is_coinbase_transaction_valid(index, transaction);
+    naivecoin::transaction::Transaction const transaction = naivecoin::transaction::create_coinbase_transaction(index, addresses[3]);
+    bool const is_valid = naivecoin::transaction::is_coinbase_transaction_valid(index, transaction);
 
     BOOST_CHECK(is_valid);
 }
@@ -226,14 +226,14 @@ BOOST_AUTO_TEST_CASE(is_transaction_list_valid)
 {
     uint64_t const index = 33;
     auto pair = make_test_transaction();
-    naivecoin::Transaction transaction = pair.first;
-    std::list<naivecoin::UnspentOutput> unspent_outputs = pair.second;
+    naivecoin::transaction::Transaction transaction = pair.first;
+    std::list<naivecoin::transaction::UnspentOutput> unspent_outputs = pair.second;
 
-    naivecoin::Transaction coinbase_transaction = naivecoin::create_coinbase_transaction(index, addresses[3]);
+    naivecoin::transaction::Transaction coinbase_transaction = naivecoin::transaction::create_coinbase_transaction(index, addresses[3]);
 
-    std::list<naivecoin::Transaction> transactions{coinbase_transaction, transaction};
+    std::list<naivecoin::transaction::Transaction> transactions{coinbase_transaction, transaction};
 
-    bool const is_valid = naivecoin::is_transaction_list_valid(index, transactions, unspent_outputs);
+    bool const is_valid = naivecoin::transaction::is_transaction_list_valid(index, transactions, unspent_outputs);
 
     BOOST_CHECK(is_valid);
 }

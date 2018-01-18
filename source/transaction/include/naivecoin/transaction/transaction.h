@@ -12,7 +12,7 @@
 #include <naivecoin/transaction/unspent_output.h>
 #include <naivecoin/transaction/input.h>
 
-namespace naivecoin {
+namespace naivecoin::transaction {
 
 uint64_t const COINBASE_AMOUNT = 50;
 
@@ -70,6 +70,6 @@ Transaction create_coinbase_transaction(
     std::string const & address
 );
 
-} // namespace naivecoin
+} // namespace naivecoin::transaction
 
 #endif // NAIVECOIN_TRANSACTION_TRANSACTION_H

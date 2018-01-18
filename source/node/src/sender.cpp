@@ -6,7 +6,7 @@ namespace {
 
 } // unnamed namespace
 
-namespace naivecoin {
+namespace naivecoin::node {
 
 Sender::Sender()
 : logger(spdlog::get("sender"))
@@ -60,4 +60,4 @@ void Sender::enqueue_message(std::string const & message, std::string const & re
     this->condition_variable.notify_one();
 }
 
-} // namespace naivecoin
+} // namespace naivecoin::node

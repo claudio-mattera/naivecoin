@@ -1,6 +1,6 @@
 #include <naivecoin/transaction/input.h>
 
-namespace naivecoin {
+namespace naivecoin::transaction {
 
 Input::Input(
     std::string const & transaction_output_id,
@@ -22,4 +22,4 @@ std::ostream & operator<<(std::ostream & stream, Input const & input)
     return stream;
 }
 
-} // namespace naivecoin
+} // namespace naivecoin::transaction

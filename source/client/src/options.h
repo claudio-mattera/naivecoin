@@ -6,10 +6,10 @@
 
 #include <boost/program_options.hpp>
 
-namespace naivecoin {
+namespace naivecoin::client {
 
 boost::program_options::variables_map process_program_options(int const argc, char const * const argv[]);
 
-} // namespace naivecoin
+} // namespace naivecoin::client
 
 #endif // NAIVECOIN_CLIENT_OPTIONS_H

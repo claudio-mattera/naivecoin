@@ -49,7 +49,7 @@ std::string get_response_data(std::string const & response)
 
 int main(int argc, char * argv[])
 {
-    auto const options = naivecoin::process_program_options(argc, argv);
+    auto const options = naivecoin::client::process_program_options(argc, argv);
 
     initialize_loggers();
     auto logger = spdlog::get("main");
@@ -99,9 +99,9 @@ int main(int argc, char * argv[])
         std::string const response = stream.str();
         std::string const response_data = get_response_data(response);
 
-        std::list<naivecoin::Block> const blockchain = naivecoin::deserialize_blockchain(response_data);
-        for (naivecoin::Block block: blockchain) {
-            std::list<naivecoin::Transaction> const transactions = naivecoin::deserialize_transactions(block.data);
+        std::list<naivecoin::core::Block> const blockchain = naivecoin::core::deserialize_blockchain(response_data);
+        for (naivecoin::core::Block block: blockchain) {
+            std::list<naivecoin::transaction::Transaction> const transactions = naivecoin::transaction::deserialize_transactions(block.data);
             for (auto transaction: transactions) {
                 std::cout << transaction.id << '\n';
             }

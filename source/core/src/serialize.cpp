@@ -9,6 +9,8 @@
 
 namespace {
 
+using namespace naivecoin::core;
+
 std::string format_json(Json::Value const & value)
 {
     std::ostringstream stream;
@@ -25,14 +27,14 @@ Json::Value parse_json(std::string const & text)
     return value;
 }
 
-Json::Value serialize_block_to_json(naivecoin::Block const & block)
+Json::Value serialize_block_to_json(Block const & block)
 {
     Json::Value value;
 
     value["index"] = block.index;
     value["hash"] = block.hash;
     value["previous_hash"] = block.previous_hash;
-    value["timestamp"] = naivecoin::format_timestamp(block.timestamp);
+    value["timestamp"] = format_timestamp(block.timestamp);
     value["data"] = block.data;
     value["difficulty"] = block.difficulty;
     value["nonce"] = block.nonce;
@@ -40,7 +42,7 @@ Json::Value serialize_block_to_json(naivecoin::Block const & block)
     return value;
 }
 
-Json::Value serialize_blockchain_to_json(std::list<naivecoin::Block> const & blockchain)
+Json::Value serialize_blockchain_to_json(std::list<Block> const & blockchain)
 {
     Json::Value array(Json::arrayValue);
 
@@ -51,11 +53,11 @@ Json::Value serialize_blockchain_to_json(std::list<naivecoin::Block> const & blo
     return array;
 }
 
-naivecoin::Block deserialize_json_to_block(Json::Value const & value)
+Block deserialize_json_to_block(Json::Value const & value)
 {
-    auto timestamp = naivecoin::parse_timestamp(value["timestamp"].asString());
+    auto timestamp = parse_timestamp(value["timestamp"].asString());
 
-    naivecoin::Block const block = naivecoin::Block::make_block(
+    Block const block = Block::make_block(
         static_cast<uint16_t>(value["index"].asUInt64()),
         value["previous_hash"].asString(),
         timestamp,
@@ -73,9 +75,9 @@ naivecoin::Block deserialize_json_to_block(Json::Value const & value)
     return block;
 }
 
-std::list<naivecoin::Block> deserialize_json_to_blockchain(Json::Value const & array)
+std::list<Block> deserialize_json_to_blockchain(Json::Value const & array)
 {
-    std::list<naivecoin::Block> blockchain;
+    std::list<Block> blockchain;
 
     for (auto value: array) {
         blockchain.push_back(deserialize_json_to_block(value));
@@ -101,7 +103,7 @@ Json::Value create_message(
 
 } // unnamed namespace
 
-namespace naivecoin {
+namespace naivecoin::core {
 
 Block deserialize_block(std::string const & text)
 {
@@ -185,4 +187,4 @@ void process_message(
     }
 }
 
-} // namespace naivecoin
+} // namespace naivecoin::core

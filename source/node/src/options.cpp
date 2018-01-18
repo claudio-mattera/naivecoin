@@ -55,7 +55,7 @@ void check_socket(std::string const & value)
 
 } // unnamed namespace
 
-namespace naivecoin {
+namespace naivecoin::node {
 
 boost::program_options::variables_map process_program_options(int const argc, char const * const argv[])
 {
@@ -135,4 +135,4 @@ boost::program_options::variables_map process_program_options(int const argc, ch
     return args;
 }
 
-} // namespace naivecoin
+} // namespace naivecoin::node

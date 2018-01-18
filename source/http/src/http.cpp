@@ -26,7 +26,7 @@ std::string make_response(
 
 } // unnamed namespace
 
-namespace naivecoin {
+namespace naivecoin::http {
 
 std::string process_request(
 	std::string const & request,
@@ -78,4 +78,4 @@ std::string process_request(
 	}
 }
 
-} // namespace naivecoin
+} // namespace naivecoin::http

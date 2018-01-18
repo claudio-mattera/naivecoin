@@ -30,7 +30,7 @@ std::string read_file(std::string const & filename)
 
 int main(int argc, char * argv[])
 {
-    auto const options = naivecoin::process_program_options(argc, argv);
+    auto const options = naivecoin::node::process_program_options(argc, argv);
 
     initialize_loggers();
     auto logger = spdlog::get("main");
@@ -47,7 +47,7 @@ int main(int argc, char * argv[])
 
     uint64_t const port = options["port"].as<uint64_t>();
     uint64_t const sleep_time = options["sleep"].as<uint64_t>();
-    naivecoin::Node node(port, public_key, peers, sleep_time, seed);
+    naivecoin::node::Node node(port, public_key, peers, sleep_time, seed);
 
     logger->info("Launching node thread");
     auto main_future = std::async(std::launch::async, [&node](){node.start();});

@@ -11,9 +11,12 @@
 
 namespace {
 
+using namespace naivecoin::transaction;
+using namespace naivecoin;
+
 std::string compute_transaction_id(
-    std::list<naivecoin::Input> const & inputs,
-    std::list<naivecoin::Output> const & outputs
+    std::list<Input> const & inputs,
+    std::list<Output> const & outputs
 )
 {
     std::string const inputs_string = join_inputs(inputs);
@@ -21,13 +24,13 @@ std::string compute_transaction_id(
 
     std::string const whole_string = inputs_string + outputs_string;
 
-    return naivecoin::compute_hash(whole_string);
+    return crypto::compute_hash(whole_string);
 }
 
-naivecoin::UnspentOutput find_unspent_output(
+UnspentOutput find_unspent_output(
     std::string const & transaction_output_id,
     uint16_t const transaction_output_index,
-    std::list<naivecoin::UnspentOutput> const & unspent_outputs
+    std::list<UnspentOutput> const & unspent_outputs
 )
 {
     for (auto unspent_output: unspent_outputs) {
@@ -41,9 +44,9 @@ naivecoin::UnspentOutput find_unspent_output(
 }
 
 bool is_transaction_input_valid(
-    naivecoin::Input const & input,
-    naivecoin::Transaction const & transaction,
-    std::list<naivecoin::UnspentOutput> const & unspent_outputs
+    Input const & input,
+    Transaction const & transaction,
+    std::list<UnspentOutput> const & unspent_outputs
 )
 {
     auto const referenced_unspent_output_iterator = std::find_if(
@@ -60,14 +63,16 @@ bool is_transaction_input_valid(
 
     std::string const & address = referenced_unspent_output_iterator->address;
 
-    bool const verified = naivecoin::verify(transaction.id, input.signature, address);
+    bool const verified = crypto::verify(transaction.id, input.signature, address);
 
     return verified;
 }
 
 } // unnamed namespace
 
-namespace naivecoin {
+namespace naivecoin::transaction {
+
+using namespace naivecoin;
 
 Transaction::Transaction(
     std::string const & id,
@@ -120,7 +125,7 @@ std::string compute_input_signature(
     );
     std::string const referenced_address = referenced_unspent_output.address;
 
-    std::string const signature = sign(data_to_sign, private_key);
+    std::string const signature = crypto::sign(data_to_sign, private_key);
     return signature;
 }
 
@@ -172,7 +177,7 @@ bool is_coinbase_transaction_valid(
         // Coinbase transaction has exactly one output.
         return false;
     }
-    if (coinbase_transaction.outputs.front().amount != naivecoin::COINBASE_AMOUNT) {
+    if (coinbase_transaction.outputs.front().amount != transaction::COINBASE_AMOUNT) {
         return false;
     }
 
@@ -253,7 +258,7 @@ std::string compute_input_signature(
     );
     std::string const referenced_address = referenced_unspent_output.address;
 
-    std::string const signature = sign(data_to_sign, private_key);
+    std::string const signature = crypto::sign(data_to_sign, private_key);
     return signature;
 }
 
@@ -290,10 +295,10 @@ Transaction create_coinbase_transaction(uint64_t const index, std::string const 
 {
     return create_transaction(
         {Input("", index)},
-        {Output(address, naivecoin::COINBASE_AMOUNT)},
+        {Output(address, transaction::COINBASE_AMOUNT)},
         {},
         {}
     );
 }
 
-} // namespace naivecoin
+} // namespace naivecoin::transaction

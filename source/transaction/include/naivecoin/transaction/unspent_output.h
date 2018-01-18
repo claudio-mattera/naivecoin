@@ -9,7 +9,7 @@
 #include <list>
 #include <ctime>
 
-namespace naivecoin {
+namespace naivecoin::transaction {
 
 struct UnspentOutput
 {
@@ -30,6 +30,6 @@ public:
 
 std::ostream & operator<<(std::ostream & stream, UnspentOutput const & unspent_output);
 
-} // namespace naivecoin
+} // namespace naivecoin::transaction
 
 #endif // NAIVECOIN_TRANSACTION_UNSPENTOUTPUT_H

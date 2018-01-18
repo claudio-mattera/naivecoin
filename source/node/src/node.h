@@ -19,7 +19,9 @@
 #include "miner.h"
 #include "sender.h"
 
-namespace naivecoin {
+namespace naivecoin::node {
+
+using namespace naivecoin;
 
 class Node
 {
@@ -36,16 +38,16 @@ public:
 
 private:
     void connect_to_peer(std::string const & peer);
-    void send_block_to_peers(Block const & block);
-    bool try_adding_block_to_blockchain(Block const & block);
-    void replace_blockchain(std::list<Block> blockchain);
-    Block get_latest_block() const;
+    void send_block_to_peers(core::Block const & block);
+    bool try_adding_block_to_blockchain(core::Block const & block);
+    void replace_blockchain(std::list<core::Block> blockchain);
+    core::Block get_latest_block() const;
     std::string serialize_blockchain() const;
     uint64_t compute_cumulative_difficulty() const;
     std::string create_send_blockchain_message(std::string const & address) const;
 
-    void process_send_block_message(Block const &, std::string const &);
-    void process_send_blockchain_message(std::list<Block> const &, std::string const &);
+    void process_send_block_message(core::Block const &, std::string const &);
+    void process_send_blockchain_message(std::list<core::Block> const &, std::string const &);
     void process_query_latest_block_message(std::string const &);
     void process_query_blockchain_message(std::string const &);
     void process_unknown_message(std::string const &, std::string const &);
@@ -56,7 +58,7 @@ private:
 private:
     std::string const address;
     std::vector<std::string> peers;
-    std::list<Block> blockchain;
+    std::list<core::Block> blockchain;
     Miner miner;
     Sender sender;
     std::thread miner_thread;
@@ -68,6 +70,6 @@ private:
     std::shared_ptr<spdlog::logger> logger;
 };
 
-} // namespace naivecoin
+} // namespace naivecoin::node
 
 #endif // NAIVECOIN_NODE_NODE_H

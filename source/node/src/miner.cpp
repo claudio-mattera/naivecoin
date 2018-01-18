@@ -9,7 +9,9 @@
 #include <naivecoin/transaction/transaction.h>
 #include <naivecoin/transaction/serialize.h>
 
-namespace naivecoin {
+namespace naivecoin::node {
+
+using namespace naivecoin;
 
 Miner::Miner(
     std::string const & public_key,
@@ -32,7 +34,7 @@ Miner::Miner(
 void Miner::start()
 {
     while (true) {
-        Block const * latest_block_ptr;
+        core::Block const * latest_block_ptr;
         {
             std::unique_lock<std::mutex> unique_lock(this->input_mutex);
             this->input_condition_variable.wait(unique_lock);
@@ -41,7 +43,7 @@ void Miner::start()
         }
 
 
-        Block const next_block = this->mine_next_block(*latest_block_ptr);
+        core::Block const next_block = this->mine_next_block(*latest_block_ptr);
 
         {
             std::lock_guard<std::mutex> lock_guard(this->output_mutex);
@@ -52,7 +54,7 @@ void Miner::start()
     }
 }
 
-void Miner::request_mine_next_block(Block const & latest_block)
+void Miner::request_mine_next_block(core::Block const & latest_block)
 {
     {
         std::lock_guard<std::mutex> lock_guard(this->input_mutex);
@@ -65,34 +67,34 @@ void Miner::request_mine_next_block(Block const & latest_block)
     this->input_condition_variable.notify_one();
 }
 
-Block Miner::get_next_block()
+core::Block Miner::get_next_block()
 {
     {
         std::unique_lock<std::mutex> unique_lock(this->output_mutex);
         this->output_condition_variable.wait(unique_lock);
 
-        Block const next_block = this->next_blocks.front();
+        core::Block const next_block = this->next_blocks.front();
         this->next_blocks.pop();
         return next_block;
     }
 }
 
-Block Miner::mine_next_block(Block const & latest_block)
+core::Block Miner::mine_next_block(core::Block const & latest_block)
 {
     uint64_t const index = 1 + latest_block.index;
 
-    Transaction const coinbase_transaction = create_coinbase_transaction(
+    transaction::Transaction const coinbase_transaction = transaction::create_coinbase_transaction(
         index,
         this->public_key
     );
-    std::list<Transaction> block_transactions{coinbase_transaction};
+    std::list<transaction::Transaction> block_transactions{coinbase_transaction};
 
     std::string const & previous_hash = latest_block.hash;
-    std::string const data = serialize_transactions(block_transactions);
-    std::time_t const timestamp= naivecoin::now();
+    std::string const data = transaction::serialize_transactions(block_transactions);
+    std::time_t const timestamp= core::now();
     uint16_t const difficulty = this->get_difficulty();
 
-    naivecoin::Block const next_block = this->find_next_block(
+    core::Block const next_block = this->find_next_block(
         index,
         previous_hash,
         timestamp,
@@ -103,7 +105,7 @@ Block Miner::mine_next_block(Block const & latest_block)
     return next_block;
 }
 
-naivecoin::Block Miner::find_next_block(
+core::Block Miner::find_next_block(
     uint64_t const index,
     std::string const & previous_hash,
     std::time_t const & timestamp,
@@ -114,7 +116,7 @@ naivecoin::Block Miner::find_next_block(
     while (true) {
         uint64_t const nonce = this->mersenne_twister_engine();
 
-        std::string const hash = compute_block_hash(
+        std::string const hash = core::compute_block_hash(
             index,
             previous_hash,
             timestamp,
@@ -122,8 +124,8 @@ naivecoin::Block Miner::find_next_block(
             difficulty,
             nonce
         );
-        if (naivecoin::hash_matches_difficulty(hash, difficulty)) {
-            return naivecoin::Block::make_block(
+        if (core::hash_matches_difficulty(hash, difficulty)) {
+            return core::Block::make_block(
                 index,
                 previous_hash,
                 timestamp,
@@ -139,7 +141,7 @@ naivecoin::Block Miner::find_next_block(
 
 uint16_t Miner::get_difficulty()
 {
-    naivecoin::Block const & latest_block = this->latest_blocks.back();
+    core::Block const & latest_block = this->latest_blocks.back();
     if (latest_block.index % Miner::DIFFICULTY_ADJUSTMENT_INTERVAL_IN_BLOCKS == 0) {
         return this->get_adjusted_difficulty(latest_block);
     } else {
@@ -147,12 +149,12 @@ uint16_t Miner::get_difficulty()
     }
 }
 
-uint16_t Miner::get_adjusted_difficulty(naivecoin::Block const & latest_block)
+uint16_t Miner::get_adjusted_difficulty(core::Block const & latest_block)
 {
     std::ostringstream log_stream;
     log_stream << "Adjusting difficulty for block " << latest_block.index;
 
-    naivecoin::Block const latest_adjustment_block = this->latest_blocks.front();
+    core::Block const latest_adjustment_block = this->latest_blocks.front();
 
     auto expected_elapsed_time = std::chrono::seconds(
         Miner::DIFFICULTY_ADJUSTMENT_INTERVAL_IN_BLOCKS * Miner::BLOCK_GENERATION_INTERVAL_IN_SECONDS
@@ -185,9 +187,9 @@ uint16_t Miner::get_adjusted_difficulty(naivecoin::Block const & latest_block)
     return new_difficulty;
 }
 
-bool Miner::is_timestamp_valid(naivecoin::Block const & new_block)
+bool Miner::is_timestamp_valid(core::Block const & new_block)
 {
-    naivecoin::Block const & latest_block = this->latest_blocks.back();
+    core::Block const & latest_block = this->latest_blocks.back();
     std::time_t const now = std::time(nullptr);
 
     if (std::difftime(new_block.timestamp, latest_block.timestamp) < -60) {
@@ -199,4 +201,4 @@ bool Miner::is_timestamp_valid(naivecoin::Block const & new_block)
     }
 }
 
-} // namespace naivecoin
+} // namespace naivecoin::node

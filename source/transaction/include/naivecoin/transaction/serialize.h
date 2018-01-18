@@ -9,11 +9,11 @@
 
 #include <naivecoin/transaction/transaction.h>
 
-namespace naivecoin {
+namespace naivecoin::transaction {
 
 std::string serialize_transactions(std::list<Transaction> const & transactions);
 std::list<Transaction> deserialize_transactions(std::string const & text);
 
-} // namespace naivecoin
+} // namespace naivecoin::transaction
 
 #endif // NAIVECOIN_TRANSACTION_SERIALIZE_H

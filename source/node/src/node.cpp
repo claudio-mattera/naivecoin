@@ -13,7 +13,9 @@ std::mutex blockchain_mutex;
 } // unnamed namespace
 
 
-namespace naivecoin {
+namespace naivecoin::node {
+
+using namespace naivecoin;
 
 Node::Node(
     uint16_t const port,
@@ -34,7 +36,7 @@ Node::Node(
 )
 , logger(spdlog::get("node"))
 {
-    this->blockchain.push_back(naivecoin::Block::genesis());
+    this->blockchain.push_back(core::Block::genesis());
 
     this->server.config.port = port;
 
@@ -42,7 +44,7 @@ Node::Node(
         std::string const content = request->content.string();
         using namespace std::placeholders;
         try {
-            naivecoin::process_message(
+            core::process_message(
                 content,
                 std::bind(& Node::process_send_block_message, this, _1, _2),
                 std::bind(& Node::process_send_blockchain_message, this, _1, _2),
@@ -82,11 +84,11 @@ void Node::start()
 {
     this->logger->info("Node active with {} peers", this->peers.size());
     while (true) {
-        Block const latest_block = this->get_latest_block();
+        core::Block const latest_block = this->get_latest_block();
 
         this->miner.request_mine_next_block(latest_block);
 
-        Block const & next_block = this->miner.get_next_block();
+        core::Block const & next_block = this->miner.get_next_block();
 
         if (this->try_adding_block_to_blockchain(next_block)) {
             this->logger->info("Mined next block {}", next_block.index);
@@ -99,27 +101,27 @@ void Node::start()
 
 void Node::connect_to_peer(std::string const & peer)
 {
-    std::string const message = create_query_latest_block_message(this->address);
+    std::string const message = core::create_query_latest_block_message(this->address);
 
     this->logger->info("Querying peer {} for its latest block", peer);
     this->sender.enqueue_message(message, peer);
 }
 
-void Node::send_block_to_peers(Block const & block)
+void Node::send_block_to_peers(core::Block const & block)
 {
     for (std::string const peer: this->peers) {
-        std::string const message = create_send_block_message(block, this->address);
+        std::string const message = core::create_send_block_message(block, this->address);
 
         this->logger->debug("Sending block to peer {}", peer);
         this->sender.enqueue_message(message, peer);
     }
 }
 
-bool Node::try_adding_block_to_blockchain(Block const & block)
+bool Node::try_adding_block_to_blockchain(core::Block const & block)
 {
     std::lock_guard lock_guard(blockchain_mutex);
 
-    Block const & latest_block = * this->blockchain.crbegin();
+    core::Block const & latest_block = * this->blockchain.crbegin();
 
     if (block.index == latest_block.index + 1 && block.previous_hash == latest_block.hash) {
         this->blockchain.push_back(block);
@@ -129,7 +131,7 @@ bool Node::try_adding_block_to_blockchain(Block const & block)
     }
 }
 
-void Node::replace_blockchain(std::list<Block> new_blockchain)
+void Node::replace_blockchain(std::list<core::Block> new_blockchain)
 {
     std::lock_guard lock_guard(blockchain_mutex);
 
@@ -138,11 +140,11 @@ void Node::replace_blockchain(std::list<Block> new_blockchain)
     this->blockchain.splice(std::begin(this->blockchain), new_blockchain);
 }
 
-Block Node::get_latest_block() const
+core::Block Node::get_latest_block() const
 {
     std::lock_guard lock_guard(blockchain_mutex);
 
-    Block const & latest_block = * this->blockchain.crbegin();
+    core::Block const & latest_block = * this->blockchain.crbegin();
 
     return latest_block;
 }
@@ -151,30 +153,30 @@ std::string Node::serialize_blockchain() const
 {
     std::lock_guard lock_guard(blockchain_mutex);
 
-    return naivecoin::serialize_blockchain(this->blockchain);
+    return core::serialize_blockchain(this->blockchain);
 }
 
 uint64_t Node::compute_cumulative_difficulty() const
 {
     std::lock_guard lock_guard(blockchain_mutex);
 
-    return naivecoin::compute_cumulative_difficulty(this->blockchain);
+    return core::compute_cumulative_difficulty(this->blockchain);
 }
 
 std::string Node::create_send_blockchain_message(std::string const & address) const
 {
     std::lock_guard lock_guard(blockchain_mutex);
 
-    return naivecoin::create_send_blockchain_message(this->blockchain, address);
+    return core::create_send_blockchain_message(this->blockchain, address);
 }
 
-void Node::process_send_block_message(Block const & block, std::string const & sender)
+void Node::process_send_block_message(core::Block const & block, std::string const & sender)
 {
     this->logger->info("Received block {} from sender {}", block.index, sender);
 
     this->add_peer(sender);
 
-    Block const latest_block = this->get_latest_block();
+    core::Block const latest_block = this->get_latest_block();
 
     if (block.index <= latest_block.index) {
         // Do nothings
@@ -189,13 +191,13 @@ void Node::process_send_block_message(Block const & block, std::string const & s
         } else {
             this->logger->info("This block comes from a blockchain longer than ours, querying for full blockchain");
 
-            std::string const message = create_query_blockchain_message(this->address);
+            std::string const message = core::create_query_blockchain_message(this->address);
             this->sender.enqueue_message(message, sender);
         }
     }
 }
 
-void Node::process_send_blockchain_message(std::list<Block> const & other_blockchain, std::string const & sender)
+void Node::process_send_blockchain_message(std::list<core::Block> const & other_blockchain, std::string const & sender)
 {
     this->logger->info("Received blockchain of {} blocks from sender {}", other_blockchain.size(), sender);
 
@@ -203,7 +205,7 @@ void Node::process_send_blockchain_message(std::list<Block> const & other_blockc
 
     if (is_blockchain_valid(other_blockchain)) {
         this->logger->info("Blockchain is valid");
-        uint64_t const other_cumulative_difficulty = naivecoin::compute_cumulative_difficulty(other_blockchain);
+        uint64_t const other_cumulative_difficulty = core::compute_cumulative_difficulty(other_blockchain);
         uint64_t const this_cumulative_difficulty = this->compute_cumulative_difficulty();
 
         if (other_cumulative_difficulty > this_cumulative_difficulty) {
@@ -232,7 +234,7 @@ void Node::process_query_latest_block_message(std::string const & sender)
 
     this->add_peer(sender);
 
-    Block const latest_block = this->get_latest_block();
+    core::Block const latest_block = this->get_latest_block();
     std::string const message = create_send_block_message(latest_block, this->address);
     this->sender.enqueue_message(message, sender);
 }
@@ -268,4 +270,4 @@ void Node::add_peer(std::string const & peer)
     }
 }
 
-} // namespace naivecoin
+} // namespace naivecoin::node

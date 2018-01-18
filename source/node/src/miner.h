@@ -19,7 +19,9 @@
 
 #include <naivecoin/core/block.h>
 
-namespace naivecoin {
+namespace naivecoin::node {
+
+using namespace naivecoin;
 
 class Miner
 {
@@ -32,9 +34,9 @@ public:
 
     void start();
 
-    void request_mine_next_block(Block const & latest_block);
+    void request_mine_next_block(core::Block const & latest_block);
 
-    Block get_next_block();
+    core::Block get_next_block();
 
 private:
     uint16_t const BLOCK_GENERATION_INTERVAL_IN_SECONDS = 10;
@@ -42,8 +44,8 @@ private:
     uint16_t const DIFFICULTY_ADJUSTMENT_INTERVAL_IN_BLOCKS = 10;
 
 private:
-    Block mine_next_block(Block const & latest_block);
-    naivecoin::Block find_next_block(
+    core::Block mine_next_block(core::Block const & latest_block);
+    core::Block find_next_block(
         uint64_t const index,
         std::string const & previous_hash,
         std::time_t const & timestamp,
@@ -51,15 +53,15 @@ private:
         uint16_t const difficulty
     );
     uint16_t get_difficulty();
-    uint16_t get_adjusted_difficulty(naivecoin::Block const & latest_block);
-    bool is_timestamp_valid(naivecoin::Block const & new_block);
+    uint16_t get_adjusted_difficulty(core::Block const & latest_block);
+    bool is_timestamp_valid(core::Block const & new_block);
 
 private:
     std::string const public_key;
     uint64_t const sleep_time;
 
-    std::queue<Block> latest_blocks;
-    std::queue<Block> next_blocks;
+    std::queue<core::Block> latest_blocks;
+    std::queue<core::Block> next_blocks;
 
     std::mutex input_mutex;
     std::condition_variable input_condition_variable;
@@ -72,6 +74,6 @@ private:
     std::shared_ptr<spdlog::logger> logger;
 };
 
-} // namespace naivecoin
+} // namespace naivecoin::node
 
 #endif // NAIVECOIN_NODE_MINER_H

@@ -14,12 +14,12 @@ BOOST_AUTO_TEST_CASE(compute_block_hash)
 {
     uint64_t const index = 0;
     std::string const previous_hash = "";
-    std::time_t const timestamp = naivecoin::parse_timestamp("1970-01-01T00:00:00Z");
+    std::time_t const timestamp = naivecoin::core::parse_timestamp("1970-01-01T00:00:00Z");
     std::string const data = "Some data";
     uint16_t difficulty = 0;
     uint64_t nonce = 0;
 
-    std::string const hash = naivecoin::compute_block_hash(index, previous_hash, timestamp, data, difficulty, nonce);
+    std::string const hash = naivecoin::core::compute_block_hash(index, previous_hash, timestamp, data, difficulty, nonce);
 
     std::string const expected_hash = "25b14367acd2fee29d0b2a8ed4603297f5703a59";
 
@@ -28,9 +28,9 @@ BOOST_AUTO_TEST_CASE(compute_block_hash)
 
 BOOST_AUTO_TEST_CASE(genesis)
 {
-    naivecoin::Block const genesis = naivecoin::Block::genesis();
+    naivecoin::core::Block const genesis = naivecoin::core::Block::genesis();
 
-    auto timestamp = naivecoin::parse_timestamp("2017-12-28T15:00:00Z");
+    auto timestamp = naivecoin::core::parse_timestamp("2017-12-28T15:00:00Z");
 
     BOOST_CHECK_EQUAL(genesis.index, 0);
     BOOST_CHECK_EQUAL(genesis.previous_hash, "");
@@ -49,9 +49,9 @@ BOOST_AUTO_TEST_CASE(make_block)
     uint16_t difficulty = 0;
     uint64_t nonce = 0;
 
-    auto timestamp = naivecoin::parse_timestamp("2017-12-28T15:00:00Z");
+    auto timestamp = naivecoin::core::parse_timestamp("2017-12-28T15:00:00Z");
 
-    naivecoin::Block const block = naivecoin::Block::make_block(
+    naivecoin::core::Block const block = naivecoin::core::Block::make_block(
         index,
         previous_hash,
         timestamp,
@@ -71,9 +71,9 @@ BOOST_AUTO_TEST_CASE(make_block)
 
 BOOST_AUTO_TEST_CASE(is_new_block_valid)
 {
-    naivecoin::Block const genesis = naivecoin::Block::genesis();
+    naivecoin::core::Block const genesis = naivecoin::core::Block::genesis();
 
-    BOOST_ASSERT(! naivecoin::is_new_block_valid(genesis, genesis));
+    BOOST_ASSERT(! naivecoin::core::is_new_block_valid(genesis, genesis));
 
 
     uint64_t const index = 1;
@@ -82,9 +82,9 @@ BOOST_AUTO_TEST_CASE(is_new_block_valid)
     uint16_t difficulty = 0;
     uint64_t nonce = 0;
 
-    auto timestamp = naivecoin::parse_timestamp("2017-12-28T15:00:00Z");
+    auto timestamp = naivecoin::core::parse_timestamp("2017-12-28T15:00:00Z");
 
-    naivecoin::Block const new_block = naivecoin::Block::make_block(
+    naivecoin::core::Block const new_block = naivecoin::core::Block::make_block(
         index,
         previous_hash,
         timestamp,
@@ -93,10 +93,10 @@ BOOST_AUTO_TEST_CASE(is_new_block_valid)
         nonce
     );
 
-    BOOST_ASSERT(naivecoin::is_new_block_valid(new_block, genesis));
+    BOOST_ASSERT(naivecoin::core::is_new_block_valid(new_block, genesis));
 
 
-    naivecoin::Block const new_bad_block_1 = naivecoin::Block::make_block(
+    naivecoin::core::Block const new_bad_block_1 = naivecoin::core::Block::make_block(
         index + 3,
         previous_hash,
         timestamp,
@@ -105,16 +105,16 @@ BOOST_AUTO_TEST_CASE(is_new_block_valid)
         nonce
     );
 
-    BOOST_ASSERT(! naivecoin::is_new_block_valid(new_bad_block_1, genesis));
+    BOOST_ASSERT(! naivecoin::core::is_new_block_valid(new_bad_block_1, genesis));
 }
 
 BOOST_AUTO_TEST_CASE(is_blockchain_valid)
 {
-    naivecoin::Block const genesis = naivecoin::Block::genesis();
+    naivecoin::core::Block const genesis = naivecoin::core::Block::genesis();
 
-    auto timestamp = naivecoin::parse_timestamp("2017-12-28T15:00:00Z");
+    auto timestamp = naivecoin::core::parse_timestamp("2017-12-28T15:00:00Z");
 
-    naivecoin::Block const second_block = naivecoin::Block::make_block(
+    naivecoin::core::Block const second_block = naivecoin::core::Block::make_block(
         1,
         "2366930026a1831f1490ea762d134ffa03f675dd",
         timestamp,
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(is_blockchain_valid)
         0
     );
 
-    naivecoin::Block const third_block = naivecoin::Block::make_block(
+    naivecoin::core::Block const third_block = naivecoin::core::Block::make_block(
         2,
         "a0f5e0cbb1b06ff17f236b90168db9fb1ecd4278",
         timestamp,
@@ -132,9 +132,9 @@ BOOST_AUTO_TEST_CASE(is_blockchain_valid)
         0
     );
 
-    std::list<naivecoin::Block> blockchain{genesis, second_block, third_block};
+    std::list<naivecoin::core::Block> blockchain{genesis, second_block, third_block};
 
-    BOOST_ASSERT(naivecoin::is_blockchain_valid(blockchain));
+    BOOST_ASSERT(naivecoin::core::is_blockchain_valid(blockchain));
 }
 
 BOOST_AUTO_TEST_CASE(hash_matches_difficulty)
@@ -143,41 +143,41 @@ BOOST_AUTO_TEST_CASE(hash_matches_difficulty)
     std::string const hash_1_1 = "08f3a3ee5e6b4b0d3255bfef95601890afd80709";
     std::string const hash_1_2 = "16bca3ee5e6b4b0d3255bfef95601890afd80709";
 
-    BOOST_ASSERT(naivecoin::hash_matches_difficulty(hash_1_1, difficulty_1));
-    BOOST_ASSERT(! naivecoin::hash_matches_difficulty(hash_1_2, difficulty_1));
+    BOOST_ASSERT(naivecoin::core::hash_matches_difficulty(hash_1_1, difficulty_1));
+    BOOST_ASSERT(! naivecoin::core::hash_matches_difficulty(hash_1_2, difficulty_1));
 
     uint16_t const difficulty_2 = 8;
     std::string const hash_2_1 = "0027a3ee5e6b4b0d3255bfef95601890afd80709";
     std::string const hash_2_2 = "05c2a3ee5e6b4b0d3255bfef95601890afd80709";
 
-    BOOST_ASSERT(naivecoin::hash_matches_difficulty(hash_2_1, difficulty_2));
-    BOOST_ASSERT(! naivecoin::hash_matches_difficulty(hash_2_2, difficulty_2));
+    BOOST_ASSERT(naivecoin::core::hash_matches_difficulty(hash_2_1, difficulty_2));
+    BOOST_ASSERT(! naivecoin::core::hash_matches_difficulty(hash_2_2, difficulty_2));
 }
 
 BOOST_AUTO_TEST_CASE(compute_cumulative_difficulty)
 {
-    naivecoin::Block const first_block = naivecoin::Block::make_block(
+    naivecoin::core::Block const first_block = naivecoin::core::Block::make_block(
         0,
         "",
-        naivecoin::parse_timestamp("2017-12-28T15:00:00Z"),
+        naivecoin::core::parse_timestamp("2017-12-28T15:00:00Z"),
         "Some data 2\u2078 = 256",
         4,
         0
     );
 
-    naivecoin::Block const second_block = naivecoin::Block::make_block(
+    naivecoin::core::Block const second_block = naivecoin::core::Block::make_block(
         1,
         "bb01688103096f8389dd97460f5805dead135b2f",
-        naivecoin::parse_timestamp("2017-12-28T16:00:00Z"),
+        naivecoin::core::parse_timestamp("2017-12-28T16:00:00Z"),
         "Some other 2\u00B9\u2070 = 1024",
         6,
         0
     );
 
-    std::list<naivecoin::Block> const blockchain{first_block, second_block};
+    std::list<naivecoin::core::Block> const blockchain{first_block, second_block};
 
     uint64_t const expected_difficulty = 16 + 64;
-    uint64_t const actual_difficulty = naivecoin::compute_cumulative_difficulty(blockchain);
+    uint64_t const actual_difficulty = naivecoin::core::compute_cumulative_difficulty(blockchain);
 
     BOOST_CHECK_EQUAL(actual_difficulty, expected_difficulty);
 }

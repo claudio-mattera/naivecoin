@@ -9,7 +9,7 @@ BOOST_AUTO_TEST_CASE(constructor)
     std::string const address = "";
     uint64_t const amount = 12;
 
-    naivecoin::Output output(address, amount);
+    naivecoin::transaction::Output output(address, amount);
 
     BOOST_CHECK_EQUAL(output.address, address);
     BOOST_CHECK_EQUAL(output.amount, amount);

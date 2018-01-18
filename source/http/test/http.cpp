@@ -13,13 +13,13 @@ BOOST_AUTO_TEST_CASE(process_request)
         "\r\n"
         "My data";
 
-    naivecoin::Method outer_method;
+    naivecoin::http::Method outer_method;
     std::string outer_path;
     std::string outer_data;
 
-    std::string const response = naivecoin::process_request(
+    std::string const response = naivecoin::http::process_request(
         request,
-        [&](naivecoin::Method const method, std::string const & path, std::string const & data) {
+        [&](naivecoin::http::Method const method, std::string const & path, std::string const & data) {
             outer_method = method;
             outer_path = path;
             outer_data = data;
@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE(process_request)
         }
     );
 
-    BOOST_CHECK_EQUAL(outer_method, naivecoin::GET);
+    BOOST_CHECK_EQUAL(outer_method, naivecoin::http::GET);
     BOOST_CHECK_EQUAL(outer_path, "/my/path");
     BOOST_CHECK_EQUAL(outer_data, "My data");
 
@@ -40,13 +40,13 @@ BOOST_AUTO_TEST_CASE(process_request_http11)
         "\r\n"
         "My data";
 
-    naivecoin::Method outer_method;
+    naivecoin::http::Method outer_method;
     std::string outer_path;
     std::string outer_data;
 
-    std::string const response = naivecoin::process_request(
+    std::string const response = naivecoin::http::process_request(
         request,
-        [&](naivecoin::Method const method, std::string const & path, std::string const & data) {
+        [&](naivecoin::http::Method const method, std::string const & path, std::string const & data) {
             outer_method = method;
             outer_path = path;
             outer_data = data;
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(process_request_http11)
         }
     );
 
-    BOOST_CHECK_EQUAL(outer_method, naivecoin::GET);
+    BOOST_CHECK_EQUAL(outer_method, naivecoin::http::GET);
     BOOST_CHECK_EQUAL(outer_path, "/my/path");
     BOOST_CHECK_EQUAL(outer_data, "My data");
 
@@ -68,13 +68,13 @@ BOOST_AUTO_TEST_CASE(process_request_explicit_length)
         "\r\n"
         "My data and garbage";
 
-    naivecoin::Method outer_method;
+    naivecoin::http::Method outer_method;
     std::string outer_path;
     std::string outer_data;
 
-    std::string const response = naivecoin::process_request(
+    std::string const response = naivecoin::http::process_request(
         request,
-        [&](naivecoin::Method const method, std::string const & path, std::string const & data) {
+        [&](naivecoin::http::Method const method, std::string const & path, std::string const & data) {
             outer_method = method;
             outer_path = path;
             outer_data = data;
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(process_request_explicit_length)
         }
     );
 
-    BOOST_CHECK_EQUAL(outer_method, naivecoin::GET);
+    BOOST_CHECK_EQUAL(outer_method, naivecoin::http::GET);
     BOOST_CHECK_EQUAL(outer_path, "/my/path");
     BOOST_CHECK_EQUAL(outer_data, "My data");
 

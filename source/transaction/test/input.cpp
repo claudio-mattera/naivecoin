@@ -10,7 +10,7 @@ BOOST_AUTO_TEST_CASE(constructor)
     uint64_t const transaction_output_index = 12;
     std::string const signature = "";
 
-    naivecoin::Input input(transaction_output_id, transaction_output_index, signature);
+    naivecoin::transaction::Input input(transaction_output_id, transaction_output_index, signature);
 
     BOOST_CHECK_EQUAL(input.transaction_output_id, transaction_output_id);
     BOOST_CHECK_EQUAL(input.transaction_output_index, transaction_output_index);

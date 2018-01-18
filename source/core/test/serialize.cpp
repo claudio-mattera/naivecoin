@@ -17,9 +17,9 @@ BOOST_AUTO_TEST_CASE(create_send_block_message)
     uint16_t difficulty = 0;
     uint64_t nonce = 0;
 
-    auto timestamp = naivecoin::parse_timestamp("2017-12-28T15:00:00Z");
+    auto timestamp = naivecoin::core::parse_timestamp("2017-12-28T15:00:00Z");
 
-    naivecoin::Block const block = naivecoin::Block::make_block(
+    naivecoin::core::Block const block = naivecoin::core::Block::make_block(
         index,
         previous_hash,
         timestamp,
@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(create_send_block_message)
 
     std::string const sender = "localhost:8080";
 
-    std::string const serialized = naivecoin::create_send_block_message(block, sender);
+    std::string const serialized = naivecoin::core::create_send_block_message(block, sender);
 
     std::string expected = "{\n"
         "\t\"data\" : \n"
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(deserialize_block)
         "\t\"timestamp\" : \"2017-12-28T15:00:00Z\"\n"
         "}";
 
-    naivecoin::Block const block = naivecoin::deserialize_block(text);
+    naivecoin::core::Block const block = naivecoin::core::deserialize_block(text);
 
     uint64_t const index = 0;
     std::string const previous_hash = "ac0c62f1871b2bda6c28af2a12f9cc1487b2d2b1";
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(deserialize_block)
     uint16_t difficulty = 0;
     uint64_t nonce = 0;
 
-    auto timestamp = naivecoin::parse_timestamp("2017-12-28T15:00:00Z");
+    auto timestamp = naivecoin::core::parse_timestamp("2017-12-28T15:00:00Z");
 
     BOOST_CHECK_EQUAL(block.index, index);
     BOOST_CHECK_EQUAL(block.previous_hash, previous_hash);
@@ -83,29 +83,29 @@ BOOST_AUTO_TEST_CASE(deserialize_block)
 
 BOOST_AUTO_TEST_CASE(create_send_blockchain_message)
 {
-    naivecoin::Block const first_block = naivecoin::Block::make_block(
+    naivecoin::core::Block const first_block = naivecoin::core::Block::make_block(
         0,
         "",
-        naivecoin::parse_timestamp("2017-12-28T15:00:00Z"),
+        naivecoin::core::parse_timestamp("2017-12-28T15:00:00Z"),
         "Some data 2\u2078 = 256",
         0,
         0
     );
 
-    naivecoin::Block const second_block = naivecoin::Block::make_block(
+    naivecoin::core::Block const second_block = naivecoin::core::Block::make_block(
         1,
         "bb01688103096f8389dd97460f5805dead135b2f",
-        naivecoin::parse_timestamp("2017-12-28T16:00:00Z"),
+        naivecoin::core::parse_timestamp("2017-12-28T16:00:00Z"),
         "Some other 2\u00B9\u2070 = 1024",
         0,
         0
     );
 
-    std::list<naivecoin::Block> const blockchain{first_block, second_block};
+    std::list<naivecoin::core::Block> const blockchain{first_block, second_block};
 
     std::string const sender = "localhost:8080";
 
-    std::string const serialized = naivecoin::create_send_blockchain_message(blockchain, sender);
+    std::string const serialized = naivecoin::core::create_send_blockchain_message(blockchain, sender);
 
     std::string expected = "{\n"
         "\t\"data\" : \n"
@@ -159,27 +159,27 @@ BOOST_AUTO_TEST_CASE(deserialize_blockchain)
         "\t}\n"
         "]";
 
-    naivecoin::Block const first_block = naivecoin::Block::make_block(
+    naivecoin::core::Block const first_block = naivecoin::core::Block::make_block(
         0,
         "",
-        naivecoin::parse_timestamp("2017-12-28T15:00:00Z"),
+        naivecoin::core::parse_timestamp("2017-12-28T15:00:00Z"),
         "Some data 2\u2078 = 256",
         0,
         0
     );
 
-    naivecoin::Block const second_block = naivecoin::Block::make_block(
+    naivecoin::core::Block const second_block = naivecoin::core::Block::make_block(
         1,
         "bb01688103096f8389dd97460f5805dead135b2f",
-        naivecoin::parse_timestamp("2017-12-28T16:00:00Z"),
+        naivecoin::core::parse_timestamp("2017-12-28T16:00:00Z"),
         "Some other 2\u00B9\u2070 = 1024",
         0,
         0
     );
 
-    std::list<naivecoin::Block> const expected_blockchain{first_block, second_block};
+    std::list<naivecoin::core::Block> const expected_blockchain{first_block, second_block};
 
-    std::list<naivecoin::Block> const blockchain = naivecoin::deserialize_blockchain(text);
+    std::list<naivecoin::core::Block> const blockchain = naivecoin::core::deserialize_blockchain(text);
 
     BOOST_CHECK_EQUAL(blockchain.size(), expected_blockchain.size());
 
@@ -204,7 +204,7 @@ BOOST_AUTO_TEST_CASE(create_query_latest_block_message)
 {
     std::string const sender = "localhost:8080";
 
-    std::string const serialized = naivecoin::create_query_latest_block_message(sender);
+    std::string const serialized = naivecoin::core::create_query_latest_block_message(sender);
 
     std::string expected = "{\n"
         "\t\"data\" : null,\n"
@@ -219,7 +219,7 @@ BOOST_AUTO_TEST_CASE(create_query_blockchain_message)
 {
     std::string const sender = "localhost:8080";
 
-    std::string const serialized = naivecoin::create_query_blockchain_message(sender);
+    std::string const serialized = naivecoin::core::create_query_blockchain_message(sender);
 
     std::string expected = "{\n"
         "\t\"data\" : null,\n"
@@ -238,9 +238,9 @@ BOOST_AUTO_TEST_CASE(process_message_send_block)
     uint16_t difficulty = 0;
     uint64_t nonce = 0;
 
-    auto timestamp = naivecoin::parse_timestamp("2017-12-28T15:00:00Z");
+    auto timestamp = naivecoin::core::parse_timestamp("2017-12-28T15:00:00Z");
 
-    naivecoin::Block const original_block = naivecoin::Block::make_block(
+    naivecoin::core::Block const original_block = naivecoin::core::Block::make_block(
         index,
         previous_hash,
         timestamp,
@@ -251,9 +251,9 @@ BOOST_AUTO_TEST_CASE(process_message_send_block)
 
     std::string const original_sender = "localhost:8080";
 
-    std::string const message = naivecoin::create_send_block_message(original_block, original_sender);
+    std::string const message = naivecoin::core::create_send_block_message(original_block, original_sender);
 
-    auto process_send_block_message = [&original_sender, &original_block](naivecoin::Block const & block, std::string const & sender){
+    auto process_send_block_message = [&original_sender, &original_block](naivecoin::core::Block const & block, std::string const & sender){
         BOOST_CHECK(sender == original_sender);
 
         BOOST_CHECK_EQUAL(block.index, original_block.index);
@@ -264,7 +264,7 @@ BOOST_AUTO_TEST_CASE(process_message_send_block)
         BOOST_CHECK_EQUAL(block.difficulty, original_block.difficulty);
         BOOST_CHECK_EQUAL(block.nonce, original_block.nonce);
     };
-    auto process_send_blockchain_message = [](std::list<naivecoin::Block> const &, std::string const &){
+    auto process_send_blockchain_message = [](std::list<naivecoin::core::Block> const &, std::string const &){
         BOOST_CHECK(false);
     };
     auto process_query_latest_block_message = [](std::string const &){
@@ -280,7 +280,7 @@ BOOST_AUTO_TEST_CASE(process_message_send_block)
         BOOST_CHECK(false);
     };
 
-    naivecoin::process_message(
+    naivecoin::core::process_message(
         message,
         process_send_block_message,
         process_send_blockchain_message,
@@ -295,32 +295,32 @@ BOOST_AUTO_TEST_CASE(process_message_send_blockchain)
 {
     std::string const original_sender = "localhost:8080";
 
-    naivecoin::Block const first_block = naivecoin::Block::make_block(
+    naivecoin::core::Block const first_block = naivecoin::core::Block::make_block(
         0,
         "",
-        naivecoin::parse_timestamp("2017-12-28T15:00:00Z"),
+        naivecoin::core::parse_timestamp("2017-12-28T15:00:00Z"),
         "Some data 2\u2078 = 256",
         0,
         0
     );
 
-    naivecoin::Block const second_block = naivecoin::Block::make_block(
+    naivecoin::core::Block const second_block = naivecoin::core::Block::make_block(
         1,
         "bb01688103096f8389dd97460f5805dead135b2f",
-        naivecoin::parse_timestamp("2017-12-28T16:00:00Z"),
+        naivecoin::core::parse_timestamp("2017-12-28T16:00:00Z"),
         "Some other 2\u00B9\u2070 = 1024",
         0,
         0
     );
 
-    std::list<naivecoin::Block> const original_blockchain{first_block, second_block};
+    std::list<naivecoin::core::Block> const original_blockchain{first_block, second_block};
 
-    std::string const message = naivecoin::create_send_blockchain_message(original_blockchain, original_sender);
+    std::string const message = naivecoin::core::create_send_blockchain_message(original_blockchain, original_sender);
 
-    auto process_send_block_message = [](naivecoin::Block const &, std::string const &){
+    auto process_send_block_message = [](naivecoin::core::Block const &, std::string const &){
         BOOST_CHECK(false);
     };
-    auto process_send_blockchain_message = [&original_sender, &original_blockchain](std::list<naivecoin::Block> const & blockchain, std::string const & sender){
+    auto process_send_blockchain_message = [&original_sender, &original_blockchain](std::list<naivecoin::core::Block> const & blockchain, std::string const & sender){
         BOOST_CHECK(sender == original_sender);
 
         auto expected_iterator = std::begin(original_blockchain);
@@ -352,7 +352,7 @@ BOOST_AUTO_TEST_CASE(process_message_send_blockchain)
         BOOST_CHECK(false);
     };
 
-    naivecoin::process_message(
+    naivecoin::core::process_message(
         message,
         process_send_block_message,
         process_send_blockchain_message,
@@ -367,12 +367,12 @@ BOOST_AUTO_TEST_CASE(process_message_query_latest_block)
 {
     std::string const original_sender = "localhost:8080";
 
-    std::string const message = naivecoin::create_query_latest_block_message(original_sender);
+    std::string const message = naivecoin::core::create_query_latest_block_message(original_sender);
 
-    auto process_send_block_message = [](naivecoin::Block const &, std::string const &){
+    auto process_send_block_message = [](naivecoin::core::Block const &, std::string const &){
         BOOST_CHECK(false);
     };
-    auto process_send_blockchain_message = [](std::list<naivecoin::Block> const &, std::string const &){
+    auto process_send_blockchain_message = [](std::list<naivecoin::core::Block> const &, std::string const &){
         BOOST_CHECK(false);
     };
     auto process_query_latest_block_message = [&original_sender](std::string const & sender){
@@ -388,7 +388,7 @@ BOOST_AUTO_TEST_CASE(process_message_query_latest_block)
         BOOST_CHECK(false);
     };
 
-    naivecoin::process_message(
+    naivecoin::core::process_message(
         message,
         process_send_block_message,
         process_send_blockchain_message,
@@ -403,12 +403,12 @@ BOOST_AUTO_TEST_CASE(process_message_query_blockchain)
 {
     std::string const original_sender = "localhost:8080";
 
-    std::string const message = naivecoin::create_query_blockchain_message(original_sender);
+    std::string const message = naivecoin::core::create_query_blockchain_message(original_sender);
 
-    auto process_send_block_message = [](naivecoin::Block const &, std::string const &){
+    auto process_send_block_message = [](naivecoin::core::Block const &, std::string const &){
         BOOST_CHECK(false);
     };
-    auto process_send_blockchain_message = [](std::list<naivecoin::Block> const &, std::string const &){
+    auto process_send_blockchain_message = [](std::list<naivecoin::core::Block> const &, std::string const &){
         BOOST_CHECK(false);
     };
     auto process_query_latest_block_message = [](std::string const &){
@@ -424,7 +424,7 @@ BOOST_AUTO_TEST_CASE(process_message_query_blockchain)
         BOOST_CHECK(false);
     };
 
-    naivecoin::process_message(
+    naivecoin::core::process_message(
         message,
         process_send_block_message,
         process_send_blockchain_message,
@@ -439,10 +439,10 @@ BOOST_AUTO_TEST_CASE(process_unknown_message)
 {
     std::string const message = "{\"message\": \"fhllierjgijdfjl\", \"sender\": \"localhost:8080\"}";
 
-    auto process_send_block_message = [](naivecoin::Block const &, std::string const &){
+    auto process_send_block_message = [](naivecoin::core::Block const &, std::string const &){
         BOOST_CHECK(false);
     };
-    auto process_send_blockchain_message = [](std::list<naivecoin::Block> const &, std::string const &){
+    auto process_send_blockchain_message = [](std::list<naivecoin::core::Block> const &, std::string const &){
         BOOST_CHECK(false);
     };
     auto process_query_latest_block_message = [](std::string const &){
@@ -459,7 +459,7 @@ BOOST_AUTO_TEST_CASE(process_unknown_message)
         BOOST_CHECK(false);
     };
 
-    naivecoin::process_message(
+    naivecoin::core::process_message(
         message,
         process_send_block_message,
         process_send_blockchain_message,
@@ -474,10 +474,10 @@ BOOST_AUTO_TEST_CASE(process_invalid_message)
 {
     std::string const message = "[]";
 
-    auto process_send_block_message = [](naivecoin::Block const &, std::string const &){
+    auto process_send_block_message = [](naivecoin::core::Block const &, std::string const &){
         BOOST_CHECK(false);
     };
-    auto process_send_blockchain_message = [](std::list<naivecoin::Block> const &, std::string const &){
+    auto process_send_blockchain_message = [](std::list<naivecoin::core::Block> const &, std::string const &){
         BOOST_CHECK(false);
     };
     auto process_query_latest_block_message = [](std::string const &){
@@ -493,7 +493,7 @@ BOOST_AUTO_TEST_CASE(process_invalid_message)
         BOOST_CHECK(true);
     };
 
-    naivecoin::process_message(
+    naivecoin::core::process_message(
         message,
         process_send_block_message,
         process_send_blockchain_message,
@@ -508,10 +508,10 @@ BOOST_AUTO_TEST_CASE(process_invalid_json_message)
 {
     std::string const message = "few9n8y438v5t3nl86rtkretgiu";
 
-    auto process_send_block_message = [](naivecoin::Block const &, std::string const &){
+    auto process_send_block_message = [](naivecoin::core::Block const &, std::string const &){
         BOOST_CHECK(false);
     };
-    auto process_send_blockchain_message = [](std::list<naivecoin::Block> const &, std::string const &){
+    auto process_send_blockchain_message = [](std::list<naivecoin::core::Block> const &, std::string const &){
         BOOST_CHECK(false);
     };
     auto process_query_latest_block_message = [](std::string const &){
@@ -527,7 +527,7 @@ BOOST_AUTO_TEST_CASE(process_invalid_json_message)
         BOOST_CHECK(true);
     };
 
-    naivecoin::process_message(
+    naivecoin::core::process_message(
         message,
         process_send_block_message,
         process_send_blockchain_message,

@@ -10,7 +10,7 @@
 
 #include <naivecoin/core/block.h>
 
-namespace naivecoin {
+namespace naivecoin::core {
 
 Block deserialize_block(std::string const & text);
 std::list<Block> deserialize_blockchain(std::string const & text);
@@ -31,6 +31,6 @@ void process_message(
     std::function<void(std::string const &)> const & process_invalid_message
 );
 
-} // namespace naivecoin
+} // namespace naivecoin::core
 
 #endif // NAIVECOIN_CORE_SERIALIZE_H
