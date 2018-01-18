@@ -238,4 +238,107 @@ BOOST_AUTO_TEST_CASE(is_transaction_list_valid)
     BOOST_CHECK(is_valid);
 }
 
+BOOST_AUTO_TEST_CASE(update_unspent_outputs)
+{
+    uint64_t const index = 7;
+    std::list<naivecoin::transaction::UnspentOutput> const old_unspent_outputs{
+        naivecoin::transaction::UnspentOutput(
+            "first transaction",
+            4,
+            "first_address",
+            10
+        ),
+        naivecoin::transaction::UnspentOutput(
+            "second transaction",
+            5,
+            "second_address",
+            12
+        ),
+        naivecoin::transaction::UnspentOutput(
+            "third transaction",
+            6,
+            "first_address",
+            4
+        )
+    };
+
+    std::list<naivecoin::transaction::Transaction> const new_transactions{
+        naivecoin::transaction::create_coinbase_transaction(
+            index,
+            "first address"
+        ),
+        naivecoin::transaction::Transaction(
+            "fourth transaction",
+            {
+                naivecoin::transaction::Input{
+                    "first transaction",
+                    4
+                },
+                naivecoin::transaction::Input{
+                    "third transaction",
+                    6
+                }
+            },
+            {
+                naivecoin::transaction::Output{
+                    "second address",
+                    5
+                },
+                naivecoin::transaction::Output{
+                    "first address",
+                    9
+                }
+            }
+        )
+    };
+
+    std::list<naivecoin::transaction::UnspentOutput> const expected_new_unspent_outputs{
+        naivecoin::transaction::UnspentOutput(
+            "second transaction",
+            5,
+            "second_address",
+            12
+        ),
+        naivecoin::transaction::UnspentOutput{
+            "e271e7e7916813e486628efc56ca7ce9176f380e",
+            index,
+            "first address",
+            naivecoin::transaction::COINBASE_AMOUNT
+        },
+        naivecoin::transaction::UnspentOutput{
+            "fourth transaction",
+            index,
+            "second address",
+            5
+        },
+        naivecoin::transaction::UnspentOutput{
+            "fourth transaction",
+            index,
+            "first address",
+            9
+        }
+    };
+
+    std::list<naivecoin::transaction::UnspentOutput> const new_unspent_outputs = naivecoin::transaction::update_unspent_outputs(
+        index,
+        new_transactions,
+        old_unspent_outputs
+    );
+
+    BOOST_CHECK_EQUAL(new_unspent_outputs.size(), expected_new_unspent_outputs.size());
+
+    auto actual_it = std::begin(new_unspent_outputs);
+    auto expected_it = std::begin(expected_new_unspent_outputs);
+
+    while (actual_it != std::end(new_unspent_outputs)) {
+        BOOST_CHECK_EQUAL(actual_it->transaction_id, expected_it->transaction_id);
+        BOOST_CHECK_EQUAL(actual_it->transaction_index, expected_it->transaction_index);
+        BOOST_CHECK_EQUAL(actual_it->address, expected_it->address);
+        BOOST_CHECK_EQUAL(actual_it->amount, expected_it->amount);
+
+        ++actual_it;
+        ++expected_it;
+    }
+}
+
 BOOST_AUTO_TEST_SUITE_END()

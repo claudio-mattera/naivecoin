@@ -301,4 +301,45 @@ Transaction create_coinbase_transaction(uint64_t const index, std::string const 
     );
 }
 
+std::list<UnspentOutput> update_unspent_outputs(
+    uint64_t const index,
+    std::list<Transaction> const & new_transactions,
+    std::list<UnspentOutput> old_unspent_outputs
+)
+{
+    std::list<UnspentOutput> new_unspent_outputs;
+    for (Transaction transaction: new_transactions) {
+        for (Output output: transaction.outputs) {
+            new_unspent_outputs.push_back(
+                UnspentOutput(transaction.id, index, output.address, output.amount)
+            );
+        }
+    }
+
+    std::list<std::pair<std::string, uint64_t>> spent_outputs;
+    for (Transaction transaction: new_transactions) {
+        for (Input input: transaction.inputs) {
+            spent_outputs.push_back(
+                std::make_pair(input.transaction_output_id, input.transaction_output_index)
+            );
+        }
+    }
+
+    old_unspent_outputs.remove_if(
+        [&spent_outputs](UnspentOutput const & unspent_output) {
+            auto it = std::find_if(
+                std::begin(spent_outputs),
+                std::end(spent_outputs),
+                [&unspent_output](auto const pair) {
+                    return pair.first == unspent_output.transaction_id &&
+                        pair.second == unspent_output.transaction_index;
+                });
+            return it != std::end(spent_outputs);
+        });
+
+    old_unspent_outputs.splice(old_unspent_outputs.end(), new_unspent_outputs);
+
+    return old_unspent_outputs;
+}
+
 } // namespace naivecoin::transaction

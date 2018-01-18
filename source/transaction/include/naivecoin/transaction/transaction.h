@@ -70,6 +70,12 @@ Transaction create_coinbase_transaction(
     std::string const & address
 );
 
+std::list<UnspentOutput> update_unspent_outputs(
+    uint64_t  const index,
+    std::list<Transaction> const & new_transactions,
+    std::list<UnspentOutput> old_unspent_outputs
+);
+
 } // namespace naivecoin::transaction
 
 #endif // NAIVECOIN_TRANSACTION_TRANSACTION_H
