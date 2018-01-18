@@ -11,6 +11,7 @@
 
 #include <naivecoin/core/block.h>
 #include <naivecoin/core/serialize.h>
+#include <naivecoin/core/utils.h>
 
 #include <naivecoin/transaction/transaction.h>
 #include <naivecoin/transaction/serialize.h>
@@ -50,22 +51,14 @@ int main(int argc, char * argv[])
 
     try {
         SimpleWeb::Client<SimpleWeb::HTTP> client(node);
-        client.request("GET", "/query/blockchain", [&logger](auto response, auto error_code) {
+        SimpleWeb::CaseInsensitiveMultimap header;
+        header.emplace("Address", naivecoin::core::replace(public_key, "\n", "_"));
+        client.request("GET", "/query/balance", "", header, [&logger](auto response, auto error_code) {
             if (error_code) {
                 logger->error("Error: {}", error_code.message());
             } else {
                 std::string const data = response->content.string();
-                std::list<naivecoin::core::Block> blockchain;
-                naivecoin::core::deserialize_blockchain(
-                    std::insert_iterator(blockchain, std::begin(blockchain)),
-                    data
-                );
-                for (naivecoin::core::Block block: blockchain) {
-                    std::list<naivecoin::transaction::Transaction> const transactions = naivecoin::transaction::deserialize_transactions(block.data);
-                    for (auto transaction: transactions) {
-                        std::cout << transaction.id << ", " << transaction.outputs.front() << '\n';
-                    }
-                }
+                std::cout << "Balance: " << data << '\n';
             }
         });
         client.io_service->run();
