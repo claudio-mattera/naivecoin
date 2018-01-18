@@ -64,6 +64,14 @@ add_executable(
     test/utils.cpp
 )
 
+set_target_properties(
+    NaivecoinCoreTest
+    PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON
+    CXX_EXTENSIONS OFF
+)
+
 target_link_libraries(
     NaivecoinCoreTest
     boost-test

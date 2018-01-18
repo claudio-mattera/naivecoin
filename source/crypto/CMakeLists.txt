@@ -59,6 +59,14 @@ add_executable(
     test/crypto.cpp
 )
 
+set_target_properties(
+    NaivecoinCryptoTest
+    PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON
+    CXX_EXTENSIONS OFF
+)
+
 target_link_libraries(
     NaivecoinCryptoTest
     boost-test
