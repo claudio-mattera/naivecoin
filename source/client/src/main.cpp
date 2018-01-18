@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 
-#include <boost/asio.hpp>
+#include <simple-web-server/client_http.hpp>
 
 #include <spdlog/spdlog.h>
 
@@ -21,6 +21,12 @@ void initialize_loggers()
     spdlog::stdout_logger_mt("main");
 }
 
+std::string get_address(std::string const & private_key)
+{
+    std::size_t const start = 1 + private_key.find("\n");
+    return private_key.substr(start, 10) + "...";
+}
+
 std::string read_file(std::string const & filename)
 {
     std::ifstream stream(filename);
@@ -28,23 +34,6 @@ std::string read_file(std::string const & filename)
         std::istreambuf_iterator<char>(stream),
         std::istreambuf_iterator<char>()
     );
-}
-
-std::string make_request(std::string const & path, std::string const & data)
-{
-    std::ostringstream stream;
-    stream << "GET " << path << " HTTP/1.0\r\n";
-    if (! data.empty()) {
-        stream << "Content-Length: " << data.size() << "\r\n";
-    }
-    stream << "\r\n" << data;
-    return stream.str();
-}
-
-std::string get_response_data(std::string const & response)
-{
-    std::size_t data_index = response.find("\r\n\r\n");
-    return response.substr(data_index + 4);
 }
 
 int main(int argc, char * argv[])
@@ -59,53 +48,22 @@ int main(int argc, char * argv[])
     auto const node = options["node"].as<std::string>();
 
     try {
-        boost::asio::io_service io_service;
-
-        boost::asio::ip::tcp::resolver resolver(io_service);
-        std::size_t const colon_index = node.find(":");
-        boost::asio::ip::tcp::resolver::query query(
-            node.substr(0, colon_index),
-            node.substr(colon_index + 1)
-        );
-        boost::asio::ip::tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-
-        boost::asio::ip::tcp::socket socket(io_service);
-        boost::asio::connect(socket, endpoint_iterator);
-
-        std::string const request = make_request("/query/blockchain", "");
-
-        boost::system::error_code ignored_error;
-        boost::asio::write(socket, boost::asio::buffer(request), ignored_error);
-
-        std::cout << ignored_error << '\n';
-
-        std::ostringstream stream;
-
-        for (;;)
-        {
-            boost::array<char, 128> buf;
-            boost::system::error_code error;
-
-            size_t len = socket.read_some(boost::asio::buffer(buf), error);
-
-            if (error == boost::asio::error::eof)
-                break; // Connection closed cleanly by peer.
-            else if (error)
-                throw boost::system::system_error(error); // Some other error.
-
-            stream.write(buf.data(), len);
-        }
-
-        std::string const response = stream.str();
-        std::string const response_data = get_response_data(response);
-
-        std::list<naivecoin::core::Block> const blockchain = naivecoin::core::deserialize_blockchain(response_data);
-        for (naivecoin::core::Block block: blockchain) {
-            std::list<naivecoin::transaction::Transaction> const transactions = naivecoin::transaction::deserialize_transactions(block.data);
-            for (auto transaction: transactions) {
-                std::cout << transaction.id << '\n';
+        SimpleWeb::Client<SimpleWeb::HTTP> client(node);
+        client.request("GET", "/query/blockchain", [&logger](auto response, auto error_code) {
+            if (error_code) {
+                logger->error("Error: {}", error_code.message());
+            } else {
+                std::string const data = response->content.string();
+                std::list<naivecoin::core::Block> const blockchain = naivecoin::core::deserialize_blockchain(data);
+                for (naivecoin::core::Block block: blockchain) {
+                    std::list<naivecoin::transaction::Transaction> const transactions = naivecoin::transaction::deserialize_transactions(block.data);
+                    for (auto transaction: transactions) {
+                        std::cout << transaction.id << ", " << transaction.outputs.front() << '\n';
+                    }
+                }
             }
-        }
+        });
+        client.io_service->run();
     }
     catch (std::exception& e)
     {
