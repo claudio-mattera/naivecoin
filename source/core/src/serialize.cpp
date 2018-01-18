@@ -42,12 +42,13 @@ Json::Value serialize_block_to_json(Block const & block)
     return value;
 }
 
-Json::Value serialize_blockchain_to_json(std::list<Block> const & blockchain)
+template<template<class> class Iterator>
+Json::Value serialize_blockchain_to_json(Iterator<Block> const begin, Iterator<Block> const end)
 {
     Json::Value array(Json::arrayValue);
 
-    for (auto block: blockchain) {
-        array.append(serialize_block_to_json(block));
+    for (Iterator i = begin; i != end; ++i) {
+        array.append(serialize_block_to_json(*i));
     }
 
     return array;
@@ -75,15 +76,12 @@ Block deserialize_json_to_block(Json::Value const & value)
     return block;
 }
 
-std::list<Block> deserialize_json_to_blockchain(Json::Value const & array)
+template<class Container>
+void deserialize_json_to_blockchain(std::insert_iterator<Container> dest, Json::Value const & array)
 {
-    std::list<Block> blockchain;
-
     for (auto value: array) {
-        blockchain.push_back(deserialize_json_to_block(value));
+        *dest++ = deserialize_json_to_block(value);
     }
-
-    return blockchain;
 }
 
 Json::Value create_message(
@@ -111,15 +109,17 @@ Block deserialize_block(std::string const & text)
     return deserialize_json_to_block(value);
 }
 
-std::list<Block> deserialize_blockchain(std::string const & text)
+template<class Container>
+void deserialize_blockchain(std::insert_iterator<Container> dest, std::string const & text)
 {
     Json::Value const array = parse_json(text);
-    return deserialize_json_to_blockchain(array);
+    deserialize_json_to_blockchain(dest, array);
 }
 
-std::string serialize_blockchain(std::list<Block> const & blockchain)
+template<template<class> class Iterator>
+std::string serialize_blockchain(Iterator<Block> const begin, Iterator<Block> const end)
 {
-    Json::Value const value = serialize_blockchain_to_json(blockchain);
+    Json::Value const value = serialize_blockchain_to_json(begin, end);
     return format_json(value);
 }
 
@@ -130,9 +130,10 @@ std::string create_send_block_message(Block const & block, std::string const & s
     return format_json(message);
 }
 
-std::string create_send_blockchain_message(std::list<Block> const & blockchain, std::string const & sender)
+template<template<class> class Iterator>
+std::string create_send_blockchain_message(Iterator<Block> const begin, Iterator<Block> const end, std::string const & sender)
 {
-    Json::Value const data = serialize_blockchain_to_json(blockchain);
+    Json::Value const data = serialize_blockchain_to_json(begin, end);
     Json::Value const message = create_message("send blockchain", data, sender);
     return format_json(message);
 }
@@ -171,7 +172,11 @@ void process_message(
             Block const block = deserialize_json_to_block(root["data"]);
             process_send_block_message(block, sender);
         } else if (message == "send blockchain") {
-            std::list<Block> const blockchain = deserialize_json_to_blockchain(root["data"]);
+            std::list<Block> blockchain;
+            deserialize_json_to_blockchain(
+                std::insert_iterator<std::list<Block>>(blockchain, std::begin(blockchain)),
+                root["data"]
+            );
             process_send_blockchain_message(blockchain, sender);
         } else if (message == "query latest block") {
             process_query_latest_block_message(sender);
@@ -186,5 +191,27 @@ void process_message(
         process_invalid_message(exception.what());
     }
 }
+
+
+// Explicit template instantiations
+
+template
+std::string serialize_blockchain<>(
+    std::list<Block>::const_iterator const begin,
+    std::list<Block>::const_iterator const end
+);
+
+template
+std::string create_send_blockchain_message<>(
+    std::list<Block>::const_iterator const begin,
+    std::list<Block>::const_iterator const end,
+    std::string const & sender
+);
+
+template
+void deserialize_blockchain(
+    std::insert_iterator<std::list<Block>> dest,
+    std::string const & text
+);
 
 } // namespace naivecoin::core

@@ -132,9 +132,9 @@ BOOST_AUTO_TEST_CASE(is_blockchain_valid)
         0
     );
 
-    std::list<naivecoin::core::Block> blockchain{genesis, second_block, third_block};
+    std::list<naivecoin::core::Block> const blockchain{genesis, second_block, third_block};
 
-    BOOST_ASSERT(naivecoin::core::is_blockchain_valid(blockchain));
+    BOOST_ASSERT(naivecoin::core::is_blockchain_valid(std::begin(blockchain), std::end(blockchain)));
 }
 
 BOOST_AUTO_TEST_CASE(hash_matches_difficulty)
@@ -177,7 +177,10 @@ BOOST_AUTO_TEST_CASE(compute_cumulative_difficulty)
     std::list<naivecoin::core::Block> const blockchain{first_block, second_block};
 
     uint64_t const expected_difficulty = 16 + 64;
-    uint64_t const actual_difficulty = naivecoin::core::compute_cumulative_difficulty(blockchain);
+    uint64_t const actual_difficulty = naivecoin::core::compute_cumulative_difficulty(
+        std::begin(blockchain),
+        std::end(blockchain)
+    );
 
     BOOST_CHECK_EQUAL(actual_difficulty, expected_difficulty);
 }

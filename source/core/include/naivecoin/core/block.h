@@ -6,7 +6,6 @@
 
 #include <string>
 #include <ostream>
-#include <list>
 #include <ctime>
 
 namespace naivecoin::core {
@@ -58,11 +57,13 @@ std::string compute_block_hash(
 
 bool is_new_block_valid(Block const & new_block, Block const & previous_block);
 
-bool is_blockchain_valid(std::list<Block> const & blockchain);
+template<template<class> class Iterator>
+bool is_blockchain_valid(Iterator<Block> const begin, Iterator<Block> const end);
 
 bool hash_matches_difficulty(std::string const & hash, uint16_t const difficulty);
 
-uint64_t compute_cumulative_difficulty(std::list<Block> const & blockchain);
+template<template<class> class Iterator>
+uint64_t compute_cumulative_difficulty(Iterator<Block> const begin, Iterator<Block> const end);
 
 } // namespace naivecoin::core
 

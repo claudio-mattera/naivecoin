@@ -1,6 +1,7 @@
 #include <naivecoin/core/block.h>
 
 #include <sstream>
+#include <list>
 #include <vector>
 #include <algorithm>
 #include <numeric>
@@ -147,17 +148,17 @@ bool is_new_block_valid(Block const & new_block, Block const & previous_block)
     return true;
 }
 
-bool is_blockchain_valid(std::list<Block> const & blockchain)
+template<template<class> class Iterator>
+bool is_blockchain_valid(Iterator<Block> const begin, Iterator<Block> const end)
 {
-    auto iterator = std::begin(blockchain);
-
-    if (iterator == std::end(blockchain)) {
+    if (begin == end) {
         return false;
     }
 
+    auto iterator = begin;
     auto previous_iterator = iterator++;
 
-    while (iterator != std::end(blockchain)) {
+    while (iterator != end) {
         if (!is_new_block_valid(*iterator, *previous_iterator)) {
             return false;
         }
@@ -180,12 +181,13 @@ bool hash_matches_difficulty(std::string const & hash, uint16_t const difficulty
     return true;
 }
 
-uint64_t compute_cumulative_difficulty(std::list<Block> const & blockchain)
+template<template<class> class Iterator>
+uint64_t compute_cumulative_difficulty(Iterator<Block> const begin, Iterator<Block> const end)
 {
-    std::vector<uint64_t> difficulties(blockchain.size());
+    std::vector<uint64_t> difficulties(std::distance(begin, end));
     std::transform(
-        std::begin(blockchain),
-        std::end(blockchain),
+        begin,
+        end,
         std::begin(difficulties),
         [](auto const & block) {
             return block.difficulty;
@@ -200,5 +202,20 @@ uint64_t compute_cumulative_difficulty(std::list<Block> const & blockchain)
         }
     );
 }
+
+
+// Explicit template instantiations
+
+template
+uint64_t compute_cumulative_difficulty<>(
+    std::list<Block>::const_iterator const begin,
+    std::list<Block>::const_iterator const end
+);
+
+template
+bool is_blockchain_valid<>(
+    std::list<Block>::const_iterator const begin,
+    std::list<Block>::const_iterator const end
+);
 
 } // namespace naivecoin::core

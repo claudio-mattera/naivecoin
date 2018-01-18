@@ -3,6 +3,7 @@
 #include <sstream>
 #include <iostream>
 #include <string>
+#include <iterator>
 
 #include <simple-web-server/client_http.hpp>
 
@@ -54,7 +55,11 @@ int main(int argc, char * argv[])
                 logger->error("Error: {}", error_code.message());
             } else {
                 std::string const data = response->content.string();
-                std::list<naivecoin::core::Block> const blockchain = naivecoin::core::deserialize_blockchain(data);
+                std::list<naivecoin::core::Block> blockchain;
+                naivecoin::core::deserialize_blockchain(
+                    std::insert_iterator(blockchain, std::begin(blockchain)),
+                    data
+                );
                 for (naivecoin::core::Block block: blockchain) {
                     std::list<naivecoin::transaction::Transaction> const transactions = naivecoin::transaction::deserialize_transactions(block.data);
                     for (auto transaction: transactions) {

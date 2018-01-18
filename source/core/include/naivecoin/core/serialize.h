@@ -7,17 +7,24 @@
 #include <string>
 #include <list>
 #include <functional>
+#include <iterator>
 
 #include <naivecoin/core/block.h>
 
 namespace naivecoin::core {
 
 Block deserialize_block(std::string const & text);
-std::list<Block> deserialize_blockchain(std::string const & text);
-std::string serialize_blockchain(std::list<Block> const & blockchain);
+
+template<class Container>
+void deserialize_blockchain(std::insert_iterator<Container> dest, std::string const & text);
+
+template<template<class> class Iterator>
+std::string serialize_blockchain(Iterator<Block> const begin, Iterator<Block> const end);
 
 std::string create_send_block_message(Block const & block, std::string const & sender);
-std::string create_send_blockchain_message(std::list<Block> const & blockchain, std::string const & sender);
+
+template<template<class> class Iterator>
+std::string create_send_blockchain_message(Iterator<Block> const begin, Iterator<Block> const end, std::string const & sender);
 std::string create_query_latest_block_message(std::string const & sender);
 std::string create_query_blockchain_message(std::string const & sender);
 

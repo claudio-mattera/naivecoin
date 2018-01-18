@@ -153,21 +153,31 @@ std::string Node::serialize_blockchain() const
 {
     std::lock_guard lock_guard(blockchain_mutex);
 
-    return core::serialize_blockchain(this->blockchain);
+    return core::serialize_blockchain(
+        std::begin(this->blockchain),
+        std::end(this->blockchain)
+    );
 }
 
 uint64_t Node::compute_cumulative_difficulty() const
 {
     std::lock_guard lock_guard(blockchain_mutex);
 
-    return core::compute_cumulative_difficulty(this->blockchain);
+    return core::compute_cumulative_difficulty(
+        std::begin(this->blockchain),
+        std::end(this->blockchain)
+    );
 }
 
 std::string Node::create_send_blockchain_message(std::string const & address) const
 {
     std::lock_guard lock_guard(blockchain_mutex);
 
-    return core::create_send_blockchain_message(this->blockchain, address);
+    return core::create_send_blockchain_message(
+        std::begin(this->blockchain),
+        std::end(this->blockchain),
+        address
+    );
 }
 
 void Node::process_send_block_message(core::Block const & block, std::string const & sender)
@@ -203,9 +213,12 @@ void Node::process_send_blockchain_message(std::list<core::Block> const & other_
 
     this->add_peer(sender);
 
-    if (is_blockchain_valid(other_blockchain)) {
+    if (is_blockchain_valid(std::begin(other_blockchain), std::end(other_blockchain))) {
         this->logger->info("Blockchain is valid");
-        uint64_t const other_cumulative_difficulty = core::compute_cumulative_difficulty(other_blockchain);
+        uint64_t const other_cumulative_difficulty = core::compute_cumulative_difficulty(
+            std::begin(other_blockchain),
+            std::end(other_blockchain)
+        );
         uint64_t const this_cumulative_difficulty = this->compute_cumulative_difficulty();
 
         if (other_cumulative_difficulty > this_cumulative_difficulty) {

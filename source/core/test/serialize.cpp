@@ -1,5 +1,6 @@
 #include <list>
 #include <iomanip>
+#include <iterator>
 
 #include <boost/test/unit_test.hpp>
 
@@ -105,7 +106,11 @@ BOOST_AUTO_TEST_CASE(create_send_blockchain_message)
 
     std::string const sender = "localhost:8080";
 
-    std::string const serialized = naivecoin::core::create_send_blockchain_message(blockchain, sender);
+    std::string const serialized = naivecoin::core::create_send_blockchain_message(
+        std::begin(blockchain),
+        std::end(blockchain),
+        sender
+    );
 
     std::string expected = "{\n"
         "\t\"data\" : \n"
@@ -179,7 +184,11 @@ BOOST_AUTO_TEST_CASE(deserialize_blockchain)
 
     std::list<naivecoin::core::Block> const expected_blockchain{first_block, second_block};
 
-    std::list<naivecoin::core::Block> const blockchain = naivecoin::core::deserialize_blockchain(text);
+    std::list<naivecoin::core::Block> blockchain;
+    naivecoin::core::deserialize_blockchain(
+        std::insert_iterator(blockchain, std::begin(blockchain)),
+        text
+    );
 
     BOOST_CHECK_EQUAL(blockchain.size(), expected_blockchain.size());
 
@@ -315,7 +324,11 @@ BOOST_AUTO_TEST_CASE(process_message_send_blockchain)
 
     std::list<naivecoin::core::Block> const original_blockchain{first_block, second_block};
 
-    std::string const message = naivecoin::core::create_send_blockchain_message(original_blockchain, original_sender);
+    std::string const message = naivecoin::core::create_send_blockchain_message(
+        std::begin(original_blockchain),
+        std::end(original_blockchain),
+        original_sender
+    );
 
     auto process_send_block_message = [](naivecoin::core::Block const &, std::string const &){
         BOOST_CHECK(false);
