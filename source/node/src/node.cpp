@@ -149,33 +149,36 @@ bool Node::try_adding_block_to_blockchain(core::Block const & block)
     core::Block const & latest_block = * this->blockchain.crbegin();
 
     if (block.index == latest_block.index + 1 && block.previous_hash == latest_block.hash) {
-        this->blockchain.push_back(block);
-
-        std::list<transaction::Transaction> const block_transactions = transaction::deserialize_transactions(block.data);
-        std::list<transaction::UnspentOutput> new_unspent_outputs = transaction::update_unspent_outputs(
-            block.index,
-            block_transactions,
-            this->unspent_outputs
-        );
-
-        this->unspent_outputs.clear();
-        this->unspent_outputs.splice(std::begin(this->unspent_outputs), new_unspent_outputs);
-
+        this->add_block_to_blockchain(block);
         return true;
     } else {
         return false;
     }
 }
 
+void Node::add_block_to_blockchain(core::Block const & block)
+{
+    this->blockchain.push_back(block);
+
+    std::list<transaction::Transaction> const block_transactions = transaction::deserialize_transactions(block.data);
+    std::list<transaction::UnspentOutput> new_unspent_outputs = transaction::update_unspent_outputs(
+        block.index,
+        block_transactions,
+        this->unspent_outputs
+    );
+
+    this->unspent_outputs.clear();
+    this->unspent_outputs.splice(std::begin(this->unspent_outputs), new_unspent_outputs);
+
+}
+
 void Node::replace_blockchain(std::list<core::Block> new_blockchain)
 {
-    {
-        std::lock_guard lock_guard(blockchain_mutex);
-        this->blockchain.clear();
-    }
+    std::lock_guard lock_guard(blockchain_mutex);
+    this->blockchain.clear();
 
     for (core::Block block: new_blockchain) {
-        this->try_adding_block_to_blockchain(block);
+        this->add_block_to_blockchain(block);
     }
 }
 

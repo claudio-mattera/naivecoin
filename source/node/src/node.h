@@ -40,6 +40,7 @@ private:
     void connect_to_peer(std::string const & peer);
     void send_block_to_peers(core::Block const & block);
     bool try_adding_block_to_blockchain(core::Block const & block);
+    void add_block_to_blockchain(core::Block const & block);
     void replace_blockchain(std::list<core::Block> blockchain);
     core::Block get_latest_block() const;
     std::string serialize_blockchain() const;
