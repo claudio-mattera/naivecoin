@@ -1,12 +1,12 @@
 #include <boost/test/unit_test.hpp>
 
-#include <naivecoin/transaction/serialize.h>
+#include <naivecoin/serialization/transaction.h>
 
 #include <naivecoin/transaction/input.h>
 #include <naivecoin/transaction/output.h>
 #include <naivecoin/transaction/transaction.h>
 
-BOOST_AUTO_TEST_SUITE(TransactionSerialize)
+BOOST_AUTO_TEST_SUITE(SerializationTransaction)
 
 BOOST_AUTO_TEST_CASE(serialize)
 {
@@ -17,9 +17,9 @@ BOOST_AUTO_TEST_CASE(serialize)
     naivecoin::transaction::Transaction const t{"", {i1, i2}, {o3}};
     std::list<naivecoin::transaction::Transaction> const expected_transactions{t};
 
-    std::string const text = naivecoin::transaction::serialize_transactions(expected_transactions);
+    std::string const text = naivecoin::serialization::serialize_transactions(expected_transactions);
 
-    std::list<naivecoin::transaction::Transaction> transactions = naivecoin::transaction::deserialize_transactions(text);
+    std::list<naivecoin::transaction::Transaction> transactions = naivecoin::serialization::deserialize_transactions(text);
 
     BOOST_CHECK_EQUAL(transactions.size(), expected_transactions.size());
     BOOST_CHECK_EQUAL(transactions.front().id, expected_transactions.front().id);

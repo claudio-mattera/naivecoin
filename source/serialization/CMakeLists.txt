@@ -1,19 +1,19 @@
-project(NaivecoinTransaction VERSION 0.1 LANGUAGES CXX)
+project(NaivecoinSerialization VERSION 0.1 LANGUAGES CXX)
 
 # Library
 
 add_library(
-    NaivecoinTransaction
+    NaivecoinSerialization
     SHARED
-    src/output.cpp
-    src/unspent_output.cpp
-    src/input.cpp
+    src/common.cpp
+    src/time.cpp
+    src/block.cpp
+    src/message.cpp
     src/transaction.cpp
-    src/utils.cpp
 )
 
 target_include_directories(
-    NaivecoinTransaction
+    NaivecoinSerialization
     PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
@@ -22,7 +22,7 @@ target_include_directories(
 )
 
 set_target_properties(
-    NaivecoinTransaction
+    NaivecoinSerialization
     PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
@@ -30,17 +30,19 @@ set_target_properties(
 )
 
 target_link_libraries(
-    NaivecoinTransaction
+    NaivecoinSerialization
     LINK_PUBLIC
     jsoncpp_lib
     NaivecoinCrypto
+    NaivecoinCore
+    NaivecoinTransaction
 )
 
 
 # Installation
 
 install(
-    TARGETS NaivecoinTransaction EXPORT NaivecoinTransactionConfig
+    TARGETS NaivecoinSerialization EXPORT NaivecoinSerializationConfig
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}  # This is for Windows
@@ -50,26 +52,24 @@ install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 # This makes the project importable from the install directory
 # Put config file in per-project dir (name MUST match), can also
 # just go into 'cmake'.
-install(EXPORT NaivecoinTransactionConfig DESTINATION share/naivecoin/cmake)
+install(EXPORT NaivecoinSerializationConfig DESTINATION share/naivecoin/cmake)
 
 # This makes the project importable from the build directory
-export(TARGETS NaivecoinTransaction FILE NaivecoinTransactionConfig.cmake)
+export(TARGETS NaivecoinSerialization FILE NaivecoinSerializationConfig.cmake)
 
 
 # Testing
 
 add_executable(
-    NaivecoinTransactionTest
+    NaivecoinSerializationTest
     test/main.cpp
-    test/output.cpp
-    test/unspent_output.cpp
-    test/input.cpp
+    test/block.cpp
+    test/message.cpp
     test/transaction.cpp
-    test/utils.cpp
 )
 
 set_target_properties(
-    NaivecoinTransactionTest
+    NaivecoinSerializationTest
     PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
@@ -77,9 +77,9 @@ set_target_properties(
 )
 
 target_link_libraries(
-    NaivecoinTransactionTest
+    NaivecoinSerializationTest
     boost-test
-    NaivecoinTransaction
+    NaivecoinSerialization
 )
 
-add_test(NaivecoinTransactionTest NaivecoinTransactionTest)
+add_test(NaivecoinSerializationTest NaivecoinSerializationTest)

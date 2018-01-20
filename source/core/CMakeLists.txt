@@ -6,7 +6,6 @@ add_library(
     NaivecoinCore
     SHARED
     src/block.cpp
-    src/serialize.cpp
     src/utils.cpp
 )
 
@@ -60,7 +59,6 @@ add_executable(
     NaivecoinCoreTest
     test/main.cpp
     test/block.cpp
-    test/serialize.cpp
     test/utils.cpp
 )
 

@@ -1,9 +1,10 @@
 #include "node.h"
 
-#include <naivecoin/core/serialize.h>
 #include <naivecoin/core/utils.h>
 
-#include <naivecoin/transaction/serialize.h>
+#include <naivecoin/serialization/block.h>
+#include <naivecoin/serialization/message.h>
+#include <naivecoin/serialization/transaction.h>
 
 #include <mutex>
 #include <sstream>
@@ -48,7 +49,7 @@ Node::Node(
         std::string const content = request->content.string();
         using namespace std::placeholders;
         try {
-            core::process_message(
+            serialization::process_message(
                 content,
                 std::bind(& Node::process_send_block_message, this, _1, _2),
                 std::bind(& Node::process_send_blockchain_message, this, _1, _2),
@@ -126,7 +127,7 @@ void Node::start()
 
 void Node::connect_to_peer(std::string const & peer)
 {
-    std::string const message = core::create_query_latest_block_message(this->address);
+    std::string const message = serialization::create_query_latest_block_message(this->address);
 
     this->logger->info("Querying peer {} for its latest block", peer);
     this->sender.enqueue_message(message, peer);
@@ -135,7 +136,7 @@ void Node::connect_to_peer(std::string const & peer)
 void Node::send_block_to_peers(core::Block const & block)
 {
     for (std::string const peer: this->peers) {
-        std::string const message = core::create_send_block_message(block, this->address);
+        std::string const message = serialization::create_send_block_message(block, this->address);
 
         this->logger->debug("Sending block to peer {}", peer);
         this->sender.enqueue_message(message, peer);
@@ -160,7 +161,7 @@ void Node::add_block_to_blockchain(core::Block const & block)
 {
     this->blockchain.push_back(block);
 
-    std::list<transaction::Transaction> const block_transactions = transaction::deserialize_transactions(block.data);
+    std::list<transaction::Transaction> const block_transactions = serialization::deserialize_transactions(block.data);
     std::list<transaction::UnspentOutput> new_unspent_outputs = transaction::update_unspent_outputs(
         block.index,
         block_transactions,
@@ -195,7 +196,7 @@ std::string Node::serialize_blockchain() const
 {
     std::lock_guard lock_guard(blockchain_mutex);
 
-    return core::serialize_blockchain(
+    return serialization::serialize_blockchain(
         std::begin(this->blockchain),
         std::end(this->blockchain)
     );
@@ -215,7 +216,7 @@ std::string Node::create_send_blockchain_message(std::string const & address) co
 {
     std::lock_guard lock_guard(blockchain_mutex);
 
-    return core::create_send_blockchain_message(
+    return serialization::create_send_blockchain_message(
         std::begin(this->blockchain),
         std::end(this->blockchain),
         address
@@ -258,7 +259,7 @@ void Node::process_send_block_message(core::Block const & block, std::string con
         } else {
             this->logger->info("This block comes from a blockchain longer than ours, querying for full blockchain");
 
-            std::string const message = core::create_query_blockchain_message(this->address);
+            std::string const message = serialization::create_query_blockchain_message(this->address);
             this->sender.enqueue_message(message, sender);
         }
     }
@@ -305,7 +306,7 @@ void Node::process_query_latest_block_message(std::string const & sender)
     this->add_peer(sender);
 
     core::Block const latest_block = this->get_latest_block();
-    std::string const message = create_send_block_message(latest_block, this->address);
+    std::string const message = serialization::create_send_block_message(latest_block, this->address);
     this->sender.enqueue_message(message, sender);
 }
 

@@ -10,11 +10,9 @@
 #include <spdlog/spdlog.h>
 
 #include <naivecoin/core/block.h>
-#include <naivecoin/core/serialize.h>
 #include <naivecoin/core/utils.h>
 
 #include <naivecoin/transaction/transaction.h>
-#include <naivecoin/transaction/serialize.h>
 
 #include "options.h"
 

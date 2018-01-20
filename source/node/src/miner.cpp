@@ -7,7 +7,8 @@
 #include <naivecoin/transaction/output.h>
 #include <naivecoin/transaction/input.h>
 #include <naivecoin/transaction/transaction.h>
-#include <naivecoin/transaction/serialize.h>
+
+#include <naivecoin/serialization/transaction.h>
 
 namespace naivecoin::node {
 
@@ -90,7 +91,7 @@ core::Block Miner::mine_next_block(core::Block const & latest_block)
     std::list<transaction::Transaction> block_transactions{coinbase_transaction};
 
     std::string const & previous_hash = latest_block.hash;
-    std::string const data = transaction::serialize_transactions(block_transactions);
+    std::string const data = serialization::serialize_transactions(block_transactions);
     std::time_t const timestamp= core::now();
     uint16_t const difficulty = this->get_difficulty();
 
