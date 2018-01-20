@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(is_new_block_valid)
 {
     naivecoin::core::Block const genesis = naivecoin::core::Block::genesis();
 
-    BOOST_ASSERT(! naivecoin::core::is_new_block_valid(genesis, genesis));
+    BOOST_CHECK(! naivecoin::core::is_new_block_valid(genesis, genesis));
 
 
     uint64_t const index = 1;
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(is_new_block_valid)
         nonce
     );
 
-    BOOST_ASSERT(naivecoin::core::is_new_block_valid(new_block, genesis));
+    BOOST_CHECK(naivecoin::core::is_new_block_valid(new_block, genesis));
 
 
     naivecoin::core::Block const new_bad_block_1 = naivecoin::core::Block::make_block(
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(is_new_block_valid)
         nonce
     );
 
-    BOOST_ASSERT(! naivecoin::core::is_new_block_valid(new_bad_block_1, genesis));
+    BOOST_CHECK(! naivecoin::core::is_new_block_valid(new_bad_block_1, genesis));
 }
 
 BOOST_AUTO_TEST_CASE(is_blockchain_valid)
@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE(is_blockchain_valid)
 
     std::list<naivecoin::core::Block> const blockchain{genesis, second_block, third_block};
 
-    BOOST_ASSERT(naivecoin::core::is_blockchain_valid(std::begin(blockchain), std::end(blockchain)));
+    BOOST_CHECK(naivecoin::core::is_blockchain_valid(std::begin(blockchain), std::end(blockchain)));
 }
 
 BOOST_AUTO_TEST_CASE(hash_matches_difficulty)
@@ -143,15 +143,15 @@ BOOST_AUTO_TEST_CASE(hash_matches_difficulty)
     std::string const hash_1_1 = "08f3a3ee5e6b4b0d3255bfef95601890afd80709";
     std::string const hash_1_2 = "16bca3ee5e6b4b0d3255bfef95601890afd80709";
 
-    BOOST_ASSERT(naivecoin::core::hash_matches_difficulty(hash_1_1, difficulty_1));
-    BOOST_ASSERT(! naivecoin::core::hash_matches_difficulty(hash_1_2, difficulty_1));
+    BOOST_CHECK(naivecoin::core::hash_matches_difficulty(hash_1_1, difficulty_1));
+    BOOST_CHECK(! naivecoin::core::hash_matches_difficulty(hash_1_2, difficulty_1));
 
     uint16_t const difficulty_2 = 8;
     std::string const hash_2_1 = "0027a3ee5e6b4b0d3255bfef95601890afd80709";
     std::string const hash_2_2 = "05c2a3ee5e6b4b0d3255bfef95601890afd80709";
 
-    BOOST_ASSERT(naivecoin::core::hash_matches_difficulty(hash_2_1, difficulty_2));
-    BOOST_ASSERT(! naivecoin::core::hash_matches_difficulty(hash_2_2, difficulty_2));
+    BOOST_CHECK(naivecoin::core::hash_matches_difficulty(hash_2_1, difficulty_2));
+    BOOST_CHECK(! naivecoin::core::hash_matches_difficulty(hash_2_2, difficulty_2));
 }
 
 BOOST_AUTO_TEST_CASE(compute_cumulative_difficulty)
