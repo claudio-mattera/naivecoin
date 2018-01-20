@@ -7,20 +7,6 @@
 
 BOOST_AUTO_TEST_SUITE(CoreUtils)
 
-BOOST_AUTO_TEST_CASE(parse_and_format_timestamp)
-{
-    auto first_timestamp = naivecoin::core::parse_timestamp("2017-12-28T15:00:00Z");
-    std::string first_string = naivecoin::core::format_timestamp(first_timestamp);
-    auto second_timestamp = naivecoin::core::parse_timestamp(first_string);
-    std::string second_string = naivecoin::core::format_timestamp(second_timestamp);
-    auto third_timestamp = naivecoin::core::parse_timestamp(second_string);
-    std::string third_string = naivecoin::core::format_timestamp(third_timestamp);
-    auto fourth_timestamp = naivecoin::core::parse_timestamp(third_string);
-    std::string fourth_string = naivecoin::core::format_timestamp(fourth_timestamp);
-
-    BOOST_CHECK_EQUAL(first_string, fourth_string);
-}
-
 BOOST_AUTO_TEST_CASE(hex_to_binary_1)
 {
     std::string const hex = "b";

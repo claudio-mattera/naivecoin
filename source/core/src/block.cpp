@@ -9,6 +9,8 @@
 
 #include <naivecoin/core/utils.h>
 
+#include <naivecoin/time/time.h>
+
 #include <naivecoin/crypto/crypto.h>
 
 namespace naivecoin::core {
@@ -59,7 +61,7 @@ Block Block::make_block(
 // static
 Block Block::genesis()
 {
-    auto timestamp = parse_timestamp("2017-12-28T15:00:00Z");
+    auto timestamp = time::parse_timestamp("2017-12-28T15:00:00Z");
 
     uint64_t const index = 0;
     std::string const previous_hash = "";
@@ -82,7 +84,7 @@ std::ostream & operator<<(std::ostream & stream, Block const & block)
 {
     stream
         << "Block index: " << block.index << ", "
-        << "Timestamp: " << format_timestamp(block.timestamp) << ", "
+        << "Timestamp: " << time::format_timestamp(block.timestamp) << ", "
         << "Previous hash: " << block.previous_hash << ", "
         << "Hash: " << block.hash << ", "
         << "Data: " << block.data << ", "
@@ -105,7 +107,7 @@ std::string compute_block_hash(
     stream
         << index << ','
         << previous_hash << ','
-        << format_timestamp(timestamp) << ','
+        << time::format_timestamp(timestamp) << ','
         << data << ','
         << difficulty << ','
         << nonce;

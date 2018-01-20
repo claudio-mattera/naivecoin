@@ -3,7 +3,7 @@
 #include <sstream>
 #include <list>
 
-#include <naivecoin/serialization/time.h>
+#include <naivecoin/time/time.h>
 
 namespace naivecoin::serialization {
 
@@ -32,7 +32,7 @@ Json::Value serialize_block_to_json(core::Block const & block)
     value["index"] = block.index;
     value["hash"] = block.hash;
     value["previous_hash"] = block.previous_hash;
-    value["timestamp"] = serialization::format_timestamp(block.timestamp);
+    value["timestamp"] = time::format_timestamp(block.timestamp);
     value["data"] = block.data;
     value["difficulty"] = block.difficulty;
     value["nonce"] = block.nonce;
@@ -42,7 +42,7 @@ Json::Value serialize_block_to_json(core::Block const & block)
 
 core::Block deserialize_json_to_block(Json::Value const & value)
 {
-    auto timestamp = serialization::parse_timestamp(value["timestamp"].asString());
+    auto timestamp = time::parse_timestamp(value["timestamp"].asString());
 
     core::Block const block = core::Block::make_block(
         static_cast<uint16_t>(value["index"].asUInt64()),

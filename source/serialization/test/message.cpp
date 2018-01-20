@@ -6,7 +6,8 @@
 
 #include <naivecoin/core/block.h>
 #include <naivecoin/serialization/message.h>
-#include <naivecoin/serialization/time.h>
+
+#include <naivecoin/time/time.h>
 
 BOOST_AUTO_TEST_SUITE(SerializationMessage)
 
@@ -18,7 +19,7 @@ BOOST_AUTO_TEST_CASE(create_send_block_message)
     uint16_t difficulty = 0;
     uint64_t nonce = 0;
 
-    auto timestamp = naivecoin::serialization::parse_timestamp("2017-12-28T15:00:00Z");
+    auto timestamp = naivecoin::time::parse_timestamp("2017-12-28T15:00:00Z");
 
     naivecoin::core::Block const block = naivecoin::core::Block::make_block(
         index,
@@ -56,7 +57,7 @@ BOOST_AUTO_TEST_CASE(create_send_blockchain_message)
     naivecoin::core::Block const first_block = naivecoin::core::Block::make_block(
         0,
         "",
-        naivecoin::serialization::parse_timestamp("2017-12-28T15:00:00Z"),
+        naivecoin::time::parse_timestamp("2017-12-28T15:00:00Z"),
         "Some data 2\u2078 = 256",
         0,
         0
@@ -65,7 +66,7 @@ BOOST_AUTO_TEST_CASE(create_send_blockchain_message)
     naivecoin::core::Block const second_block = naivecoin::core::Block::make_block(
         1,
         "bb01688103096f8389dd97460f5805dead135b2f",
-        naivecoin::serialization::parse_timestamp("2017-12-28T16:00:00Z"),
+        naivecoin::time::parse_timestamp("2017-12-28T16:00:00Z"),
         "Some other 2\u00B9\u2070 = 1024",
         0,
         0
@@ -148,7 +149,7 @@ BOOST_AUTO_TEST_CASE(process_message_send_block)
     uint16_t difficulty = 0;
     uint64_t nonce = 0;
 
-    auto timestamp = naivecoin::serialization::parse_timestamp("2017-12-28T15:00:00Z");
+    auto timestamp = naivecoin::time::parse_timestamp("2017-12-28T15:00:00Z");
 
     naivecoin::core::Block const original_block = naivecoin::core::Block::make_block(
         index,
@@ -208,7 +209,7 @@ BOOST_AUTO_TEST_CASE(process_message_send_blockchain)
     naivecoin::core::Block const first_block = naivecoin::core::Block::make_block(
         0,
         "",
-        naivecoin::serialization::parse_timestamp("2017-12-28T15:00:00Z"),
+        naivecoin::time::parse_timestamp("2017-12-28T15:00:00Z"),
         "Some data 2\u2078 = 256",
         0,
         0
@@ -217,7 +218,7 @@ BOOST_AUTO_TEST_CASE(process_message_send_blockchain)
     naivecoin::core::Block const second_block = naivecoin::core::Block::make_block(
         1,
         "bb01688103096f8389dd97460f5805dead135b2f",
-        naivecoin::serialization::parse_timestamp("2017-12-28T16:00:00Z"),
+        naivecoin::time::parse_timestamp("2017-12-28T16:00:00Z"),
         "Some other 2\u00B9\u2070 = 1024",
         0,
         0

@@ -2,13 +2,13 @@
 
 #include <chrono>
 
-#include <naivecoin/core/utils.h>
-
 #include <naivecoin/transaction/output.h>
 #include <naivecoin/transaction/input.h>
 #include <naivecoin/transaction/transaction.h>
 
 #include <naivecoin/serialization/transaction.h>
+
+#include <naivecoin/time/time.h>
 
 namespace naivecoin::node {
 
@@ -92,7 +92,7 @@ core::Block Miner::mine_next_block(core::Block const & latest_block)
 
     std::string const & previous_hash = latest_block.hash;
     std::string const data = serialization::serialize_transactions(block_transactions);
-    std::time_t const timestamp= core::now();
+    std::time_t const timestamp= time::now();
     uint16_t const difficulty = this->get_difficulty();
 
     core::Block const next_block = this->find_next_block(

@@ -1,18 +1,15 @@
-project(NaivecoinSerialization VERSION 0.1 LANGUAGES CXX)
+project(NaivecoinTime VERSION 0.1 LANGUAGES CXX)
 
 # Library
 
 add_library(
-    NaivecoinSerialization
+    NaivecoinTime
     SHARED
-    src/common.cpp
-    src/block.cpp
-    src/message.cpp
-    src/transaction.cpp
+    src/time.cpp
 )
 
 target_include_directories(
-    NaivecoinSerialization
+    NaivecoinTime
     PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
@@ -21,28 +18,18 @@ target_include_directories(
 )
 
 set_target_properties(
-    NaivecoinSerialization
+    NaivecoinTime
     PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
     CXX_EXTENSIONS OFF
 )
 
-target_link_libraries(
-    NaivecoinSerialization
-    LINK_PUBLIC
-    jsoncpp_lib
-    NaivecoinCrypto
-    NaivecoinTime
-    NaivecoinCore
-    NaivecoinTransaction
-)
-
 
 # Installation
 
 install(
-    TARGETS NaivecoinSerialization EXPORT NaivecoinSerializationConfig
+    TARGETS NaivecoinTime EXPORT NaivecoinTimeConfig
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}  # This is for Windows
@@ -52,24 +39,22 @@ install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 # This makes the project importable from the install directory
 # Put config file in per-project dir (name MUST match), can also
 # just go into 'cmake'.
-install(EXPORT NaivecoinSerializationConfig DESTINATION share/naivecoin/cmake)
+install(EXPORT NaivecoinTimeConfig DESTINATION share/naivecoin/cmake)
 
 # This makes the project importable from the build directory
-export(TARGETS NaivecoinSerialization FILE NaivecoinSerializationConfig.cmake)
+export(TARGETS NaivecoinTime FILE NaivecoinTimeConfig.cmake)
 
 
 # Testing
 
 add_executable(
-    NaivecoinSerializationTest
+    NaivecoinTimeTest
     test/main.cpp
-    test/block.cpp
-    test/message.cpp
-    test/transaction.cpp
+    test/time.cpp
 )
 
 set_target_properties(
-    NaivecoinSerializationTest
+    NaivecoinTimeTest
     PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
@@ -77,9 +62,9 @@ set_target_properties(
 )
 
 target_link_libraries(
-    NaivecoinSerializationTest
+    NaivecoinTimeTest
     boost-test
-    NaivecoinSerialization
+    NaivecoinTime
 )
 
-add_test(NaivecoinSerializationTest NaivecoinSerializationTest)
+add_test(NaivecoinTimeTest NaivecoinTimeTest)

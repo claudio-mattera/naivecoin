@@ -52,6 +52,7 @@ find_package(spdlog CONFIG REQUIRED)
 # Subprojects
 
 enable_testing()
+add_subdirectory(time)
 add_subdirectory(core)
 add_subdirectory(crypto)
 add_subdirectory(transaction)

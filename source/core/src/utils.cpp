@@ -1,38 +1,6 @@
 #include <naivecoin/core/utils.h>
 
-#include <sstream>
-#include <iomanip>
-#include <mutex>
-
 namespace naivecoin::core {
-
-std::mutex time_mutex;
-
-std::time_t now()
-{
-    std::lock_guard<std::mutex> guard(time_mutex);
-
-    return std::time(nullptr);
-}
-
-std::time_t parse_timestamp(std::string const & text)
-{
-    std::lock_guard<std::mutex> guard(time_mutex);
-
-    std::tm tm = {};
-    std::istringstream stream(text);
-    stream >> std::get_time(& tm, "%Y-%m-%dT%H:%M:%SZ");
-    return std::mktime(& tm);
-}
-
-std::string format_timestamp(std::time_t const & timestamp)
-{
-    std::lock_guard<std::mutex> guard(time_mutex);
-
-    std::ostringstream stream;
-    stream << std::put_time(std::localtime(& timestamp), "%Y-%m-%dT%H:%M:%SZ");
-    return stream.str();
-}
 
 template <int N>
 std::array<bool, 4 * N> hex_to_binary(std::string const & text)

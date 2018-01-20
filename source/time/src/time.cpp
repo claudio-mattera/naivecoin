@@ -1,34 +1,31 @@
-#include <naivecoin/serialization/time.h>
+#include <naivecoin/time/time.h>
 
+#include <mutex>
 #include <sstream>
 #include <iomanip>
-#include <mutex>
-#include <ctime>
-
-#include "common.h"
 
 namespace {
 
-using namespace naivecoin::core;
-
+// Functions std::get_time and std::put_time are not thread safe!
+// Use a mutex to ensure there are no race conditions.
 std::mutex time_mutex;
 
 constexpr char const * const TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ";
 
 } // unnamed namespace
 
-namespace naivecoin::serialization {
+namespace naivecoin::time {
 
 std::time_t now()
 {
-    std::lock_guard<std::mutex> lock_guard(time_mutex);
+    std::lock_guard<std::mutex> guard(time_mutex);
 
     return std::time(nullptr);
 }
 
 std::time_t parse_timestamp(std::string const & text)
 {
-    std::lock_guard<std::mutex> lock_guard(time_mutex);
+    std::lock_guard<std::mutex> guard(time_mutex);
 
     std::tm tm = {};
     std::istringstream stream(text);
@@ -38,11 +35,11 @@ std::time_t parse_timestamp(std::string const & text)
 
 std::string format_timestamp(std::time_t const & timestamp)
 {
-    std::lock_guard<std::mutex> lock_guard(time_mutex);
+    std::lock_guard<std::mutex> guard(time_mutex);
 
     std::ostringstream stream;
     stream << std::put_time(std::localtime(& timestamp), TIME_FORMAT);
     return stream.str();
 }
 
-} // namespace naivecoin::serialization
+} // namespace naivecoin::time

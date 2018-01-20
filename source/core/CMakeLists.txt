@@ -29,6 +29,7 @@ set_target_properties(
 target_link_libraries(
     NaivecoinCore
     LINK_PUBLIC
+    NaivecoinTime
     NaivecoinCrypto
     jsoncpp_lib
 )
