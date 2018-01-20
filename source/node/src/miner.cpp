@@ -183,6 +183,8 @@ uint16_t Miner::get_adjusted_difficulty(core::Block const & latest_block)
         new_difficulty = latest_block.difficulty;
     }
 
+    log_stream << " to " << new_difficulty;
+
     this->logger->info(log_stream.str());
 
     return new_difficulty;
