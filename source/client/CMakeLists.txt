@@ -5,7 +5,7 @@ project(NaivecoinClient VERSION 0.1 LANGUAGES CXX)
 add_executable(
     NaivecoinClient
     src/main.cpp
-    src/options.cpp
+    src/commandlinehandler.cpp
 )
 
 target_include_directories(
