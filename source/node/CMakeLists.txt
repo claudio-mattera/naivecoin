@@ -34,7 +34,6 @@ target_link_libraries(
     spdlog::spdlog
     NaivecoinCore
     NaivecoinSerialization
-    NaivecoinHttp
     NaivecoinTransaction
 )
 
