@@ -43,16 +43,22 @@ void Miner::start()
             latest_block_ptr = & this->latest_blocks.back();
         }
 
+        this->interrupted = false;
 
-        core::Block const next_block = this->mine_next_block(*latest_block_ptr);
+        std::optional<core::Block> const next_block = this->mine_next_block(*latest_block_ptr);
 
-        {
+        if (next_block) {
             std::lock_guard<std::mutex> lock_guard(this->output_mutex);
-
-            this->next_block.emplace(next_block);
+            this->next_block.emplace(next_block.value());
         }
+
         this->output_condition_variable.notify_one();
     }
+}
+
+void Miner::interrupt()
+{
+    this->interrupted = true;
 }
 
 void Miner::request_mine_next_block(core::Block const & latest_block)
@@ -74,13 +80,17 @@ std::optional<core::Block> Miner::get_next_block()
         std::unique_lock<std::mutex> unique_lock(this->output_mutex);
         this->output_condition_variable.wait(unique_lock);
 
-        core::Block const next_block = this->next_block.value();
-        this->next_block.reset();
-        return std::make_optional(next_block);
+        if (this->next_block) {
+            core::Block const next_block = this->next_block.value();
+            this->next_block.reset();
+            return std::make_optional(next_block);
+        } else {
+            return std::nullopt;
+        }
     }
 }
 
-core::Block Miner::mine_next_block(core::Block const & latest_block)
+std::optional<core::Block> Miner::mine_next_block(core::Block const & latest_block)
 {
     uint64_t const index = 1 + latest_block.index;
 
@@ -95,7 +105,7 @@ core::Block Miner::mine_next_block(core::Block const & latest_block)
     std::time_t const timestamp= time::now();
     uint16_t const difficulty = this->get_difficulty();
 
-    core::Block const next_block = this->find_next_block(
+    std::optional<core::Block> const next_block = this->find_next_block(
         index,
         previous_hash,
         timestamp,
@@ -106,7 +116,7 @@ core::Block Miner::mine_next_block(core::Block const & latest_block)
     return next_block;
 }
 
-core::Block Miner::find_next_block(
+std::optional<core::Block> Miner::find_next_block(
     uint64_t const index,
     std::string const & previous_hash,
     std::time_t const & timestamp,
@@ -114,7 +124,7 @@ core::Block Miner::find_next_block(
     uint16_t const difficulty
 )
 {
-    while (true) {
+    while (! this->interrupted) {
         uint64_t const nonce = this->mersenne_twister_engine();
 
         std::string const hash = core::compute_block_hash(
@@ -126,18 +136,22 @@ core::Block Miner::find_next_block(
             nonce
         );
         if (core::hash_matches_difficulty(hash, difficulty)) {
-            return core::Block::make_block(
-                index,
-                previous_hash,
-                timestamp,
-                data,
-                difficulty,
-                nonce
+            return std::make_optional(
+                core::Block::make_block(
+                    index,
+                    previous_hash,
+                    timestamp,
+                    data,
+                    difficulty,
+                    nonce
+                )
             );
         }
 
         std::this_thread::sleep_for( std::chrono::milliseconds(this->sleep_time));
     }
+
+    return std::nullopt;
 }
 
 uint16_t Miner::get_difficulty()

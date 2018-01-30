@@ -254,7 +254,9 @@ void Node::process_send_block_message(core::Block const & block, std::string con
         if (block.index == latest_block.index + 1) {
             if (block.previous_hash == latest_block.hash) {
                 this->logger->info("This is a valid next block (index: {}), adding it to our blockchain", block.index);
-                this->try_adding_block_to_blockchain(block);
+                if (this->try_adding_block_to_blockchain(block)) {
+                    this->miner.interrupt();
+                }
             } else {
                 this->logger->warn("Block does not belong to our blockchain, ignoring it");
             }

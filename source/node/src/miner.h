@@ -13,6 +13,7 @@
 #include <list>
 #include <random>
 #include <optional>
+#include <atomic>
 
 #include <boost/asio.hpp>
 
@@ -34,6 +35,7 @@ public:
     );
 
     void start();
+    void interrupt();
 
     void request_mine_next_block(core::Block const & latest_block);
 
@@ -45,8 +47,8 @@ private:
     uint16_t const DIFFICULTY_ADJUSTMENT_INTERVAL_IN_BLOCKS = 10;
 
 private:
-    core::Block mine_next_block(core::Block const & latest_block);
-    core::Block find_next_block(
+    std::optional<core::Block> mine_next_block(core::Block const & latest_block);
+    std::optional<core::Block> find_next_block(
         uint64_t const index,
         std::string const & previous_hash,
         std::time_t const & timestamp,
@@ -69,6 +71,8 @@ private:
 
     std::mutex output_mutex;
     std::condition_variable output_condition_variable;
+
+    std::atomic<bool> interrupted;
 
     std::mt19937_64 mersenne_twister_engine;
 
