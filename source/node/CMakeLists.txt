@@ -6,6 +6,7 @@ add_executable(
     NaivecoinNode
     src/main.cpp
     src/node.cpp
+    src/peersmanager.cpp
     src/sender.cpp
     src/miner.cpp
     src/options.cpp

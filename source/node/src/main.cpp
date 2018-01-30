@@ -17,6 +17,7 @@ void initialize_loggers()
     spdlog::stdout_logger_mt("node");
     spdlog::stdout_logger_mt("sender");
     spdlog::stdout_logger_mt("miner");
+    spdlog::stdout_logger_mt("peersmanager");
 }
 
 std::string read_file(std::string const & filename)

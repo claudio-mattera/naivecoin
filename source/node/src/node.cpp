@@ -29,11 +29,10 @@ Node::Node(
     uint64_t const seed
 )
 : address(std::string("localhost:") + std::to_string(port))
-, peers(std::begin(peers), std::end(peers))
 , blockchain()
 , unspent_outputs()
 , miner(public_key, sleep_time, seed)
-, sender()
+, peers_manager()
 , miner_thread(
     std::thread(
         std::bind(& Miner::start, std::ref(miner))
@@ -93,22 +92,22 @@ Node::Node(
     this->server.on_error = [this](auto /*request*/, auto /*error_code*/) {
     };
 
-    this->sender_thread = std::thread([this]() {
-        this->sender.start();
+    this->peers_manager_thread = std::thread([this]() {
+        this->peers_manager.start();
     });
 
     this->server_thread = std::thread([this]() {
         this->server.start();
     });
 
-    for (std::string const peer: this->peers) {
+    for (std::string const peer: peers) {
         this->connect_to_peer(peer);
     }
 }
 
 void Node::start()
 {
-    this->logger->info("Node active with {} peers", this->peers.size());
+    this->logger->info("Node active");
     while (true) {
         core::Block const latest_block = this->get_latest_block();
 
@@ -130,17 +129,15 @@ void Node::connect_to_peer(std::string const & peer)
     std::string const message = serialization::create_query_latest_block_message(this->address);
 
     this->logger->info("Querying peer {} for its latest block", peer);
-    this->sender.enqueue_message(message, peer);
+    this->peers_manager.send_message(message, peer);
 }
 
 void Node::send_block_to_peers(core::Block const & block)
 {
-    for (std::string const peer: this->peers) {
-        std::string const message = serialization::create_send_block_message(block, this->address);
+    std::string const message = serialization::create_send_block_message(block, this->address);
 
-        this->logger->debug("Sending block to peer {}", peer);
-        this->sender.enqueue_message(message, peer);
-    }
+    this->logger->debug("Sending block to all peer");
+    this->peers_manager.send_message_to_all(message);
 }
 
 bool Node::try_adding_block_to_blockchain(core::Block const & block)
@@ -242,7 +239,7 @@ void Node::process_send_block_message(core::Block const & block, std::string con
 {
     this->logger->info("Received block {} from sender {}", block.index, sender);
 
-    this->add_peer(sender);
+    this->peers_manager.add_peer(sender);
 
     core::Block const latest_block = this->get_latest_block();
 
@@ -260,7 +257,7 @@ void Node::process_send_block_message(core::Block const & block, std::string con
             this->logger->info("This block comes from a blockchain longer than ours, querying for full blockchain");
 
             std::string const message = serialization::create_query_blockchain_message(this->address);
-            this->sender.enqueue_message(message, sender);
+            this->peers_manager.send_message(message, sender);
         }
     }
 }
@@ -269,7 +266,7 @@ void Node::process_send_blockchain_message(std::list<core::Block> const & other_
 {
     this->logger->info("Received blockchain of {} blocks from sender {}", other_blockchain.size(), sender);
 
-    this->add_peer(sender);
+    this->peers_manager.add_peer(sender);
 
     if (is_blockchain_valid(std::begin(other_blockchain), std::end(other_blockchain))) {
         this->logger->info("Blockchain is valid");
@@ -303,21 +300,21 @@ void Node::process_query_latest_block_message(std::string const & sender)
 {
     this->logger->info("Sender {} requested latest block", sender);
 
-    this->add_peer(sender);
+    this->peers_manager.add_peer(sender);
 
     core::Block const latest_block = this->get_latest_block();
     std::string const message = serialization::create_send_block_message(latest_block, this->address);
-    this->sender.enqueue_message(message, sender);
+    this->peers_manager.send_message(message, sender);
 }
 
 void Node::process_query_blockchain_message(std::string const & sender)
 {
     this->logger->info("Sender {} requested blockchain", sender);
 
-    this->add_peer(sender);
+    this->peers_manager.add_peer(sender);
 
     std::string const message = this->create_send_blockchain_message(this->address);
-    this->sender.enqueue_message(message, sender);
+    this->peers_manager.send_message(message, sender);
 }
 
 void Node::process_unknown_message(std::string const & message, std::string const & sender)
@@ -330,14 +327,6 @@ void Node::process_invalid_message(std::string const & /*content*/, std::string 
     std::string const prefix = "Hash mismatch";
     this->logger->info("Received invalid message: {}", error);
     if (std::equal(prefix.begin(), prefix.end(), error.begin())) {
-    }
-}
-
-void Node::add_peer(std::string const & peer)
-{
-    if (std::find(std::begin(this->peers), std::end(this->peers), peer) == std::end(this->peers)) {
-        this->logger->info("Added new peer {}", peer);
-        this->peers.push_back(peer);
     }
 }
 

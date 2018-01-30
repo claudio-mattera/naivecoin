@@ -17,7 +17,7 @@
 #include <naivecoin/transaction/unspent_output.h>
 
 #include "miner.h"
-#include "sender.h"
+#include "peersmanager.h"
 
 namespace naivecoin::node {
 
@@ -55,18 +55,15 @@ private:
     void process_unknown_message(std::string const &, std::string const &);
     void process_invalid_message(std::string const &, std::string const &);
 
-    void add_peer(std::string const & peer);
-
 private:
     std::string const address;
-    std::vector<std::string> peers;
     std::list<core::Block> blockchain;
     std::list<transaction::UnspentOutput> unspent_outputs;
     Miner miner;
-    Sender sender;
+    PeersManager peers_manager;
     std::thread miner_thread;
     std::thread server_thread;
-    std::thread sender_thread;
+    std::thread peers_manager_thread;
 
     SimpleWeb::Server<SimpleWeb::HTTP> server;
 
