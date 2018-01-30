@@ -22,7 +22,7 @@ Miner::Miner(
 : public_key(public_key)
 , sleep_time(sleep_time)
 , latest_blocks()
-, next_blocks()
+, next_block()
 , input_mutex()
 , input_condition_variable()
 , output_mutex()
@@ -49,7 +49,7 @@ void Miner::start()
         {
             std::lock_guard<std::mutex> lock_guard(this->output_mutex);
 
-            this->next_blocks.push(next_block);
+            this->next_block.emplace(next_block);
         }
         this->output_condition_variable.notify_one();
     }
@@ -68,15 +68,15 @@ void Miner::request_mine_next_block(core::Block const & latest_block)
     this->input_condition_variable.notify_one();
 }
 
-core::Block Miner::get_next_block()
+std::optional<core::Block> Miner::get_next_block()
 {
     {
         std::unique_lock<std::mutex> unique_lock(this->output_mutex);
         this->output_condition_variable.wait(unique_lock);
 
-        core::Block const next_block = this->next_blocks.front();
-        this->next_blocks.pop();
-        return next_block;
+        core::Block const next_block = this->next_block.value();
+        this->next_block.reset();
+        return std::make_optional(next_block);
     }
 }
 

@@ -12,6 +12,7 @@
 #include <condition_variable>
 #include <list>
 #include <random>
+#include <optional>
 
 #include <boost/asio.hpp>
 
@@ -36,7 +37,7 @@ public:
 
     void request_mine_next_block(core::Block const & latest_block);
 
-    core::Block get_next_block();
+    std::optional<core::Block> get_next_block();
 
 private:
     uint16_t const BLOCK_GENERATION_INTERVAL_IN_SECONDS = 10;
@@ -61,7 +62,7 @@ private:
     uint64_t const sleep_time;
 
     std::queue<core::Block> latest_blocks;
-    std::queue<core::Block> next_blocks;
+    std::optional<core::Block> next_block;
 
     std::mutex input_mutex;
     std::condition_variable input_condition_variable;

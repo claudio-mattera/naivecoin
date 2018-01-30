@@ -113,13 +113,18 @@ void Node::start()
 
         this->miner.request_mine_next_block(latest_block);
 
-        core::Block const & next_block = this->miner.get_next_block();
+        std::optional<core::Block> const next_block_optional = this->miner.get_next_block();
 
-        if (this->try_adding_block_to_blockchain(next_block)) {
-            this->logger->info("Mined next block {}", next_block.index);
-            this->send_block_to_peers(next_block);
+        if (next_block_optional) {
+            core::Block const next_block = next_block_optional.value();
+            if (this->try_adding_block_to_blockchain(next_block)) {
+                this->logger->info("Mined next block {}", next_block.index);
+                this->send_block_to_peers(next_block);
+            } else {
+                this->logger->info("Could not add mined block to blockchain");
+            }
         } else {
-            this->logger->info("Could not add mined block to blockchain");
+            this->logger->info("Miner did not mine a new block");
         }
     }
 }
