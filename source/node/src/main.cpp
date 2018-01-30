@@ -18,6 +18,8 @@ void initialize_loggers()
     spdlog::stdout_logger_mt("sender");
     spdlog::stdout_logger_mt("miner");
     spdlog::stdout_logger_mt("peersmanager");
+
+    spdlog::set_pattern("[%Y-%m-%dT%H:%M:%S.%f] [%t] [%n] [%l] %v");
 }
 
 std::string read_file(std::string const & filename)
