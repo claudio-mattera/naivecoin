@@ -125,6 +125,18 @@ std::list<transaction::Transaction> deserialize_json_to_transactions(Json::Value
 
 namespace naivecoin::serialization {
 
+std::string serialize_transaction(transaction::Transaction const & transaction)
+{
+    Json::Value const value = serialize_transaction_to_json(transaction);
+    return format_json(value);
+}
+
+transaction::Transaction deserialize_transaction(std::string const & text)
+{
+    Json::Value const value = parse_json(text);
+    return deserialize_json_to_transaction(value);
+}
+
 std::string serialize_transactions(std::list<transaction::Transaction> const & transactions)
 {
     Json::Value const value = serialize_transactions_to_json(transactions);

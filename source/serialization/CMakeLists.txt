@@ -9,6 +9,7 @@ add_library(
     src/block.cpp
     src/message.cpp
     src/transaction.cpp
+    src/unspent_output.cpp
 )
 
 target_include_directories(
@@ -66,6 +67,7 @@ add_executable(
     test/block.cpp
     test/message.cpp
     test/transaction.cpp
+    test/unspent_output.cpp
 )
 
 set_target_properties(
