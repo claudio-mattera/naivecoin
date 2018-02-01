@@ -5,6 +5,7 @@
 #include <naivecoin/serialization/block.h>
 #include <naivecoin/serialization/message.h>
 #include <naivecoin/serialization/transaction.h>
+#include <naivecoin/serialization/unspent_output.h>
 
 #include <mutex>
 #include <sstream>
@@ -89,6 +90,53 @@ Node::Node(
             }
         }
     };
+    this->server.resource["^/query/unspent-outputs$"]["GET"] = [this](auto response, auto request) {
+        auto address_it = request->header.find("Address");
+        if (address_it == std::end(request->header)) {
+            response->write(
+                SimpleWeb::StatusCode::client_error_bad_request,
+                "Address unspecified"
+            );
+        } else {
+            try {
+                std::string const address = naivecoin::core::replace(address_it->second, "_", "\n");
+                std::list<transaction::UnspentOutput> relevant_unspent_outputs;
+                std::copy_if(
+                    std::begin(this->unspent_outputs),
+                    std::end(this->unspent_outputs),
+                    std::back_inserter(relevant_unspent_outputs),
+                    [&address](auto unspent_output) {
+                        return address == unspent_output.address;
+                    }
+                );
+                this->logger->info("Requested unspent outputs, found {}", relevant_unspent_outputs.size());
+                std::string const data = serialization::serialize_unspent_outputs(relevant_unspent_outputs);
+                //response->write(SimpleWeb::StatusCode::success_ok);
+                response->write(data);
+            } catch (std::exception const & exception) {
+                response->write(
+                    SimpleWeb::StatusCode::client_error_bad_request,
+                    exception.what()
+                );
+            }
+        }
+    };
+    this->server.resource["^/submit/transaction$"]["POST"] = [this](auto response, auto request) {
+        std::string const content = request->content.string();
+        transaction::Transaction transaction = serialization::deserialize_transaction(content);
+
+        this->logger->info("Received transaction");
+
+        if (is_transaction_valid(transaction, this->unspent_outputs)) {
+            this->pending_transactions.push_back(transaction);
+            response->write(SimpleWeb::StatusCode::success_ok);
+        } else {
+            response->write(
+                SimpleWeb::StatusCode::client_error_bad_request,
+                "Invalid transaction"
+            );
+        }
+    };
     this->server.on_error = [this](auto /*request*/, auto /*error_code*/) {
     };
 
@@ -111,7 +159,7 @@ void Node::start()
     while (true) {
         core::Block const latest_block = this->get_latest_block();
 
-        this->miner.request_mine_next_block(latest_block);
+        this->miner.request_mine_next_block(latest_block, this->pending_transactions);
 
         std::optional<core::Block> const next_block_optional = this->miner.get_next_block();
 
@@ -173,12 +221,24 @@ void Node::add_block_to_blockchain(core::Block const & block)
     this->unspent_outputs.clear();
     this->unspent_outputs.splice(std::begin(this->unspent_outputs), new_unspent_outputs);
 
+    this->pending_transactions.remove_if([&block_transactions](auto pending_transaction) {
+        auto it = std::find_if(
+            std::begin(block_transactions),
+            std::end(block_transactions),
+            [&pending_transaction](auto block_transaction) {
+                return pending_transaction.id == block_transaction.id;
+            }
+        );
+        return it != std::end(block_transactions);
+    });
+
 }
 
 void Node::replace_blockchain(std::list<core::Block> new_blockchain)
 {
     std::lock_guard lock_guard(blockchain_mutex);
     this->blockchain.clear();
+    this->unspent_outputs.clear();
 
     for (core::Block block: new_blockchain) {
         this->add_block_to_blockchain(block);

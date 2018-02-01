@@ -61,7 +61,10 @@ void Miner::interrupt()
     this->interrupted = true;
 }
 
-void Miner::request_mine_next_block(core::Block const & latest_block)
+void Miner::request_mine_next_block(
+    core::Block const & latest_block,
+    std::list<transaction::Transaction> pending_transactions
+)
 {
     {
         std::lock_guard<std::mutex> lock_guard(this->input_mutex);
@@ -70,6 +73,9 @@ void Miner::request_mine_next_block(core::Block const & latest_block)
         if (this->latest_blocks.size() > Miner::DIFFICULTY_ADJUSTMENT_INTERVAL_IN_BLOCKS) {
             this->latest_blocks.pop();
         }
+
+        this->pending_transactions.clear();
+        this->pending_transactions.splice(std::end(this->pending_transactions), pending_transactions);
     }
     this->input_condition_variable.notify_one();
 }
@@ -99,6 +105,7 @@ std::optional<core::Block> Miner::mine_next_block(core::Block const & latest_blo
         this->public_key
     );
     std::list<transaction::Transaction> block_transactions{coinbase_transaction};
+    block_transactions.splice(std::end(block_transactions), this->pending_transactions);
 
     std::string const & previous_hash = latest_block.hash;
     std::string const data = serialization::serialize_transactions(block_transactions);

@@ -12,6 +12,12 @@
 
 #include <naivecoin/core/utils.h>
 #include <naivecoin/crypto/crypto.h>
+#include <naivecoin/serialization/unspent_output.h>
+#include <naivecoin/serialization/transaction.h>
+#include <naivecoin/transaction/output.h>
+#include <naivecoin/transaction/input.h>
+#include <naivecoin/transaction/transaction.h>
+#include <naivecoin/transaction/unspent_output.h>
 
 #include "commandlinehandler.h"
 
@@ -155,6 +161,148 @@ int main(int argc, char * argv[])
         }
     };
 
+    po::options_description submit_transaction_options("Usage");
+    submit_transaction_options.add_options()
+        (
+            "node",
+            po::value<std::string>()
+                ->required()
+                ->notifier(
+                    [](std::string const node) {
+                        check_socket(node);
+                    }
+                )
+            ,
+            "Node"
+        )
+        (
+            "origin-private",
+            po::value<std::string>()
+                ->required()
+            ,
+            "Private key filename"
+        )
+        (
+            "origin-public",
+            po::value<std::string>()
+                ->required()
+            ,
+            "Public key filename"
+        )
+        (
+            "destination",
+            po::value<std::string>()
+                ->required()
+            ,
+            "Public key filename"
+        )
+        (
+            "amount",
+            po::value<uint64_t>()
+                ->required()
+            ,
+            "Amount to transfer"
+        )
+    ;
+    auto submit_transaction_command = [&logger](boost::program_options::variables_map const & variables_map) {
+        auto const destination_public_key = read_file(variables_map["destination"].as<std::string>());
+        auto const origin_public_key = read_file(variables_map["origin-public"].as<std::string>());
+        auto const origin_private_key = read_file(variables_map["origin-private"].as<std::string>());
+        uint64_t const amount = variables_map["amount"].as<uint64_t>();
+        auto const node = variables_map["node"].as<std::string>();
+
+        std::list<naivecoin::transaction::UnspentOutput> unspent_outputs;
+
+        try {
+            SimpleWeb::Client<SimpleWeb::HTTP> client(node);
+            SimpleWeb::CaseInsensitiveMultimap header;
+            header.emplace("Address", naivecoin::core::replace(origin_public_key, "\n", "_"));
+            client.request("GET", "/query/unspent-outputs", "", header, [&logger, &unspent_outputs](auto response, auto error_code) {
+                if (error_code) {
+                    logger->error("Error: {}", error_code.message());
+                } else {
+                    std::string const data = response->content.string();
+                    unspent_outputs = naivecoin::serialization::deserialize_unspent_outputs(data);
+                    logger->info("Retrieved {} unspent outputs", unspent_outputs.size());
+                }
+            });
+            client.io_service->run();
+        }
+        catch (std::exception& e)
+        {
+          std::cerr << e.what() << std::endl;
+        }
+
+
+        uint64_t amount_found = 0;
+
+        std::list<naivecoin::transaction::Input> inputs;
+        std::list<std::string> private_keys;
+
+        std::list<naivecoin::transaction::Output> outputs{
+            {destination_public_key, amount}
+        };
+
+        for (auto unspent_output: unspent_outputs) {
+            if (unspent_output.address != origin_public_key) {
+                continue;
+            }
+
+            uint64_t const amount_left = amount - amount_found;
+            uint64_t const taken_share = std::min(amount_left, unspent_output.amount);
+            uint64_t const left_share = unspent_output.amount - taken_share;
+            amount_found += taken_share;
+
+            inputs.push_back(
+                {unspent_output.transaction_id, unspent_output.transaction_index}
+            );
+            private_keys.push_back(origin_private_key);
+
+            if (amount_found == amount) {
+                if (left_share > 0) {
+                    outputs.push_back(
+                        {origin_public_key, left_share}
+                    );
+                }
+
+                break;
+            }
+        }
+
+        if (amount_found < amount) {
+            logger->error("Insufficient funds!");
+            return EXIT_FAILURE;
+        }
+
+        naivecoin::transaction::Transaction const transaction = naivecoin::transaction::create_transaction(
+            inputs,
+            outputs,
+            private_keys,
+            unspent_outputs
+        );
+
+        std::string const serialized_transaction = naivecoin::serialization::serialize_transaction(transaction);
+
+        try {
+            SimpleWeb::Client<SimpleWeb::HTTP> client(node);
+            SimpleWeb::CaseInsensitiveMultimap header;
+            logger->info("Submitting transaction");
+            client.request("POST", "/submit/transaction", serialized_transaction, header, [&logger](auto /*response*/, auto error_code) {
+                if (error_code) {
+                    logger->error("Error: {}", error_code.message());
+                } else {
+                    logger->info("Transaction submitted");
+                }
+            });
+            client.io_service->run();
+        }
+        catch (std::exception& e)
+        {
+          std::cerr << e.what() << std::endl;
+        }
+
+    };
+
     std::map<std::string, naivecoin::client::Handler> handlers;
     handlers["generate-keypair"] = naivecoin::client::create_handler(
         generate_keypair_options,
@@ -163,6 +311,10 @@ int main(int argc, char * argv[])
     handlers["balance"] = naivecoin::client::create_handler(
         query_balance_options,
         query_balance_command
+    );
+    handlers["submit-transaction"] = naivecoin::client::create_handler(
+        submit_transaction_options,
+        submit_transaction_command
     );
 
     naivecoin::client::handle_commands(command_line, handlers);

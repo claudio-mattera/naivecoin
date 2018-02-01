@@ -21,6 +21,8 @@
 
 #include <naivecoin/core/block.h>
 
+#include <naivecoin/transaction/transaction.h>
+
 namespace naivecoin::node {
 
 using namespace naivecoin;
@@ -37,7 +39,10 @@ public:
     void start();
     void interrupt();
 
-    void request_mine_next_block(core::Block const & latest_block);
+    void request_mine_next_block(
+        core::Block const & latest_block,
+        std::list<transaction::Transaction> pending_transactions
+    );
 
     std::optional<core::Block> get_next_block();
 
@@ -65,6 +70,7 @@ private:
 
     std::queue<core::Block> latest_blocks;
     std::optional<core::Block> next_block;
+    std::list<transaction::Transaction> pending_transactions;
 
     std::mutex input_mutex;
     std::condition_variable input_condition_variable;
