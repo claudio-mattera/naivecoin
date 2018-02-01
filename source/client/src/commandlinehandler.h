@@ -21,8 +21,8 @@ void handle_commands(
 );
 
 Handler create_handler(
-    boost::program_options::options_description const & description,
-    std::function<void(boost::program_options::variables_map const &)> const & command
+    boost::program_options::options_description const description,
+    std::function<void(boost::program_options::variables_map const &)> const command
 );
 
 } // namespace naivecoin::client

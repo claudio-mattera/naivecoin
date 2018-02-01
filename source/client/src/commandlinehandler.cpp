@@ -1,5 +1,7 @@
 #include "commandlinehandler.h"
 
+#include <spdlog/spdlog.h>
+
 #include <iostream>
 
 namespace po = boost::program_options;
@@ -28,6 +30,13 @@ void handle_commands(
     std::map<std::string, Handler> const & handlers
 )
 {
+    auto logger = spdlog::get("commandlinehandler");
+
+    logger->debug("Handlers");
+    for (auto h: handlers) {
+        logger->debug("{} -> {}", h.first, reinterpret_cast<uint64_t>(& h.second));
+    }
+
     if (command_line.empty()) {
         std::cout << "Missing command" << '\n';
         std::cout << "Available commands: " << '\n';
@@ -36,6 +45,7 @@ void handle_commands(
         }
     } else {
         std::string const command_name = command_line.front();
+        logger->debug("Command: {}", command_name);
         std::vector<std::string> const rest_of_command_line(
             1 + std::begin(command_line),
             std::end(command_line)
@@ -55,11 +65,11 @@ void handle_commands(
 }
 
 Handler create_handler(
-    boost::program_options::options_description const & description,
-    std::function<void(boost::program_options::variables_map const &)> const & command
+    boost::program_options::options_description const description,
+    std::function<void(boost::program_options::variables_map const &)> const command
 )
 {
-    return [&description, &command](std::vector<std::string> const & command_line) {
+    return [description, command](std::vector<std::string> const & command_line) {
         try {
             po::command_line_parser parser(command_line);
 
