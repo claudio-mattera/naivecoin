@@ -47,6 +47,7 @@ private:
     uint64_t compute_cumulative_difficulty() const;
     std::string create_send_blockchain_message(std::string const & address) const;
     uint64_t calculate_balance(std::string const & address) const;
+    std::list<transaction::Transaction> calculate_transactions(std::string const & address) const;
 
     void process_send_block_message(core::Block const &, std::string const &);
     void process_send_blockchain_message(std::list<core::Block> const &, std::string const &);

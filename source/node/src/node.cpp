@@ -90,6 +90,28 @@ Node::Node(
             }
         }
     };
+    this->server.resource["^/query/transactions$"]["GET"] = [this](auto response, auto request) {
+        this->logger->info("/query/transactions");
+        auto address_it = request->header.find("Address");
+        if (address_it == std::end(request->header)) {
+            response->write(
+                SimpleWeb::StatusCode::client_error_bad_request,
+                "Address unspecified"
+            );
+        } else {
+            try {
+                std::string const address = core::replace(address_it->second, "_", "\n");
+                std::list<transaction::Transaction> const transactions = this->calculate_transactions(address);
+                std::string const data = serialization::serialize_transactions(transactions);
+                response->write(SimpleWeb::StatusCode::success_ok, data);
+            } catch (std::exception const & exception) {
+                response->write(
+                    SimpleWeb::StatusCode::client_error_bad_request,
+                    exception.what()
+                );
+            }
+        }
+    };
     this->server.resource["^/query/unspent-outputs$"]["GET"] = [this](auto response, auto request) {
         auto address_it = request->header.find("Address");
         if (address_it == std::end(request->header)) {
@@ -298,6 +320,40 @@ uint64_t Node::calculate_balance(std::string const & address) const
     }
 
     return balance;
+}
+
+std::list<transaction::Transaction> Node::calculate_transactions(std::string const & address) const
+{
+    std::lock_guard lock_guard(blockchain_mutex);
+
+    std::list<transaction::Transaction> transactions;
+
+    for (auto block: this->blockchain) {
+        std::list<transaction::Transaction> const block_transactions = serialization::deserialize_transactions(block.data);
+        for (auto block_transaction: block_transactions) {
+            auto input_it = std::find_if(
+                std::begin(block_transaction.inputs),
+                std::end(block_transaction.inputs),
+                [](auto /*input*/){
+                    return false;
+                }
+            );
+            auto output_it = std::find_if(
+                std::begin(block_transaction.outputs),
+                std::end(block_transaction.outputs),
+                [&address](auto output){
+                    return output.address == address;
+                }
+            );
+            bool const found_in_outputs = output_it != std::end(block_transaction.outputs);
+            bool const found_in_inputs = input_it != std::end(block_transaction.inputs);
+            if (found_in_inputs || found_in_outputs) {
+                transactions.push_back(block_transaction);
+            }
+        }
+    }
+
+    return transactions;
 }
 
 void Node::process_send_block_message(core::Block const & block, std::string const & sender)
