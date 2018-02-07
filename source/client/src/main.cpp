@@ -29,6 +29,8 @@ void initialize_loggers()
 {
     spdlog::stdout_logger_mt("main");
     spdlog::stdout_logger_mt("commandlinehandler");
+
+    spdlog::set_pattern("%v");
 }
 
 template<typename T>
