@@ -13,16 +13,16 @@
 
 namespace naivecoin::client {
 
-typedef std::function<void(std::vector<std::string> const &)> Handler;
+typedef std::function<int(std::vector<std::string> const &)> Handler;
 
-void handle_commands(
+int handle_commands(
     std::vector<std::string> const & command_line,
     std::map<std::string, Handler> const & handlers
 );
 
 Handler create_handler(
     boost::program_options::options_description const description,
-    std::function<void(boost::program_options::variables_map const &)> const command
+    std::function<int(boost::program_options::variables_map const &)> const command
 );
 
 } // namespace naivecoin::client

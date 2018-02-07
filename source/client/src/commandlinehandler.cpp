@@ -1,5 +1,7 @@
 #include "commandlinehandler.h"
 
+#include <cstdlib>
+
 #include <spdlog/spdlog.h>
 
 #include <iostream>
@@ -25,7 +27,7 @@ void show_help(
 
 namespace naivecoin::client {
 
-void handle_commands(
+int handle_commands(
     std::vector<std::string> const & command_line,
     std::map<std::string, Handler> const & handlers
 )
@@ -53,7 +55,7 @@ void handle_commands(
 
         try {
             auto command = handlers.at(command_name);
-            command(rest_of_command_line);
+            return command(rest_of_command_line);
         } catch (std::out_of_range const &) {
             std::cout << "Unknown command \"" << command_name << "\"" << '\n';
             std::cout << "Available commands: " << '\n';
@@ -62,11 +64,12 @@ void handle_commands(
             }
         }
     }
+    return EXIT_FAILURE;
 }
 
 Handler create_handler(
     boost::program_options::options_description const description,
-    std::function<void(boost::program_options::variables_map const &)> const command
+    std::function<int(boost::program_options::variables_map const &)> const command
 )
 {
     return [description, command](std::vector<std::string> const & command_line) {
@@ -80,11 +83,12 @@ Handler create_handler(
             po::store(parsed_options, variables_map);
             po::notify(variables_map);
 
-            command(variables_map);
+            return command(variables_map);
 
         } catch (po::error const & e) {
             std::cerr << "Error: " << e.what() << '\n';
             show_help(description, "", EXIT_FAILURE);
+            return EXIT_FAILURE;
         }
     };
 }

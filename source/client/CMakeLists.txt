@@ -6,6 +6,11 @@ add_executable(
     NaivecoinClient
     src/main.cpp
     src/commandlinehandler.cpp
+    src/utils.cpp
+    src/generate_keypair_command.cpp
+    src/query_balance_command.cpp
+    src/query_transactions_command.cpp
+    src/submit_transaction_command.cpp
 )
 
 target_include_directories(
