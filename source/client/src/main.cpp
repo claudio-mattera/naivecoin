@@ -50,7 +50,6 @@ void check_port(uint64_t const port)
 
 void check_socket(std::string const & value)
 {
-    // passing -1 as the submatch index parameter performs splitting
     std::regex const re("([^:]+):(\\d+)");
     std::smatch match;
     if (std::regex_match(value, match, re)) {
