@@ -15,7 +15,7 @@ struct Output
 {
 public:
     std::string const address;
-    uint16_t const amount;
+    uint64_t const amount;
 
 public:
     Output(

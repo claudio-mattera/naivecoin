@@ -29,7 +29,7 @@ std::string compute_transaction_id(
 
 UnspentOutput find_unspent_output(
     std::string const & transaction_output_id,
-    uint16_t const transaction_output_index,
+    uint64_t const transaction_output_index,
     std::list<UnspentOutput> const & unspent_outputs
 )
 {

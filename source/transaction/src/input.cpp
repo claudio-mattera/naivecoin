@@ -4,7 +4,7 @@ namespace naivecoin::transaction {
 
 Input::Input(
     std::string const & transaction_output_id,
-    uint16_t const transaction_output_index,
+    uint64_t const transaction_output_index,
     std::string const & signature
 )
 : transaction_output_id(transaction_output_id)

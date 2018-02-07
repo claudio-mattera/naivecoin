@@ -15,13 +15,13 @@ struct Input
 {
 public:
     std::string const transaction_output_id;
-    uint16_t const transaction_output_index;
+    uint64_t const transaction_output_index;
     std::string signature;
 
 public:
     Input(
         std::string const & transaction_output_id,
-        uint16_t const transaction_output_index,
+        uint64_t const transaction_output_index,
         std::string const & signature = ""
     );
 };
