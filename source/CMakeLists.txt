@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.8)
 project(naivecoin VERSION 0.1 LANGUAGES CXX)
 
 include(GNUInstallDirs)
+include(CTest)
 
 if("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
     set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall")
@@ -51,7 +52,7 @@ find_package(spdlog CONFIG REQUIRED)
 
 # Subprojects
 
-enable_testing()
+#enable_testing()
 add_subdirectory(time)
 add_subdirectory(core)
 add_subdirectory(crypto)

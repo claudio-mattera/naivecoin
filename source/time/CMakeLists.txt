@@ -47,24 +47,26 @@ export(TARGETS NaivecoinTime FILE NaivecoinTimeConfig.cmake)
 
 # Testing
 
-add_executable(
-    NaivecoinTimeTest
-    test/main.cpp
-    test/time.cpp
-)
+if(BUILD_TESTING)
+    add_executable(
+        NaivecoinTimeTest
+        test/main.cpp
+        test/time.cpp
+    )
 
-set_target_properties(
-    NaivecoinTimeTest
-    PROPERTIES
-    CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED ON
-    CXX_EXTENSIONS OFF
-)
+    set_target_properties(
+        NaivecoinTimeTest
+        PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+        CXX_EXTENSIONS OFF
+    )
 
-target_link_libraries(
-    NaivecoinTimeTest
-    boost-test
-    NaivecoinTime
-)
+    target_link_libraries(
+        NaivecoinTimeTest
+        boost-test
+        NaivecoinTime
+    )
 
-add_test(NaivecoinTimeTest NaivecoinTimeTest)
+    add_test(NaivecoinTimeTest NaivecoinTimeTest)
+endif(BUILD_TESTING)

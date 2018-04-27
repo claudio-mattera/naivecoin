@@ -56,25 +56,27 @@ export(TARGETS NaivecoinCore FILE NaivecoinCoreConfig.cmake)
 
 # Testing
 
-add_executable(
-    NaivecoinCoreTest
-    test/main.cpp
-    test/block.cpp
-    test/utils.cpp
-)
+if(BUILD_TESTING)
+    add_executable(
+        NaivecoinCoreTest
+        test/main.cpp
+        test/block.cpp
+        test/utils.cpp
+    )
 
-set_target_properties(
-    NaivecoinCoreTest
-    PROPERTIES
-    CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED ON
-    CXX_EXTENSIONS OFF
-)
+    set_target_properties(
+        NaivecoinCoreTest
+        PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+        CXX_EXTENSIONS OFF
+    )
 
-target_link_libraries(
-    NaivecoinCoreTest
-    boost-test
-    NaivecoinCore
-)
+    target_link_libraries(
+        NaivecoinCoreTest
+        boost-test
+        NaivecoinCore
+    )
 
-add_test(NaivecoinCoreTest NaivecoinCoreTest)
+    add_test(NaivecoinCoreTest NaivecoinCoreTest)
+endif(BUILD_TESTING)

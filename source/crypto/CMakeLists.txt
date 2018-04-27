@@ -53,24 +53,26 @@ export(TARGETS NaivecoinCrypto FILE NaivecoinCryptoConfig.cmake)
 
 # Testing
 
-add_executable(
-    NaivecoinCryptoTest
-    test/main.cpp
-    test/crypto.cpp
-)
+if(BUILD_TESTING)
+    add_executable(
+        NaivecoinCryptoTest
+        test/main.cpp
+        test/crypto.cpp
+    )
 
-set_target_properties(
-    NaivecoinCryptoTest
-    PROPERTIES
-    CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED ON
-    CXX_EXTENSIONS OFF
-)
+    set_target_properties(
+        NaivecoinCryptoTest
+        PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+        CXX_EXTENSIONS OFF
+    )
 
-target_link_libraries(
-    NaivecoinCryptoTest
-    boost-test
-    NaivecoinCrypto
-)
+    target_link_libraries(
+        NaivecoinCryptoTest
+        boost-test
+        NaivecoinCrypto
+    )
 
-add_test(NaivecoinCryptoTest NaivecoinCryptoTest)
+    add_test(NaivecoinCryptoTest NaivecoinCryptoTest)
+endif(BUILD_TESTING)

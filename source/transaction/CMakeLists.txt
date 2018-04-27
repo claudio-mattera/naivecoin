@@ -58,28 +58,30 @@ export(TARGETS NaivecoinTransaction FILE NaivecoinTransactionConfig.cmake)
 
 # Testing
 
-add_executable(
-    NaivecoinTransactionTest
-    test/main.cpp
-    test/output.cpp
-    test/unspent_output.cpp
-    test/input.cpp
-    test/transaction.cpp
-    test/utils.cpp
-)
+if(BUILD_TESTING)
+    add_executable(
+        NaivecoinTransactionTest
+        test/main.cpp
+        test/output.cpp
+        test/unspent_output.cpp
+        test/input.cpp
+        test/transaction.cpp
+        test/utils.cpp
+    )
 
-set_target_properties(
-    NaivecoinTransactionTest
-    PROPERTIES
-    CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED ON
-    CXX_EXTENSIONS OFF
-)
+    set_target_properties(
+        NaivecoinTransactionTest
+        PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+        CXX_EXTENSIONS OFF
+    )
 
-target_link_libraries(
-    NaivecoinTransactionTest
-    boost-test
-    NaivecoinTransaction
-)
+    target_link_libraries(
+        NaivecoinTransactionTest
+        boost-test
+        NaivecoinTransaction
+    )
 
-add_test(NaivecoinTransactionTest NaivecoinTransactionTest)
+    add_test(NaivecoinTransactionTest NaivecoinTransactionTest)
+endif(BUILD_TESTING)

@@ -61,27 +61,29 @@ export(TARGETS NaivecoinSerialization FILE NaivecoinSerializationConfig.cmake)
 
 # Testing
 
-add_executable(
-    NaivecoinSerializationTest
-    test/main.cpp
-    test/block.cpp
-    test/message.cpp
-    test/transaction.cpp
-    test/unspent_output.cpp
-)
+if(BUILD_TESTING)
+    add_executable(
+        NaivecoinSerializationTest
+        test/main.cpp
+        test/block.cpp
+        test/message.cpp
+        test/transaction.cpp
+        test/unspent_output.cpp
+    )
 
-set_target_properties(
-    NaivecoinSerializationTest
-    PROPERTIES
-    CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED ON
-    CXX_EXTENSIONS OFF
-)
+    set_target_properties(
+        NaivecoinSerializationTest
+        PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+        CXX_EXTENSIONS OFF
+    )
 
-target_link_libraries(
-    NaivecoinSerializationTest
-    boost-test
-    NaivecoinSerialization
-)
+    target_link_libraries(
+        NaivecoinSerializationTest
+        boost-test
+        NaivecoinSerialization
+    )
 
-add_test(NaivecoinSerializationTest NaivecoinSerializationTest)
+    add_test(NaivecoinSerializationTest NaivecoinSerializationTest)
+endif(BUILD_TESTING)
