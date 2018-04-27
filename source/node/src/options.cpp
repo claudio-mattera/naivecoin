@@ -35,7 +35,7 @@ void check_range(T const & value, T const & min, T const & max)
 
 void check_port(uint64_t const port)
 {
-    check_range(port, 0x1ul, 0xfffful);
+    check_range(port, static_cast<uint64_t>(0x1ul), static_cast<uint64_t>(0xfffful));
 }
 
 void check_socket(std::string const & value)
