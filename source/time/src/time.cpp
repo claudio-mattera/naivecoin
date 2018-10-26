@@ -27,10 +27,12 @@ std::time_t parse_timestamp(std::string const & text)
 {
     std::lock_guard<std::mutex> guard(time_mutex);
 
-    std::tm tm = {};
     std::istringstream stream(text);
-    stream >> std::get_time(& tm, TIME_FORMAT);
-    return std::mktime(& tm);
+
+    long int timestamp;
+    stream >> timestamp;
+
+    return static_cast<std::time_t>(timestamp);
 }
 
 std::string format_timestamp(std::time_t const & timestamp)
@@ -38,7 +40,7 @@ std::string format_timestamp(std::time_t const & timestamp)
     std::lock_guard<std::mutex> guard(time_mutex);
 
     std::ostringstream stream;
-    stream << std::put_time(std::localtime(& timestamp), TIME_FORMAT);
+    stream << static_cast<long int>(timestamp);
     return stream.str();
 }
 
