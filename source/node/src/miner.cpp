@@ -109,7 +109,7 @@ std::optional<core::Block> Miner::mine_next_block(core::Block const & latest_blo
 
     std::string const & previous_hash = latest_block.hash;
     std::string const data = serialization::serialize_transactions(block_transactions);
-    std::time_t const timestamp= time::now();
+    time::instant const timestamp= time::now();
     uint16_t const difficulty = this->get_difficulty();
 
     std::optional<core::Block> const next_block = this->find_next_block(
@@ -126,7 +126,7 @@ std::optional<core::Block> Miner::mine_next_block(core::Block const & latest_blo
 std::optional<core::Block> Miner::find_next_block(
     uint64_t const index,
     std::string const & previous_hash,
-    std::time_t const & timestamp,
+    time::instant const & timestamp,
     std::string const & data,
     uint16_t const difficulty
 )
@@ -183,9 +183,7 @@ uint16_t Miner::get_adjusted_difficulty(core::Block const & latest_block)
     );
 
     auto actual_elapsed_time = std::chrono::seconds(
-        static_cast<int>(
-            std::difftime(latest_block.timestamp, latest_adjustment_block.timestamp)
-        )
+        time::difference_in_seconds(latest_adjustment_block.timestamp, latest_block.timestamp)
     );
 
     uint16_t new_difficulty;
@@ -214,11 +212,11 @@ uint16_t Miner::get_adjusted_difficulty(core::Block const & latest_block)
 bool Miner::is_timestamp_valid(core::Block const & new_block)
 {
     core::Block const & latest_block = this->latest_blocks.back();
-    std::time_t const now = std::time(nullptr);
+    time::instant const now = time::now();
 
-    if (std::difftime(new_block.timestamp, latest_block.timestamp) < -60) {
+    if (time::difference_in_seconds(latest_block.timestamp, new_block.timestamp) < -60) {
         return false;
-    } else if (std::difftime(now, new_block.timestamp) < -60) {
+    } else if (time::difference_in_seconds(new_block.timestamp, now) < -60) {
         return false;
     } else {
         return true;

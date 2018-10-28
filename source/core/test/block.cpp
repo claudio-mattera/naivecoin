@@ -14,7 +14,7 @@ BOOST_AUTO_TEST_CASE(compute_block_hash)
 {
     uint64_t const index = 0;
     std::string const previous_hash = "";
-    std::time_t const timestamp = naivecoin::time::parse_timestamp("1970-01-01T00:00:00Z");
+    naivecoin::time::instant const timestamp = naivecoin::time::parse_timestamp("1970-01-01T00:00:00Z");
     std::string const data = "Some data";
     uint16_t difficulty = 0;
     uint64_t nonce = 0;

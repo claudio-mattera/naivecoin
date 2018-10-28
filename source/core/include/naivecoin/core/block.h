@@ -4,6 +4,8 @@
 #ifndef NAIVECOIN_CORE_BLOCK_H
 #define NAIVECOIN_CORE_BLOCK_H
 
+#include <naivecoin/time/time.h>
+
 #include <string>
 #include <ostream>
 #include <ctime>
@@ -16,7 +18,7 @@ public:
     uint64_t const index;
     std::string const hash;
     std::string const previous_hash;
-    std::time_t const timestamp;
+    time::instant const timestamp;
     std::string const data;
     uint16_t const difficulty;
     uint64_t const nonce;
@@ -24,7 +26,7 @@ public:
     static Block make_block(
         uint64_t const index,
         std::string const previous_hash,
-        std::time_t const timestamp,
+        time::instant const timestamp,
         std::string const data,
         uint16_t const difficulty,
         uint64_t const nonce
@@ -37,7 +39,7 @@ private:
         uint64_t const index,
         std::string const hash,
         std::string const previous_hash,
-        std::time_t const timestamp,
+        time::instant const timestamp,
         std::string const data,
         uint16_t const difficulty,
         uint64_t const nonce
@@ -49,7 +51,7 @@ std::ostream & operator<<(std::ostream & stream, Block const & block);
 std::string compute_block_hash(
         uint64_t const index,
         std::string const & previous_hash,
-        std::time_t const & timestamp,
+        time::instant const & timestamp,
         std::string const & data,
         uint16_t const difficulty,
         uint64_t const nonce

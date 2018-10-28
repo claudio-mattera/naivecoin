@@ -21,7 +21,7 @@ Block::Block(
         uint64_t const index,
         std::string const hash,
         std::string const previous_hash,
-        std::time_t const timestamp,
+        time::instant const timestamp,
         std::string const data,
         uint16_t const difficulty,
         uint64_t const nonce
@@ -40,7 +40,7 @@ Block::Block(
 Block Block::make_block(
         uint64_t const index,
         std::string const previous_hash,
-        std::time_t const timestamp,
+        time::instant const timestamp,
         std::string const data,
         uint16_t const difficulty,
         uint64_t const nonce
@@ -96,7 +96,7 @@ std::ostream & operator<<(std::ostream & stream, Block const & block)
 std::string compute_block_hash(
         uint64_t const index,
         std::string const & previous_hash,
-        std::time_t const & timestamp,
+        time::instant const & timestamp,
         std::string const & data,
         uint16_t const difficulty,
         uint64_t const nonce

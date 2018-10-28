@@ -1,14 +1,12 @@
 #include <naivecoin/time/time.h>
 
-#include <mutex>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/date_time/date_facet.hpp>
+
 #include <sstream>
 #include <iomanip>
 
 namespace {
-
-// Functions std::get_time and std::put_time are not thread safe!
-// Use a mutex to ensure there are no race conditions.
-std::mutex time_mutex;
 
 constexpr char const * const TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ";
 
@@ -16,32 +14,39 @@ constexpr char const * const TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ";
 
 namespace naivecoin::time {
 
-std::time_t now()
+instant now()
 {
-    std::lock_guard<std::mutex> guard(time_mutex);
-
-    return std::time(nullptr);
+    boost::posix_time::ptime const now = boost::posix_time::second_clock::local_time();
+    return now;
 }
 
-std::time_t parse_timestamp(std::string const & text)
+instant parse_timestamp(std::string const & text)
 {
-    std::lock_guard<std::mutex> guard(time_mutex);
-
     std::istringstream stream(text);
 
-    long int timestamp;
+    boost::posix_time::time_input_facet* facet = new boost::posix_time::time_input_facet(TIME_FORMAT);
+    stream.imbue(std::locale(std::locale::classic(), facet));
+
+    instant timestamp;
     stream >> timestamp;
 
-    return static_cast<std::time_t>(timestamp);
+    return timestamp;
 }
 
-std::string format_timestamp(std::time_t const & timestamp)
+std::string format_timestamp(instant const & timestamp)
 {
-    std::lock_guard<std::mutex> guard(time_mutex);
-
     std::ostringstream stream;
-    stream << static_cast<long int>(timestamp);
+
+    boost::posix_time::time_facet* facet = new boost::posix_time::time_facet(TIME_FORMAT);
+    stream.imbue(std::locale(std::locale::classic(), facet));
+
+    stream << timestamp;
     return stream.str();
+}
+
+int difference_in_seconds(instant const & first, instant const & second)
+{
+    return (second - first).total_seconds();
 }
 
 } // namespace naivecoin::time

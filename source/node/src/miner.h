@@ -56,7 +56,7 @@ private:
     std::optional<core::Block> find_next_block(
         uint64_t const index,
         std::string const & previous_hash,
-        std::time_t const & timestamp,
+        time::instant const & timestamp,
         std::string const & data,
         uint16_t const difficulty
     );

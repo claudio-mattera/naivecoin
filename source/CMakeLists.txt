@@ -12,7 +12,7 @@ endif()
 # Dependencies
 
 # Boost
-find_package(Boost COMPONENTS system log thread unit_test_framework program_options REQUIRED )
+find_package(Boost COMPONENTS system log thread unit_test_framework program_options date_time REQUIRED )
 
 add_library(boost INTERFACE IMPORTED)
 set_property(TARGET boost PROPERTY
