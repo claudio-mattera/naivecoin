@@ -7,6 +7,7 @@
 #include <future>
 
 #include <spdlog/spdlog.h>
+#include <spdlog/sinks/stdout_sinks.h>
 
 #include "node.h"
 #include "options.h"

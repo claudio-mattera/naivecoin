@@ -3,6 +3,7 @@
 #include <vector>
 
 #include <spdlog/spdlog.h>
+#include <spdlog/sinks/stdout_sinks.h>
 
 #include "commandlinehandler.h"
 #include "utils.h"
