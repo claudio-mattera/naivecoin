@@ -7,18 +7,18 @@
 #include <future>
 
 #include <spdlog/spdlog.h>
-#include <spdlog/sinks/stdout_sinks.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
 
 #include "node.h"
 #include "options.h"
 
 void initialize_loggers()
 {
-    spdlog::stdout_logger_mt("main");
-    spdlog::stdout_logger_mt("node");
-    spdlog::stdout_logger_mt("sender");
-    spdlog::stdout_logger_mt("miner");
-    spdlog::stdout_logger_mt("peersmanager");
+    spdlog::stdout_color_mt("main");
+    spdlog::stdout_color_mt("node");
+    spdlog::stdout_color_mt("sender");
+    spdlog::stdout_color_mt("miner");
+    spdlog::stdout_color_mt("peersmanager");
 
     spdlog::set_pattern("[%Y-%m-%dT%H:%M:%S.%f] [%t] [%n] [%l] %v");
 }
