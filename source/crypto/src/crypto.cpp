@@ -15,6 +15,12 @@
 #include <openssl/ec.h>
 #include <openssl/pem.h>
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000
+# define EVP_MD_CTX_new EVP_MD_CTX_create
+# define EVP_MD_CTX_free EVP_MD_CTX_destroy
+#endif
+
+
 namespace {
 
 std::mutex hash_mutex;
@@ -75,8 +81,8 @@ std::string compute_hash(std::string const & data)
 
     /* Create the Message Digest Context and wrap it in a unique_ptr */
     std::unique_ptr<EVP_MD_CTX, void(*)(EVP_MD_CTX*)> message_digest_context(
-        EVP_MD_CTX_create(),
-        EVP_MD_CTX_destroy
+        EVP_MD_CTX_new(),
+        EVP_MD_CTX_free
     );
 
     /* Initialise the Digest operation */
@@ -194,8 +200,8 @@ std::string sign(std::string const & data, std::string const & private_key)
 
     /* Create the Message Digest Context and wrap it in a unique_ptr */
     std::unique_ptr<EVP_MD_CTX, void(*)(EVP_MD_CTX*)> message_digest_context(
-        EVP_MD_CTX_create(),
-        EVP_MD_CTX_destroy
+        EVP_MD_CTX_new(),
+        EVP_MD_CTX_free
     );
 
     /* Initialise the DigestSign operation - SHA-256 has been selected as the message digest function in this example */
@@ -247,8 +253,8 @@ bool verify(std::string const & data, std::string const & signature, std::string
 
     /* Create the Message Digest Context and wrap it in a unique_ptr */
     std::unique_ptr<EVP_MD_CTX, void(*)(EVP_MD_CTX*)> message_digest_context(
-        EVP_MD_CTX_create(),
-        EVP_MD_CTX_destroy
+        EVP_MD_CTX_new(),
+        EVP_MD_CTX_free
     );
 
     /* Initialize `key` with a public key */
