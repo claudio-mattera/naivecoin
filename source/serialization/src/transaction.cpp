@@ -16,7 +16,7 @@ Json::Value serialize_output_to_json(transaction::Output const & output)
 {
     Json::Value value;
     value["address"] = output.address;
-    value["amount"] = output.amount;
+    value["amount"] = Json::Value::UInt64(output.amount);
     return value;
 }
 
@@ -33,7 +33,7 @@ Json::Value serialize_input_to_json(transaction::Input const & input)
 {
     Json::Value value;
     value["transaction_output_id"] = input.transaction_output_id;
-    value["transaction_output_index"] = input.transaction_output_index;
+    value["transaction_output_index"] = Json::Value::UInt64(input.transaction_output_index);
     value["signature"] = input.signature;
     return value;
 }

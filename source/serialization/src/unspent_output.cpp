@@ -13,9 +13,9 @@ Json::Value serialize_unspent_output_to_json(transaction::UnspentOutput const & 
 {
     Json::Value value;
     value["transaction_id"] = unspent_output.transaction_id;
-    value["transaction_index"] = unspent_output.transaction_index;
+    value["transaction_index"] = Json::Value::UInt64(unspent_output.transaction_index);
     value["address"] = unspent_output.address;
-    value["amount"] = unspent_output.amount;
+    value["amount"] = Json::Value::UInt64(unspent_output.amount);
     return value;
 }
 

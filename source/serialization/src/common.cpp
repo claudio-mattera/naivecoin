@@ -29,13 +29,13 @@ Json::Value serialize_block_to_json(core::Block const & block)
 {
     Json::Value value;
 
-    value["index"] = block.index;
+    value["index"] = Json::Value::UInt64(block.index);
     value["hash"] = block.hash;
     value["previous_hash"] = block.previous_hash;
     value["timestamp"] = time::format_timestamp(block.timestamp);
     value["data"] = block.data;
-    value["difficulty"] = block.difficulty;
-    value["nonce"] = block.nonce;
+    value["difficulty"] = Json::Value::UInt(block.difficulty);
+    value["nonce"] = Json::Value::UInt64(block.nonce);
 
     return value;
 }
