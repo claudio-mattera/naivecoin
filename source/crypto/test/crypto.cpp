@@ -17,7 +17,7 @@ BOOST_AUTO_TEST_CASE(compute_hash)
     );
 }
 
-BOOST_AUTO_TEST_CASE(generate_key_pair)
+BOOST_AUTO_TEST_CASE(generate_key_pair, *boost::unit_test::disabled())
 {
     std::pair<std::string, std::string> pair = naivecoin::crypto::generate_key_pair();
 
