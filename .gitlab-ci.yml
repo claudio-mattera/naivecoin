@@ -1,0 +1,53 @@
+stages:
+  - configure
+  - lint
+  - build
+  - test
+  - documentation
+  - package
+
+
+before_script:
+  - apt-get update
+  - apt-get install -y libboost-log-dev libboost-program-options-dev libboost-test-dev libboost-thread-dev libboost-system-dev libboost-date-time-dev
+  - apt-get install -y libssl-dev
+  - apt-get install -y libjsoncpp-dev
+  - apt-get install -y libfmt-dev
+  - apt-get install -y libspdlog-dev
+  - apt-get install -y cmake
+  - apt-get install -y build-essential
+
+
+configure:cmake:
+  stage: configure
+  image: debian:buster
+  script:
+    - mkdir -p ./build
+    - cd ./build/
+    - cmake ../source/
+  artifacts:
+    paths:
+      - './build/'
+
+
+build:make:
+  stage: build
+  image: debian:buster
+  script:
+    - cd ./build/
+    - make VERBOSE=1
+  dependencies:
+    - configure:cmake
+  artifacts:
+    paths:
+      - './build/'
+
+
+test:cmake:
+  stage: test
+  image: debian:buster
+  script:
+    - cd ./build/
+    - ctest --verbose
+  dependencies:
+    - build:make
